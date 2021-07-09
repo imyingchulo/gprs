@@ -2,11 +2,7 @@
 
 ---
 
-This package is aiming to generate a PRS model from GWAS summary statistics and is designed to deal with GWAS summary statistics from the GWAS catalog and GeneATLAS database.
-
-Download GWAS summary statistics from
-[GWAS catalog](https://www.ebi.ac.uk/gwas/) and [GeneATLAS](http://geneatlas.roslin.ed.ac.uk/). 
-(The GWAS summary statistics should have contains the information: SNPID, ALLELE, BETA, P-value, and StdErr)
+This package aims to generate a PRS model from GWAS summary statistics. It is designed to deal with GWAS summary statistics from the GWAS catalog and GeneATLAS database.
 
 :octocat: Understanding the workflow of this package:
 
@@ -37,9 +33,14 @@ $ pip install -e .
 ```
 
 ## Additional requirements
-
-
 Install both version 1.9 and 2.0 plink.  https://zzz.bwh.harvard.edu/plink/download.shtml
+
+
+## Prepare dataset
+Download GWAS summary statistics from
+[GWAS catalog](https://www.ebi.ac.uk/gwas/) and [GeneATLAS](http://geneatlas.roslin.ed.ac.uk/). 
+(The GWAS summary statistics should have contains the information: SNPID, ALLELE, BETA, P-value, and StdErr)
+
 
 
 ## Usage
