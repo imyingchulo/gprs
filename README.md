@@ -252,7 +252,8 @@ Users have to indicate the options below.
 ````
   --ref <str>                    path to population reference  [required]
   --result_dir                   path to output folder; default:[./result]
-  --vcf_input <str>              path to vcf files  [required]--columns <int>                a column index indicate the [SNPID] [ALLELE] [BETA] position; column nb starts from 1
+  --vcf_input <str>              path to vcf files  [required]
+  --columns <int>                a column index indicate the [SNPID] [ALLELE] [BETA] position; column nb starts from 1
   --plink_modifier <str>         no-mean-imputation as default in here, get more info by searching plink2.0 modifier
   --output_name <str>            output name should remain consistent as output_name to plink and filtered data [required]
   --help                         Show this message and exit.
