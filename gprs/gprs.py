@@ -12,79 +12,94 @@ class GPRS( object ):
         self.ref = ref
         self.data_dir = data_dir
         self.result_dir = Path( '{}/{}'.format( os.getcwd(), result_dir ) ).resolve()
+        self.setup_dir()
+
+    def setup_dir(self):
         self.create_result_dir()
         self.create_plink_dir()
+        self.create_plink_bfiles_dir()
+        self.create_plink_clump_dir()
+        self.create_prs_dir()
         self.create_qc_dir()
         self.create_snplists_dir()
+        self.create_qc_clump_snpslist_dir()
 
     def create_result_dir(self):
         if not os.path.exists( self.result_dir ):
             os.mkdir( self.result_dir )
 
+    def result_dir(self):
+        return self.result_dir
+
     def create_plink_dir(self):
         if not os.path.exists( self.plink_dir() ):
             os.mkdir( self.plink_dir() )
+
+    def plink_dir(self):
+        return '{}/{}'.format( self.result_dir, 'plink' )
+
+    def create_plink_bfiles_dir(self):
         if not os.path.exists( self.plink_bfiles_dir() ):
             os.mkdir( self.plink_bfiles_dir() )
+
+    def plink_bfiles_dir(self):
+        return '{}/{}'.format( self.plink_dir(), 'bfiles' )
+
+    def create_plink_clump_dir(self):
         if not os.path.exists( self.plink_clump_dir() ):
             os.mkdir( self.plink_clump_dir() )
+
+    def plink_clump_dir(self):
+        return '{}/{}'.format( self.plink_dir(), 'clump' )
+
+    def create_prs_dir(self):
         if not os.path.exists( self.prs_dir() ):
             os.mkdir( self.prs_dir() )
-        if not os.path.exists( self.qc_clump_snpslist_dir() ):
-            os.mkdir( self.qc_clump_snpslist_dir() )
+
+    def prs_dir(self):
+        return '{}/{}'.format( self.plink_dir(), 'prs' )
 
     def create_qc_dir(self):
         if not os.path.exists( self.qc_dir() ):
             os.mkdir( self.qc_dir() )
 
+    def qc_dir(self):
+        return '{}/{}'.format( self.result_dir, 'qc' )
+
     def create_snplists_dir(self):
         if not os.path.exists( self.snplists_dir() ):
             os.mkdir( self.snplists_dir() )
 
-    def qc_dir(self):
-        return '{}/{}'.format( self.result_dir, 'qc' )
-
     def snplists_dir(self):
         return '{}/{}'.format( self.result_dir, 'snplists' )
 
-    def plink_dir(self):
-        return '{}/{}'.format( self.result_dir, 'plink' )
-
-    def plink_bfiles_dir(self):
-        return '{}/{}'.format( self.plink_dir(), 'bfiles' )
-
-    def plink_clump_dir(self):
-        return '{}/{}'.format( self.plink_dir(), 'clump' )
-
-    def prs_dir(self):
-        return '{}/{}'.format( self.plink_dir(), 'prs' )
+    def create_qc_clump_snpslist_dir(self):
+        if not os.path.exists( self.qc_clump_snpslist_dir() ):
+            os.mkdir( self.qc_clump_snpslist_dir() )
 
     def qc_clump_snpslist_dir(self):
         return '{}/{}'.format( self.plink_dir(), 'qc_and_clump_snpslist' )
 
-    def generate_plink_bfiles(self, output_name, plink_bfiles_dir, snplists_dir):
+    def generate_plink_bfiles(self, output_name):
         for nb in range( 1, 23 ):
             chrnb = "chr{}".format( nb )
             # get snps lists from directory
-            for snps in os.listdir( snplists_dir ):
+            for snps in os.listdir( self.snplists_dir() ):
                 if "{}_{}.csv".format( chrnb, output_name ) in snps:
                     for i in os.listdir( self.ref ):
-                        if i.endswith(
-                                "genotypes.vcf.gz" ) and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and chrnb in i:
+                        if i.endswith("genotypes.vcf.gz" ) and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and chrnb in i:
                             # exclude chr X, Y and MT, and setting a filter to make sure all input are consistent
                             # ex: chr1 snps-list and chr1 vcf read at the same time
-                            os.system(
-                                "plink --vcf {}/{} --extract {}/{} --make-bed --out {}/{}_{}".format( self.ref, i,
-                                                                                                      snplists_dir,
+                            os.system("plink --vcf {}/{} --extract {}/{} --make-bed --out {}/{}_{}".format( self.ref, i,
+                                                                                                      self.snplists_dir(),
                                                                                                       snps,
-                                                                                                      plink_bfiles_dir,
+                                                                                                      self.plink_bfiles_dir(),
                                                                                                       chrnb,
                                                                                                       output_name ) )
                             print( "{}_{} is finished!".format( chrnb, output_name ) )
         print( "all jobs completed!" )
 
-    def clump(self, output_name, clump_kb, clump_p1, clump_p2, clump_r2='0.1', clump_field='Pvalue',
-              clump_snp_field='SNPID'):
+    def clump(self, output_name, clump_kb, clump_p1, clump_p2, clump_r2='0.1', clump_field='Pvalue',clump_snp_field='SNPID'):
         for nb in range( 1, 23 ):
             chrnb = "chr{}".format( nb )
             # TO perform plink clump function the following files are required:
@@ -125,24 +140,22 @@ class GPRS( object ):
             clump_snp.rename( columns={'SNP': 'SNPID'}, inplace=True )
             qc_snp = pd.read_csv( "{}/{}_{}.QC.csv".format( self.qc_dir(), chrnb, output_name ), sep=' ' )
             newsnplist = qc_snp[qc_snp["SNPID"].isin( clump_snp["SNPID"] )]
-            newsnplist.to_csv( "{}/{}_{}.snpslist.csv".format( self.qc_clump_snpslist_dir(), chrnb, output_name ),
+            newsnplist.to_csv( "{}/{}_{}.qc_clump_snpslist.csv".format( self.qc_clump_snpslist_dir(), chrnb, output_name ),
                                sep=' ', index=False, header=True )
             print( "new {} snpslist has been created".format( chrnb ) )
         print( "All jobs are completed" )
 
-    def build_prs(self, prs_output_dir, qc_clump_snplists_dir, output_name, columns='1 2 3',
-                  plink_modifier='no-mean-imputation'):
+    def build_prs(self, vcf_input,  output_name ,columns='1 2 3', plink_modifier='no-mean-imputation'):
         for nb in range( 1, 23 ):
             chrnb = "chr{}".format( nb )
-            for vcf_file in os.listdir( self.ref ):
-                if vcf_file.endswith(
-                        "vcf.gz" ) and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and chrnb in vcf_file:
-                    qc_file = "{}/{}_{}_clumped_snplist.csv".format( qc_clump_snplists_dir, chrnb, output_name )
+            for vcf_file in os.listdir( vcf_input ):
+                if vcf_file.endswith( "vcf.gz" ) and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and chrnb in vcf_file:
+                    qc_file = "{}/{}_{}.qc_clump_snpslist.csv".format( self.qc_clump_snpslist_dir(), chrnb, output_name )
                     os.system(
                         "plink2 --vcf {}/{} dosage=DS --score {} {} '{}' --out {}/{}_{}".format( self.ref, vcf_file,
                                                                                                  qc_file, columns,
                                                                                                  plink_modifier,
-                                                                                                 prs_output_dir, chrnb,
+                                                                                                 self.prs_dir(), chrnb,
                                                                                                  output_name ) )
                     print( "{} GPRS model built!".format( chrnb ) )
         print( "ALL work are complete!" )

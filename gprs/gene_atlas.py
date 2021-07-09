@@ -40,6 +40,10 @@ class GeneAtlas( GPRS ):
 
                 # reorder column, and extract three columns only
                 filtered_df = data[['SNPID', 'Allele', 'Beta', 'SE', 'Pvalue']]
+
+                # drop duplicate SNPs
+                filtered_df.drop_duplicates( subset=['SNPID'] )
+
                 filtered_df.to_csv( "{}/{}_{}.QC.csv".format( self.qc_dir(), chrnb, output_name ), sep=' ',
                                     index=False,
                                     header=True )
