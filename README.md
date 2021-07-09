@@ -169,7 +169,7 @@ This option generates two types of output in `qc` and `snplists` folders:
 
 
 ### `gprs generate-plink-bfiles`
-This option use plink1.9 make-bed function
+This option encodes plink1.9 make-bed function
 ```
 plink --vcf [ref] --extract [snplists after qc] --make-bed --out [bfile folder/output_name]
 ```
@@ -193,7 +193,7 @@ This option will generate three files in `bfiles` folder:
 - `*.fam`
 
 ### `gprs clump`
-This option use plink1.9 clump function
+This option encodes plink1.9 clump function
 ```
 plink --bfile [bfiles] --clump [qc snpslists] --clump-p1  --clump-p2  --clump-r2  --clump-kb  --clump-field  --clump-snp-field  --out 
 ```
@@ -241,9 +241,9 @@ This options will generate one file in `qc_and_clump_snpslist` folder:
 
 
 ### `gprs build-prs`
-This option use plink2.0 function
+This option encodes plink2.0 function
 ```
-plink --vcf [vcf input] dosage=DS --score [snplists afte clumped and qc]  --out 
+plink2 --vcf [vcf input] dosage=DS --score [snplists afte clumped and qc]  --out 
 ```
 The clumped qc snpslists and prs_output_dir will automatically be filled in the script.
 Users have to indicate the options below.
