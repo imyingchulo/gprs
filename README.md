@@ -108,6 +108,7 @@ Five folders will automatically generate under the result folder by script.
 - prs folder: `./result/plink/prs`
 
 :heavy_exclamation_mark: Users have to indicate reference and result directories every time when using the command interface.
+
 :heavy_exclamation_mark: Users have to provide output_name every time when they execute the commands. The output_name should be the same in every execution.
 
 ### `gprs geneatlas-filter-data`
