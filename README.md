@@ -52,7 +52,7 @@ For example, if you want to run GeneAtlas, create a python file, e.g: `gene_atla
 from gprs import GeneAtlas
 
 
-gene_atlas = GeneAtlas( ref='/home1/ylo40816/1000genomes/hg19', data_dir='/home1/ylo40816/Projects/GPRS/data/Gene_ATLAS/selfReported_n_1526' )
+gene_atlas = GeneAtlas( ref='/1000genomes/hg19', data_dir='Gene_ATLAS/selfReported_n_1526' )
 gene_atlas.filter_data( snp_id_header='SNP',
                         allele_header='ALLELE',
                         beta_header='NBETA-selfReported_n_1526',
@@ -64,7 +64,7 @@ gene_atlas.clump(output_name='geneatlas',
                 clump_kb='10000',
                 clump_p1='1e-3', clump_p2='1e-2')
 gene_atlas.select_clump_snps(output_name='geneatlas')
-gene_atlas.build_prs( vcf_input= '/home1/ylo40816/1000genomes/hg19',
+gene_atlas.build_prs( vcf_input= '/1000genomes/hg19',
                       output_name ='geneatlas')
 ```
 
@@ -108,6 +108,7 @@ Five folders will automatically generate under the result folder by script.
 - prs folder: `./result/plink/prs`
 
 :heavy_exclamation_mark: Users have to indicate reference and result directories every time when using the command interface.
+:heavy_exclamation_mark: Users have to provide output_name every time when they execute the commands. The output_name should be the same in every execution.
 
 ### `gprs geneatlas-filter-data`
 
@@ -116,6 +117,7 @@ SNPID, ALLELE,  BETA,  StdErr, Pvalue
 
 #### Options:
 ```
+  --ref                     path to population reference panel  [required]
   --data_dir                The directory of GeneAtlas csv files (all 1-24 chr) [required]
   --result_dir              path to output folder; default:[./result]
   --snp_id_header           SNP ID column name in GeneAtlas original file  [required]
@@ -130,7 +132,7 @@ SNPID, ALLELE,  BETA,  StdErr, Pvalue
 
 #### Result:
 
-This option generate output files in qc and snplists folders:
+This option generates two types of output in `qc` and `snplists` folders:
 
 - `*.QC.csv` (QC files )
 - `*.csv` (snplist)
@@ -144,6 +146,7 @@ SNPID, ALLELE,  BETA,  StdErr, Pvalue
 #### Options:
 
 ````
+  --ref                      path to population reference panel  [required]
   --data_dir                 path to GWAS catalog summary statistic csv file (all 1-24 chr)  [required]
   --result_dir               path to output folder; default:[./result]
   --snp_id_header            SNP ID column name in GWAS catalog original file  [required]
@@ -158,40 +161,47 @@ SNPID, ALLELE,  BETA,  StdErr, Pvalue
 
 #### Result:
 
-This option generate two folders and output files:
+This option generates two types of output in `qc` and `snplists` folders:
 
 - `*.QC.csv` (QC files )
 - `*.csv` (snplist)
 
 
 ### `gprs generate-plink-bfiles`
+This option use plink1.9 make-bed function
+```
+plink --vcf [ref] --extract [snplists after qc] --make-bed --out [bfile folder/output_name]
+```
+snplists and bfiles folders will automatically be filled in the script.
+Users have to indicate ref and output_name only.
 
 #### Options:
 ````
   --ref                path to population reference panel  [required]
-  --plink_bfiles_dir   plink bfiles output folder, default:"./result/plink/bfiles"
-  --snplists_dir       snplists folder, default: "./result/snplists", snplists the name of the file should be chrnb_[output_name].csv i.e. chr1_[output_name].csv;
-                       please check "grps gwas_filter_data --help or grps geneatlas_filter_data --help  [required]
   --output_name        output name
   --help               Show this message and exit.
 ````
 
 #### Result:
 
-This option will generate three files in bfiles folder:
+This option will generate three files in `bfiles` folder:
 
 - `*.bim`
 - `*.bed`
 - `*.fam`
 
 ### `gprs clump`
+This option use plink1.9 clump function
+```
+plink --bfile [bfiles] --clump [qc snpslists] --clump-p1  --clump-p2  --clump-r2  --clump-kb  --clump-field  --clump-snp-field  --out 
+```
+The plink_bfiles_dir, qc snpslists and clump_output_dir will automatically be filled in the script.
+Users have to indicate the options below.
 
 #### Options:
  ````
+  --ref                      path to population reference panel  [required]
   --data_dir                 path to GWAS catalog/GeneAtlas .csv file  [required]
-  --plink_bfiles_dir         plink bfiles output folder, default:"./result/plink/bfiles"
-  --clump_output_dir         path to clump output folder, default:"./result/plink/clump"
-  --qc_dir                   path to qc folder, default: "./result/qc", the qc files were generated from gwas_filter_data or geneatlas_filter_data options
   --clump_kb                 distance(kb) parameter for clumping [required]
   --clump_p1                 first set of P-value for clumping [required]
   --clump_p2                 should equals to p1 reduce the snps [required]
@@ -204,9 +214,10 @@ This option will generate three files in bfiles folder:
 
 #### Result:
 
-This option will generate one files in clump folder:
+This option will generate one file in `clump` folder:
 
 - `*.clump`
+
 
 ### `gprs select-clump-snps`
 
@@ -220,23 +231,28 @@ This option will generate one files in clump folder:
 ````
 
 #### Result:
-This options will generate one file in qc_and_clump_snpslist folder:
+This options will generate one file in `qc_and_clump_snpslist` folder:
 - `*.qc_clump_snpslist.csv`
 
 
 ### `gprs build-prs`
+This option use plink2.0 function
+```
+plink --vcf [vcf input] dosage=DS --score [snplists afte clumped and qc]  --out 
+```
+The clumped qc snpslists and prs_output_dir will automatically be filled in the script.
+Users have to indicate the options below.
+
 #### Options:
 ````
   --ref <str>                    path to population reference  [required]
-  --prs_output_dir <str>         path to prs model output, default: "./result/plink/prs"
-  --qc_clump_snplists_dir <str>  path to snpslist (after qc and clumping), default:"./result/plink/qc_and_clump_snpslist"
-  --columns <int>                a column index indicate the [SNPID] [ALLELE] [BETA] position; column nb starts from 1
+  --vcf_input <str>              path to vcf files  [required]--columns <int>                a column index indicate the [SNPID] [ALLELE] [BETA] position; column nb starts from 1
   --plink_modifier <str>         no-mean-imputation as default in here, get more info by searching plink2.0 modifier
   --output_name <str>            output name should remain consistent as output_name to plink and filtered data [required]
   --help                         Show this message and exit.
 ````
 #### Result:
-This options will generate one file in prs folder:
+This options will generate one file in `prs` folder:
 - `*.psam`
 
 
