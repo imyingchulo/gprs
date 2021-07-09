@@ -42,15 +42,41 @@ $ pip install -e .
 Install both version 1.9 and 2.0 plink.  https://zzz.bwh.harvard.edu/plink/download.shtml
 
 
-## Execute script
+## Usage
+
+### 1. Use python
+
+For example, if you want to run GeneAtlas, create a python file, e.g: `gene_atlas.py`. Paste the following code in the file and change the configuration to your settings. 
+
+```python
+from gprs import GeneAtlas
+
+
+gene_atlas = GeneAtlas( ref='/home1/ylo40816/1000genomes/hg19', data_dir='/home1/ylo40816/Projects/GPRS/data/Gene_ATLAS/selfReported_n_1526' )
+gene_atlas.filter_data( snp_id_header='SNP',
+                        allele_header='ALLELE',
+                        beta_header='NBETA-selfReported_n_1526',
+                        se_header='NSE-selfReported_n_1526',
+                        pvalue_header='PV-selfReported_n_1526' )
+
+gene_atlas.generate_plink_bfiles(output_name='geneatlas')
+gene_atlas.clump(output_name='geneatlas',
+                clump_kb='10000',
+                clump_p1='1e-3', clump_p2='1e-2')
+gene_atlas.select_clump_snps(output_name='geneatlas')
+gene_atlas.build_prs( vcf_input= '/home1/ylo40816/1000genomes/hg19',
+                      output_name ='geneatlas')
+```
+
+### 2. Use Commandline Interface
 
 ```shell
 $ gprs geneatlas-filter-data --data_dir [str] --result_dir [str] --snp_id_header [str] --allele_header [str] --beta_header --pvalue_header [str] --pvalue [float/scientific notation] --output_name [str]  
 $ gprs gwas-filter-data --data_dir [str] --result_dir [str] --snp_id_header [str] --allele_header  [str] --beta_header --pvalue_header [str] --pvalue [float/scientific notation] --output_name [str]  
-$ gprs generate-plink-bfiles --ref [str] --plink_bfiles_dir [str] --snplists_dir [str] --output_name [str]
-$ gprs clump --data_dir [str] --plink_bfiles_dir [str] --clump_output_dir [str] --qc_dir [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_p2 [float/scientific notation] --clump_r2 [float] --clump_field [str] --clump_snp_field [str] --output_name [output name]
-$ gprs select-clump-snps --qc_dir [str] --clump_output_dir [str] --qc_clump_snplists_dir [str] --output_name [output name]
-$ gprs build-prs --vcf_input [str] --prs_output_dir [str] --qc_clump_snplists_dir [str] --columns [int] --plink_modifier [str] --output_name [output name]
+$ gprs generate-plink-bfiles --ref [str] --output_name [str]
+$ gprs clump --data_dir [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_p2 [float/scientific notation] --clump_r2 [float] --clump_field [str] --clump_snp_field [str] --output_name [output name]
+$ gprs select-clump-snps --output_name [output name]
+$ gprs build-prs --vcf_input [str] --columns [int] --plink_modifier [str] --output_name [output name]
 ```
 
 
@@ -70,6 +96,18 @@ $ gprs build-prs --vcf_input [str] --prs_output_dir [str] --qc_clump_snplists_di
 
 6. `build-prs`
 
+### Result folder
+In the first step, you need to indicate the path to creating the result folder.
+Five folders will automatically generate under the result folder by script. 
+
+- qc folder: `./result/qc/`
+- snplists folder : `./result/snplists/`
+- bfile folder: `./result/plink/bfiles`
+- clump folder: `./result/plink/clump`
+- qc_and_clump_snpslist folder: `./result/plink/qc_and_clump_snpslist`
+- prs folder: `./result/plink/prs`
+
+:heavy_exclamation_mark: Users have to indicate reference and result directories every time when using the command interface.
 
 ### `gprs geneatlas-filter-data`
 
@@ -92,12 +130,11 @@ SNPID, ALLELE,  BETA,  StdErr, Pvalue
 
 #### Result:
 
-This option generate two folders and output files:
+This option generate output files in qc and snplists folders:
 
-- `./result/qc/`
-- `./result/snplists/`
 - `*.QC.csv` (QC files )
 - `*.csv` (snplist)
+
  
 ### `gprs gwas-filter-data`
 
@@ -123,8 +160,6 @@ SNPID, ALLELE,  BETA,  StdErr, Pvalue
 
 This option generate two folders and output files:
 
-- `./result/qc/`
-- `./result/snplists/`
 - `*.QC.csv` (QC files )
 - `*.csv` (snplist)
 
@@ -143,9 +178,8 @@ This option generate two folders and output files:
 
 #### Result:
 
-This option will one folder and three files:
+This option will generate three files in bfiles folder:
 
-- `./result/plink/bfiles`
 - `*.bim`
 - `*.bed`
 - `*.fam`
@@ -170,9 +204,8 @@ This option will one folder and three files:
 
 #### Result:
 
-This option will one folder and one files:
+This option will generate one files in clump folder:
 
-- `./result/plink/clump`
 - `*.clump`
 
 ### `gprs select-clump-snps`
@@ -187,8 +220,7 @@ This option will one folder and one files:
 ````
 
 #### Result:
-This options will generate one folder and one file:
-- `./result/plink/qc_and_clump_snpslist`
+This options will generate one file in qc_and_clump_snpslist folder:
 - `*.qc_clump_snpslist.csv`
 
 
@@ -204,8 +236,7 @@ This options will generate one folder and one file:
   --help                         Show this message and exit.
 ````
 #### Result:
-This options will generate one folder and one file:
-- `./result/plink/prs`
+This options will generate one file in prs folder:
 - `*.psam`
 
 
