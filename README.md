@@ -71,12 +71,12 @@ gene_atlas.build_prs( vcf_input= '/1000genomes/hg19',
 ### 2. Use Commandline Interface
 
 ```shell
-$ gprs geneatlas-filter-data --data_dir [str] --result_dir [str] --snp_id_header [str] --allele_header [str] --beta_header --pvalue_header [str] --pvalue [float/scientific notation] --output_name [str]  
-$ gprs gwas-filter-data --data_dir [str] --result_dir [str] --snp_id_header [str] --allele_header  [str] --beta_header --pvalue_header [str] --pvalue [float/scientific notation] --output_name [str]  
+$ gprs geneatlas-filter-data --ref [str] --data_dir [str] --result_dir [str] --snp_id_header [str] --allele_header [str] --beta_header --pvalue_header [str] --pvalue [float/scientific notation] --output_name [str]  
+$ gprs gwas-filter-data --ref [str] --data_dir [str] --result_dir [str] --snp_id_header [str] --allele_header  [str] --beta_header --pvalue_header [str] --pvalue [float/scientific notation] --output_name [str]  
 $ gprs generate-plink-bfiles --ref [str] --output_name [str]
-$ gprs clump --data_dir [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_p2 [float/scientific notation] --clump_r2 [float] --clump_field [str] --clump_snp_field [str] --output_name [output name]
-$ gprs select-clump-snps --output_name [output name]
-$ gprs build-prs --vcf_input [str] --columns [int] --plink_modifier [str] --output_name [output name]
+$ gprs clump --ref [str] --data_dir [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_p2 [float/scientific notation] --clump_r2 [float] --clump_field [str] --clump_snp_field [str] --output_name [output name]
+$ gprs select-clump-snps --ref [str] --output_name [output name]
+$ gprs build-prs --ref [str] --vcf_input [str] --columns [int] --plink_modifier [str] --output_name [output name]
 ```
 
 
@@ -179,6 +179,7 @@ Users have to indicate ref and output_name only.
 #### Options:
 ````
   --ref                path to population reference panel  [required]
+  --result_dir         path to output folder; default:[./result]
   --output_name        output name
   --help               Show this message and exit.
 ````
@@ -202,6 +203,7 @@ Users have to indicate the options below.
 #### Options:
  ````
   --ref                      path to population reference panel  [required]
+  --result_dir               path to output folder; default:[./result]
   --data_dir                 path to GWAS catalog/GeneAtlas .csv file  [required]
   --clump_kb                 distance(kb) parameter for clumping [required]
   --clump_p1                 first set of P-value for clumping [required]
@@ -224,6 +226,8 @@ This option will generate one file in `clump` folder:
 
 #### Options:
 ```` 
+  --ref                    path to population reference panel  [required]
+  --result_dir             path to output folder; default:[./result]
   --qc_dir                 path to qc folder, default: "./result/qc", the qc files were generated from gwas_filter_data or geneatlas_filter_data options
   --clump_output_dir       path to clump output folder, default: "./result/plink/clump"
   --qc_clump_snplists_dir  path to snpslist (after qc and clumping), default:"./result/plink/qc_and_clump_snpslist"
@@ -247,6 +251,7 @@ Users have to indicate the options below.
 #### Options:
 ````
   --ref <str>                    path to population reference  [required]
+  --result_dir                   path to output folder; default:[./result]
   --vcf_input <str>              path to vcf files  [required]--columns <int>                a column index indicate the [SNPID] [ALLELE] [BETA] position; column nb starts from 1
   --plink_modifier <str>         no-mean-imputation as default in here, get more info by searching plink2.0 modifier
   --output_name <str>            output name should remain consistent as output_name to plink and filtered data [required]
