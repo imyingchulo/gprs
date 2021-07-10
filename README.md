@@ -261,6 +261,6 @@ Users have to indicate the options below.
 ````
 #### Result:
 This options will generate one file in `prs` folder:
-- `*.psam`
+- `*.sscore`
 
 
