@@ -237,7 +237,7 @@ This option will generate one file in `clump` folder:
 ````
 
 #### Result:
-This options will generate one file in `qc_and_clump_snpslist` folder:
+This option will generate one file in `qc_and_clump_snpslist` folder:
 - `*.qc_clump_snpslist.csv`
 
 
@@ -260,7 +260,7 @@ Users have to indicate the options below.
   --help                         Show this message and exit.
 ````
 #### Result:
-This options will generate one file in `prs` folder:
+This option will generate one file in `prs` folder:
 - `*.sscore`
 
 
