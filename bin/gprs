@@ -1,0 +1,5 @@
+#!/usr/bin/env python
+
+# This script is to make "gprs" in comment line
+from gprs.cli import main
+main()
