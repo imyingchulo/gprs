@@ -110,15 +110,17 @@ def select_clump_snps(ref, result_dir, output_name):
 @click.option( '--ref', metavar='<str>', help='path to population reference panel' )
 @click.option( '--result_dir', metavar='<str>', default='./result', help='path to output folder, default: "./result"' )
 @click.option( '--vcf_input', metavar='<str>', required=True, help='path to vcf files' )
+@click.option( '--symbol', metavar='<str/int>', default='.', help='the symbol or text after chrnb, default = "." ; i.e. ALL.chr8.vcf.gz, you can put "." or ".vcf.gz"' )
 @click.option( '--columns', metavar='<int>', default='1 2 3', help='a column index indicate the [SNPID] [ALLELE] [BETA] position; column nb starts from 1 ' )
 @click.option( '--plink_modifier', metavar='<str>', default='no-mean-imputation', help='no-mean-imputation as default in here, get more info by searching plink2.0 modifier ' )
 @click.option( '--output_name', metavar='<str>', required=True, help='output name should remain consistent as output_name to plink and filtered data' )
-def build_prs(ref, result_dir, vcf_input,columns, plink_modifier, output_name, ):
+def build_prs(ref, result_dir, vcf_input,columns, plink_modifier, output_name, symbol ):
     gprs = GPRS( ref=ref, result_dir=result_dir )
     gprs.build_prs( vcf_input=vcf_input,
-               columns=columns,
-               plink_modifier=plink_modifier,
-               output_name=output_name )
+                    symbol = symbol,
+                    columns=columns,
+                    plink_modifier=plink_modifier,
+                    output_name=output_name )
 
 
 main.add_command( geneatlas_filter_data )

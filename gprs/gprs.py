@@ -145,14 +145,13 @@ class GPRS( object ):
             print( "new {} snpslist has been created".format( chrnb ) )
         print( "All jobs are completed" )
 
-    def build_prs(self, vcf_input,  output_name ,columns='1 2 3', plink_modifier='no-mean-imputation'):
+    def build_prs(self, vcf_input, output_name, symbol='.' ,columns='1 2 3', plink_modifier='no-mean-imputation'):
         for nb in range( 1, 23 ):
             chrnb = "chr{}".format( nb )
             for vcf_file in os.listdir( vcf_input ):
-                if vcf_file.endswith( "vcf.gz" ) and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and chrnb in vcf_file:
+                if vcf_file.endswith( "vcf.gz" ) and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and "{}{}".format(chrnb, symbol)in vcf_file:
                     qc_file = "{}/{}_{}.qc_clump_snpslist.csv".format( self.qc_clump_snpslist_dir(), chrnb, output_name )
-                    os.system(
-                        "plink2 --vcf {}/{} dosage=DS --score {} {} '{}' --out {}/{}_{}".format( self.ref, vcf_file,
+                    os.system("plink2 --vcf {}/{} dosage=DS --score {} {} '{}' --out {}/{}_{}".format( self.ref, vcf_file,
                                                                                                  qc_file, columns,
                                                                                                  plink_modifier,
                                                                                                  self.prs_dir(), chrnb,
