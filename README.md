@@ -106,6 +106,8 @@ $ gprs transfer_atcg --ref [str] --vcf_input [str] --columns [int] --plink_modif
 
 6. `build-prs`
 
+7. `transfer_atcg` (optional)
+
 ### Result folder
 In the first step, you need to indicate the path to creating the result folder.
 Five folders will automatically generate under the result folder by script. 
