@@ -82,9 +82,10 @@ class GPRS( object ):
     def transfer_atcg(self, output_name):
         for nb in range( 1, 23 ):
             chrnb = "chr{}".format( nb )
-            df = pd.read_csv( "{}/{}_{}.QC.csv".format( "/home1/ylo40816/Projects/GPRS/tmp/result/qc/", chrnb, output_name ), sep=' ' )
+            df = pd.read_csv( "{}/{}_{}.QC.csv".format( self.qc_dir(), chrnb, output_name ), sep=' ' )
             df.loc[:, 'Allele'] = df['Allele'].apply({'a': 'A', 't': 'T', 'c': 'C', 'g': 'G'}.get)
             df.to_csv( "{}/{}_{}.QC.csv".format( self.qc_dir(), chrnb, output_name ), sep=' ', index=False, header=True )
+        print("transfer completed!")
 
     def generate_plink_bfiles(self, output_name):
         for nb in range( 1, 23 ):
@@ -93,7 +94,7 @@ class GPRS( object ):
             for snps in os.listdir( self.snplists_dir() ):
                 if "{}_{}.csv".format( chrnb, output_name ) in snps:
                     for i in os.listdir( self.ref ):
-                        if i.endswith("genotypes.vcf.gz" ) and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and chrnb in i:
+                        if "vcf" in vcf_file and ".tbi" not in vcf_file and  and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and chrnb in i:
                             # exclude chr X, Y and MT, and setting a filter to make sure all input are consistent
                             # ex: chr1 snps-list and chr1 vcf read at the same time
                             os.system("plink --vcf {}/{} --extract {}/{} --make-bed --out {}/{}_{}".format( self.ref, i,
