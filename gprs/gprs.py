@@ -94,7 +94,7 @@ class GPRS( object ):
             for snps in os.listdir( self.snplists_dir() ):
                 if "{}_{}.csv".format( chrnb, output_name ) in snps:
                     for i in os.listdir( self.ref ):
-                        if "vcf" in vcf_file and ".tbi" not in vcf_file and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and chrnb in i:
+                        if "vcf" in i and ".tbi" not in i and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and chrnb in i:
                             # exclude chr X, Y and MT, and setting a filter to make sure all input are consistent
                             # ex: chr1 snps-list and chr1 vcf read at the same time
                             os.system("plink --vcf {}/{} --extract {}/{} --make-bed --out {}/{}_{}".format( self.ref, i,
@@ -118,8 +118,7 @@ class GPRS( object ):
                             plinkinput = plink_files.split( "." )[0]
                             # use plink to do the clump
                             # NOTE: the summary statistics file has to separate by space otherwise plink can not read it
-                            os.system(
-                                "plink --bfile {}/{} --clump {}/{} --clump-p1 {} --clump-p2 {} --clump-r2 {} --clump-kb {} --clump-field {} --clump-snp-field {} --out {}/{}_{}".format(
+                            os.system( "plink --bfile {}/{} --clump {}/{} --clump-p1 {} --clump-p2 {} --clump-r2 {} --clump-kb {} --clump-field {} --clump-snp-field {} --out {}/{}_{}".format(
                                     self.plink_bfiles_dir(), plinkinput,
                                     self.qc_dir(), qc_files,
                                     clump_p1, clump_p2, clump_r2,
