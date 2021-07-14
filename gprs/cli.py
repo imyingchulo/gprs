@@ -69,7 +69,7 @@ def gwas_filter_data(ref, data_dir, result_dir, snp_id_header,
 @click.option( '--ref', metavar='<str>', required=True, help='path to population reference panel' )
 @click.option( '--result_dir', metavar='<str>', default='./result', help='path to output folder, default: "./result"' )
 @click.option( '--output_name', metavar='<str>', help='output name' )
-def generate_plink_bfiles(ref, result_dir, output_name):
+def transfer_atcg(ref, result_dir, output_name):
     gprs = GPRS( ref=ref, result_dir=result_dir )
     gprs.transfer_atcg( output_name=output_name )
 
