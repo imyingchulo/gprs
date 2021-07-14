@@ -9,14 +9,14 @@ class GeneAtlas( GPRS ):
     def filter_data(self, snp_id_header, allele_header, beta_header, se_header, pvalue_header, output_name='geneatlas',
                     pvalue=0.05):
 
-        # for i in os.listdir( self.data_dir ):
-        #     if "genotyped" in i and i.endswith( ".gz" ):
-        #         gz_file = "{}/{}".format( self.data_dir, i )
-        #         unzipped_file = gz_file.replace( ".gz", "" )
-        #         with gzip.open( gz_file, 'rb' ) as f_in, open( unzipped_file, 'wb' ) as f_out:
-        #             shutil.copyfileobj( f_in, f_out )
-        #         print( "{} are unzipped.".format( gz_file ) )
-        # print( "starting to extract and filter SNPs" )
+        for i in os.listdir( self.data_dir ):
+            if "genotyped" in i and i.endswith( ".gz" ):
+                gz_file = "{}/{}".format( self.data_dir, i )
+                unzipped_file = gz_file.replace( ".gz", "" )
+                with gzip.open( gz_file, 'rb' ) as f_in, open( unzipped_file, 'wb' ) as f_out:
+                    shutil.copyfileobj( f_in, f_out )
+                print( "{} are unzipped.".format( gz_file ) )
+        print( "starting to extract and filter SNPs" )
 
         # extract SNPs ID for filtering
         for nb in range( 1, 23 ):
@@ -24,7 +24,7 @@ class GeneAtlas( GPRS ):
             for i in os.listdir( self.data_dir ):
                 if i.endswith( ".csv" ) and "{}.csv".format(chrnb) in i:
                     # read colnames by sep, and filter by pvalue
-                    df = pd.read_csv( "{}/{}".format( self.data_dir, i ), sep=' ' )
+                    df = pd.read_csv( "{}/{}".format( self.data_dir, i ), delim_whitespace=True )
 
                     # change column name
                     df.rename( columns={snp_id_header: 'SNPID',
