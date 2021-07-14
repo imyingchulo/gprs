@@ -94,7 +94,7 @@ class GPRS( object ):
             for snps in os.listdir( self.snplists_dir() ):
                 if "{}_{}.csv".format( chrnb, output_name ) in snps:
                     for i in os.listdir( self.ref ):
-                        if "vcf" in i and ".tbi" not in i and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and chrnb in i:
+                        if i.endswith('.vcf.gz') and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and chrnb in i:
                             # exclude chr X, Y and MT, and setting a filter to make sure all input are consistent
                             # ex: chr1 snps-list and chr1 vcf read at the same time
                             os.system("plink --vcf {}/{} --extract {}/{} --make-bed --out {}/{}_{}".format( self.ref, i,
@@ -155,7 +155,7 @@ class GPRS( object ):
         for nb in range( 1, 23 ):
             chrnb = "chr{}".format( nb )
             for vcf_file in os.listdir( vcf_input ):
-                if "vcf" in vcf_file and ".tbi" not in vcf_file and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and "{}{}".format(chrnb, symbol)in vcf_file:
+                if vcf_file.endswith('.vcf.gz') and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and "{}{}".format(chrnb, symbol)in vcf_file:
                     qc_file = "{}/{}_{}.qc_clump_snpslist.csv".format( self.qc_clump_snpslist_dir(), chrnb, output_name )
                     os.system("plink2 --vcf {}/{} dosage=DS --score {} {} '{}' --out {}/{}_{}".format( self.ref, vcf_file,
                                                                                                  qc_file, columns,
