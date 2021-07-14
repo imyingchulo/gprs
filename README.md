@@ -60,7 +60,10 @@ gene_atlas.filter_data( snp_id_header='SNP',
                         se_header='NSE-selfReported_n_1526',
                         pvalue_header='PV-selfReported_n_1526' )
 
+gene_atlas.transfer_atcg(output_name='geneatlas')
+
 gene_atlas.generate_plink_bfiles(output_name='geneatlas')
+
 gene_atlas.clump(output_name='geneatlas',
                 clump_kb='10000',
                 clump_p1='1e-3', clump_p2='1e-2')
@@ -72,12 +75,18 @@ gene_atlas.build_prs( vcf_input= '/1000genomes/hg19',
 ### 2. Use Commandline Interface
 
 ```shell
-$ gprs geneatlas-filter-data --ref [str] --data_dir [str] --result_dir [str] --snp_id_header [str] --allele_header [str] --beta_header --pvalue_header [str] --pvalue [float/scientific notation] --output_name [str]  
-$ gprs gwas-filter-data --ref [str] --data_dir [str] --result_dir [str] --snp_id_header [str] --allele_header  [str] --beta_header --pvalue_header [str] --pvalue [float/scientific notation] --output_name [str]  
+$ gprs geneatlas-filter-data --ref [str] --data_dir [str] --result_dir [str] --snp_id_header [str] --allele_header [str] --beta_header [str] --se_header [str] --pvalue_header [str] --pvalue [float/scientific notation] --output_name [str]  
+$ gprs gwas-filter-data --ref [str] --data_dir [str] --result_dir [str] --snp_id_header [str] --allele_header  [str] --beta_header [str] --se_header [str] --pvalue_header [str] --pvalue [float/scientific notation] --output_name [str]  
 $ gprs generate-plink-bfiles --ref [str] --output_name [str]
 $ gprs clump --ref [str] --data_dir [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_p2 [float/scientific notation] --clump_r2 [float] --clump_field [str] --clump_snp_field [str] --output_name [output name]
 $ gprs select-clump-snps --ref [str] --output_name [output name]
 $ gprs build-prs --ref [str] --vcf_input [str] --columns [int] --plink_modifier [str] --output_name [output name]
+```
+
+### optional function
+If alleles are a, t, c, g instead of capital A, T, C, G it might affect the further analysis. 
+```shell
+$ gprs transfer_atcg --ref [str] --vcf_input [str] --columns [int] --plink_modifier [str] --output_name [output name]
 ```
 
 
