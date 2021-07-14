@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-
 import pandas as pd
 
 
@@ -79,6 +78,13 @@ class GPRS( object ):
 
     def qc_clump_snpslist_dir(self):
         return '{}/{}'.format( self.plink_dir(), 'qc_and_clump_snpslist' )
+
+    def transfer_atcg(self, output_name):
+        for nb in range( 1, 23 ):
+            chrnb = "chr{}".format( nb )
+            df = pd.read_csv( "{}/{}_{}.QC.csv".format( "/home1/ylo40816/Projects/GPRS/tmp/result/qc/", chrnb, output_name ), sep=' ' )
+            df.loc[:, 'Allele'] = df['Allele'].apply({'a': 'A', 't': 'T', 'c': 'C', 'g': 'G'}.get)
+            df.to_csv( "{}/{}_{}.QC.csv".format( self.qc_dir(), chrnb, output_name ), sep=' ', index=False, header=True )
 
     def generate_plink_bfiles(self, output_name):
         for nb in range( 1, 23 ):

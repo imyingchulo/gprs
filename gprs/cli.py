@@ -65,6 +65,14 @@ def gwas_filter_data(ref, data_dir, result_dir, snp_id_header,
                       output_name=output_name,
                       pvalue=pvalue )
 
+@click.command()
+@click.option( '--ref', metavar='<str>', required=True, help='path to population reference panel' )
+@click.option( '--result_dir', metavar='<str>', default='./result', help='path to output folder, default: "./result"' )
+@click.option( '--output_name', metavar='<str>', help='output name' )
+def generate_plink_bfiles(ref, result_dir, output_name):
+    gprs = GPRS( ref=ref, result_dir=result_dir )
+    gprs.transfer_atcg( output_name=output_name )
+
 
 @click.command()
 @click.option( '--ref', metavar='<str>', required=True, help='path to population reference panel' )
@@ -125,7 +133,10 @@ def build_prs(ref, result_dir, vcf_input,columns, plink_modifier, output_name, s
 
 main.add_command( geneatlas_filter_data )
 main.add_command( gwas_filter_data )
+main.add_command( transfer_atcg )
 main.add_command( generate_plink_bfiles )
 main.add_command( clump )
 main.add_command( select_clump_snps )
 main.add_command( build_prs )
+
+
