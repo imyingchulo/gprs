@@ -24,7 +24,7 @@ class Gwas( GPRS ):
         for i in os.listdir( self.data_dir ):
             if i.endswith( ".csv" ):
                 # read colnames by sep
-                df = pd.read_csv( "{}/{}".format( self.data_dir, i ), sep=" " )
+                df = pd.read_csv( "{}/{}".format( self.data_dir, i ), delim_whitespace=True )
 
                 # change column name
                 df.rename( columns={snp_id_header: 'SNPID',
