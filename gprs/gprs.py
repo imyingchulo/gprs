@@ -79,22 +79,22 @@ class GPRS( object ):
     def qc_clump_snpslist_dir(self):
         return '{}/{}'.format( self.plink_dir(), 'qc_and_clump_snpslist' )
 
-    def transfer_atcg(self, output_name):
+    def transfer_atcg(self, qc_file_name):
         for nb in range( 1, 23 ):
             chrnb = "chr{}".format( nb )
-            df = pd.read_csv( "{}/{}_{}.QC.csv".format( self.qc_dir(), chrnb, output_name ), sep=' ' )
+            df = pd.read_csv( "{}/{}_{}.QC.csv".format( self.qc_dir(), chrnb, qc_file_name ), sep=' ' )
             df.loc[:, 'Allele'] = df['Allele'].apply({'a': 'A', 't': 'T', 'c': 'C', 'g': 'G'}.get)
-            df.to_csv( "{}/{}_{}.QC.csv".format( self.qc_dir(), chrnb, output_name ), sep=' ', index=False, header=True )
+            df.to_csv( "{}/{}_{}.QC.csv".format( self.qc_dir(), chrnb, qc_file_name ), sep=' ', index=False, header=True )
         print("transfer completed!")
 
-    def generate_plink_bfiles(self, output_name):
+    def generate_plink_bfiles(self, snplist_name, output_name, symbol='.' ):
         for nb in range( 1, 23 ):
             chrnb = "chr{}".format( nb )
             # get snps lists from directory
             for snps in os.listdir( self.snplists_dir() ):
-                if "{}_{}.csv".format( chrnb, output_name ) in snps:
+                if "{}_{}.csv".format( chrnb, snplist_name ) in snps:
                     for i in os.listdir( self.ref ):
-                        if i.endswith('.vcf.gz') and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and chrnb in i:
+                        if i.endswith('.vcf.gz') and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and "{}{}".format(chrnb, symbol) in i:
                             # exclude chr X, Y and MT, and setting a filter to make sure all input are consistent
                             # ex: chr1 snps-list and chr1 vcf read at the same time
                             os.system("plink --vcf {}/{} --extract {}/{} --make-bed --out {}/{}_{}".format( self.ref, i,
@@ -106,15 +106,15 @@ class GPRS( object ):
                             print( "{}_{} is finished!".format( chrnb, output_name ) )
         print( "all jobs completed!" )
 
-    def clump(self, output_name, clump_kb, clump_p1, clump_p2, clump_r2='0.1', clump_field='Pvalue',clump_snp_field='SNPID'):
+    def clump(self, qc_file_name, plink_bfile_name, output_name, clump_kb, clump_p1, clump_p2, clump_r2='0.1', clump_field='Pvalue',clump_snp_field='SNPID'):
         for nb in range( 1, 23 ):
             chrnb = "chr{}".format( nb )
             # TO perform plink clump function the following files are required:
             # .bam .bim .fam .QC(summary statistic)
             for qc_files in os.listdir( self.qc_dir() ):
-                if "{}_{}.QC.csv".format( chrnb, output_name ) in qc_files:
+                if "{}_{}.QC.csv".format( chrnb, qc_file_name ) in qc_files:
                     for plink_files in os.listdir( self.plink_bfiles_dir() ):
-                        if "{}_{}.bed".format( chrnb, output_name ) in plink_files:
+                        if "{}_{}.bed".format( chrnb, plink_bfile_name ) in plink_files:
                             plinkinput = plink_files.split( "." )[0]
                             # use plink to do the clump
                             # NOTE: the summary statistics file has to separate by space otherwise plink can not read it
@@ -126,11 +126,11 @@ class GPRS( object ):
                                     self.plink_clump_dir(), chrnb, output_name ) )
         print( "Finished Plink clump!" )
 
-    def select_clump_snps(self, output_name):
+    def select_clump_snps(self, clump_file_name, output_name):
         for nb in range( 1, 23 ):
             chrnb = "chr{}".format( nb )
             for clump_file in os.listdir( self.plink_clump_dir() ):
-                if "{}_{}.clumped".format( chrnb, output_name ) in clump_file:
+                if "{}_{}.clumped".format( chrnb, clump_file_name ) in clump_file:
                     df = pd.read_csv( "{}/{}_{}.clumped".format( self.plink_clump_dir(), chrnb, output_name ),
                                       delim_whitespace=True )
                     new_df = df.loc[(df['CHR'] == nb)]
@@ -164,3 +164,5 @@ class GPRS( object ):
                                                                                                  output_name ) )
                     print( "{} GPRS model built!".format( chrnb ) )
         print( "ALL work are complete!" )
+
+
