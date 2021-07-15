@@ -52,24 +52,32 @@ For example, if you want to run GeneAtlas, create a python file, e.g: `gene_atla
 ```python
 from gprs import GeneAtlas
 
+if __name__ == '__main__':
+    gene_atlas = GeneAtlas( ref='/1000genomes/hg19',
+                            data_dir='/Projects/GPRS/data/Gene_ATLAS/selfReported_n_1526' )
 
-gene_atlas = GeneAtlas( ref='/1000genomes/hg19', data_dir='Gene_ATLAS/selfReported_n_1526' )
-gene_atlas.filter_data( snp_id_header='SNP',
-                        allele_header='ALLELE',
-                        beta_header='NBETA-selfReported_n_1526',
-                        se_header='NSE-selfReported_n_1526',
-                        pvalue_header='PV-selfReported_n_1526' )
+    gene_atlas.filter_data( snp_id_header='SNP',
+                            allele_header='ALLELE',
+                            beta_header='NBETA-selfReported_n_1526',
+                            se_header='NSE-selfReported_n_1526',
+                            pvalue_header='PV-selfReported_n_1526' )
+    
+    gene_atlas.transfer_atcg(qc_file_name='geneatlas')
 
-gene_atlas.transfer_atcg(output_name='geneatlas')
 
-gene_atlas.generate_plink_bfiles(output_name='geneatlas')
+    gene_atlas.generate_plink_bfiles(snplist_name='geneatlas', output_name='geneatlas')
 
-gene_atlas.clump(output_name='geneatlas',
-                clump_kb='10000',
-                clump_p1='1e-3', clump_p2='1e-2')
-gene_atlas.select_clump_snps(output_name='geneatlas')
-gene_atlas.build_prs( vcf_input= '/1000genomes/hg19',
-                      output_name ='geneatlas')
+
+    gene_atlas.clump(output_name='geneatlas',
+                    clump_kb='10000',
+                    clump_p1='1e-3', clump_p2='1e-2',
+                    qc_file_name='geneatlas',
+                    plink_bfile_name='geneatlas')
+
+    gene_atlas.select_clump_snps(output_name='geneatlas',clump_file_name='geneatlas')
+
+    gene_atlas.build_prs( vcf_input= '/1000genomes/hg19',
+                          output_name ='geneatlas')
 ```
 
 ### 2. Use Commandline Interface
@@ -77,16 +85,16 @@ gene_atlas.build_prs( vcf_input= '/1000genomes/hg19',
 ```shell
 $ gprs geneatlas-filter-data --ref [str] --data_dir [str] --result_dir [str] --snp_id_header [str] --allele_header [str] --beta_header [str] --se_header [str] --pvalue_header [str] --pvalue [float/scientific notation] --output_name [str]  
 $ gprs gwas-filter-data --ref [str] --data_dir [str] --result_dir [str] --snp_id_header [str] --allele_header  [str] --beta_header [str] --se_header [str] --pvalue_header [str] --pvalue [float/scientific notation] --output_name [str]  
-$ gprs generate-plink-bfiles --ref [str] --output_name [str]
+$ gprs generate-plink-bfiles --ref [str] --snplist_name [str] --symbol [str] --output_name [str]
 $ gprs clump --ref [str] --data_dir [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_p2 [float/scientific notation] --clump_r2 [float] --clump_field [str] --clump_snp_field [str] --output_name [output name]
 $ gprs select-clump-snps --ref [str] --output_name [output name]
-$ gprs build-prs --ref [str] --vcf_input [str] --columns [int] --plink_modifier [str] --output_name [output name]
+$ gprs build-prs --ref [str] --vcf_input [str] --symbol [str] --columns [int] --plink_modifier [str] --output_name [output name]
 ```
 
 ### optional function
 If alleles are a, t, c, g instead of capital A, T, C, G it might affect the further analysis. 
 ```shell
-$ gprs transfer_atcg --ref [str] --vcf_input [str] --columns [int] --plink_modifier [str] --output_name [output name]
+$ gprs transfer_atcg --ref [str] --qc_snplist_name [str] --output_name [str]
 ```
 
 
@@ -123,6 +131,28 @@ Five folders will automatically generate under the result folder by script.
 
 :heavy_exclamation_mark: Users have to provide output_name every time when they execute the commands. The output_name should be the same in every execution.
 
+### Output file format
+This package will generate output files below:
+- `*.QC.csv` 
+- `*.csv` 
+- `*.bim`
+- `*.bed`
+- `*.fam`
+- `*.clump`
+- `*.qc_clump_snpslist.csv`
+- `*.sscore`
+
+All output files will be named as: `[chrnb]_[name].[extension]`. 
+The chrnb will given automatically, users only have to give `[name]` while using the package.
+Thus, it is better use the same output name to generate all files.
+
+- `--output_name` 
+- `--snplist_name`
+- `--qc_file_name`
+- `--clump_file_name`
+- `--plink_bfile_name`
+
+
 ### `gprs geneatlas-filter-data`
 
 Filter GeneAtlas csv file by P-value and unify the data format as following order:
@@ -138,7 +168,7 @@ SNPID, ALLELE,  BETA,  StdErr, Pvalue
   --beta_header             BETA column name in GeneAtlas original file [required]
   --se_header               StdErr column name in GeneAtlas original file  [required]
   --pvalue_header           P-value column name in GeneAtlas original file  [required]
-  --output_name             output name; default: geneatlas; the output file will be [chrnb]_[output_name].csv
+  --output_name             output name; default: "geneatlas"; the output file name is [chrnb]_[output_name].csv and [chrnb]_[output_name].QC.csv
   --pvalue                  P-value threshold
   --help                    Show this message and exit.
 ````
@@ -167,7 +197,7 @@ SNPID, ALLELE,  BETA,  StdErr, Pvalue
   --beta_header              BETA column name in GWAS catalog original file  [required]
   --se_header                StdErr column name in GWAS catalog original file  [required]
   --pvalue_header            P-value column name in GWAS catalog original file  [required]
-  --output_name              output name; default: gwas ; the output file will be named as [chrnb]_[output_name].csv
+  --output_name              output name; default: "gwas"; the output file named is [chrnb]_[output_name].csv and [chrnb]_[output_name].QC.csv
   --pvalue                   P-value threshold for filtering SNPs
   --help                     Show this message and exit.
 ````
@@ -193,6 +223,8 @@ Users have to indicate ref and output_name only.
   --ref                path to population reference panel  [required]
   --result_dir         path to output folder; default:[./result]
   --output_name        output name
+  --symbol <str/int>   indicate the symbol or text after chrnb in vcf file, default = "." ; i.e. ALL.chr8.vcf.gz, you can put "." or ".vcf.gz" 
+  --snplist_name <str> snplist_name is [output_name] from [chrnb]_[output_name].csv [required]
   --help               Show this message and exit.
 ````
 
@@ -220,7 +252,9 @@ Users have to indicate the options below.
   --clump_kb                 distance(kb) parameter for clumping [required]
   --clump_p1                 first set of P-value for clumping [required]
   --clump_p2                 should equals to p1 reduce the snps [required]
-  --output_name              output name should remain consistent as output_name to plink and filtered data; output format: [chrnb]_[output_name]_clumped_snplist.csv [required]
+  --qc_file_name <str>       qc_file_name is [output_name] from [chrnb]_[output_name].QC.csv [required]
+  --plink_bfile_name <str>   plink_bfile_name is [output_name] from [chrnb]_[output_name].bim/bed/fam [required]
+  --output_name              it is better if the output_name remain the same. The clump output: [chrnb]_[output_name]_clumped_snplist.csv [required]
   --clump_r2                 r2 value for clumping, default = 0.1
   --clump_field              P-value column name, default = Pvalue
   --clump_snp_field          SNP ID column name, default = SNPID
@@ -238,13 +272,14 @@ This option will generate one file in `clump` folder:
 
 #### Options:
 ```` 
-  --ref                    path to population reference panel  [required]
-  --result_dir             path to output folder; default:[./result]
-  --qc_dir                 path to qc folder, default: "./result/qc", the qc files were generated from gwas_filter_data or geneatlas_filter_data options
-  --clump_output_dir       path to clump output folder, default: "./result/plink/clump"
-  --qc_clump_snplists_dir  path to snpslist (after qc and clumping), default:"./result/plink/qc_and_clump_snpslist"
-  --output_name            output name should remain consistent as output_name to plink and filtered data; output format is: [chrnb]_[output_name]_clumped_snplist.csv [required]
-  --help                   Show this message and exit.
+  --ref <str>                    path to population reference panel  [required]
+  --result_dir <str>             path to output folder; default:[./result]
+  --qc_dir <str>                 path to qc folder, default: "./result/qc", the qc files were generated from gwas_filter_data or geneatlas_filter_data options
+  --clump_output_dir <str>       path to clump output folder, default: "./result/plink/clump"
+  --qc_clump_snplists_dir <str>  path to snpslist (after qc and clumping), default:"./result/plink/qc_and_clump_snpslist"
+  --clump_file_name <str>        clump_file_name is [output_name] from [chrnb]_[output_name].clump [required]
+  --output_name <str>            it is better if the output_name remain the same. output: [chrnb]_[output_name]_clumped_snplist.csv [required]
+  --help                         Show this message and exit.
 ````
 
 #### Result:
@@ -264,11 +299,11 @@ Users have to indicate the options below.
 ````
   --ref <str>                    path to population reference  [required]
   --result_dir                   path to output folder; default:[./result]
-  --symbol <str/int>             the symbol or text after chrnb, default = "." ; i.e. ALL.chr8.vcf.gz, you can put "." or ".vcf.gz"
+  --symbol <str/int>             indicate the symbol or text after chrnb in vcf file, default = "." ; i.e. ALL.chr8.vcf.gz, you can put "." or ".vcf.gz"
   --vcf_input <str>              path to vcf files  [required]
   --columns <int>                a column index indicate the [SNPID] [ALLELE] [BETA] position; column nb starts from 1
   --plink_modifier <str>         no-mean-imputation as default in here, get more info by searching plink2.0 modifier
-  --output_name <str>            output name should remain consistent as output_name to plink and filtered data [required]
+  --output_name <str>            it is better if the output_name remain the same. output: [chrnb]_[output_name].sscore
   --help                         Show this message and exit.
 ````
 #### Result:
