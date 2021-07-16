@@ -126,7 +126,7 @@ class GPRS( object ):
                                     self.plink_clump_dir(), chrnb, output_name ) )
         print( "Finished Plink clump!" )
 
-    def select_clump_snps(self, clump_file_name, output_name):
+    def select_clump_snps(self, qc_file_name, clump_file_name, output_name):
         for nb in range( 1, 23 ):
             chrnb = "chr{}".format( nb )
             for clump_file in os.listdir( self.plink_clump_dir() ):
@@ -144,7 +144,7 @@ class GPRS( object ):
             clump_snp = pd.read_csv(
                 "{}/{}_{}_clumped_snplist.csv".format( self.plink_clump_dir(), chrnb, output_name ), sep=' ' )
             clump_snp.rename( columns={'SNP': 'SNPID'}, inplace=True )
-            qc_snp = pd.read_csv( "{}/{}_{}.QC.csv".format( self.qc_dir(), chrnb, output_name ), sep=' ' )
+            qc_snp = pd.read_csv( "{}/{}_{}.QC.csv".format( self.qc_dir(), chrnb, qc_file_name ), sep=' ' )
             newsnplist = qc_snp[qc_snp["SNPID"].isin( clump_snp["SNPID"] )]
             newsnplist.to_csv( "{}/{}_{}.qc_clump_snpslist.csv".format( self.qc_clump_snpslist_dir(), chrnb, output_name ),
                                sep=' ', index=False, header=True )

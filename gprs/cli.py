@@ -111,11 +111,12 @@ def clump(ref, data_dir, qc_file_name, result_dir, plink_bfile_name, clump_kb, c
 @click.command()
 @click.option( '--ref', metavar='<str>', help='path to population reference panel' )
 @click.option( '--result_dir', metavar='<str>', default='./result', help='path to output folder, default: "./result"' )
+@click.option( '--qc_file_name', metavar='<str>', required=True, help='qc_file_name is [output_name] from [chrnb]_[output_name].QC.csv' )
 @click.option( '--clump_file_name', metavar='<str>', required=True, help='clump_file_name is [output_name] from [chrnb]_[output_name].clump' )
 @click.option( '--output_name', metavar='<str>', required=True, help='it is better if the output_name remain the same. output: [chrnb]_[output_name]_clumped_snplist.csv' )
-def select_clump_snps(ref, result_dir, clump_file_name, output_name):
+def select_clump_snps(ref, result_dir, clump_file_name, qc_file_name,output_name):
     gprs = GPRS( ref=ref, result_dir=result_dir )
-    gprs.select_clump_snps( clump_file_name=clump_file_name, output_name=output_name )
+    gprs.select_clump_snps( qc_file_name=qc_file_name, clump_file_name=clump_file_name, output_name=output_name )
 
 
 @click.command()
