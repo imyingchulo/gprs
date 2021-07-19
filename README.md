@@ -86,9 +86,9 @@ if __name__ == '__main__':
 $ gprs geneatlas-filter-data --ref [str] --data_dir [str] --result_dir [str] --snp_id_header [str] --allele_header [str] --beta_header [str] --se_header [str] --pvalue_header [str] --pvalue [float/scientific notation] --output_name [str]  
 $ gprs gwas-filter-data --ref [str] --data_dir [str] --result_dir [str] --snp_id_header [str] --allele_header  [str] --beta_header [str] --se_header [str] --pvalue_header [str] --pvalue [float/scientific notation] --output_name [str]  
 $ gprs generate-plink-bfiles --ref [str] --snplist_name [str] --symbol [str] --output_name [str]
-$ gprs clump --ref [str] --data_dir [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_p2 [float/scientific notation] --clump_r2 [float] --clump_field [str] --clump_snp_field [str] --output_name [output name]
-$ gprs select-clump-snps --ref [str] --output_name [output name]
-$ gprs build-prs --ref [str] --vcf_input [str] --symbol [str] --columns [int] --plink_modifier [str] --output_name [output name]
+$ gprs clump --ref [str] --data_dir [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_p2 [float/scientific notation] --clump_r2 [float] --clump_field [str] --clump_snp_field [str] --plink_bfile_name [str] --qc_file_name [str] --output_name [output name]
+$ gprs select-clump-snps --ref [str] --result_dir [str] --qc_file_name [str] --clump_file_name [str] --output_name [output name]
+$ gprs build-prs --ref [str] --vcf_input [str] --symbol [str] --qc_file_name [str] --columns [int] --plink_modifier [str] --output_name [output name]
 ```
 
 ### optional function
