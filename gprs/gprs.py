@@ -129,40 +129,38 @@ class GPRS( object ):
     def select_clump_snps(self, qc_file_name, clump_file_name, output_name):
         for nb in range( 1, 23 ):
             chrnb = "chr{}".format( nb )
-            for clump_file in os.listdir( self.plink_clump_dir() ):
-                if "{}_{}.clumped".format( chrnb, clump_file_name ) in clump_file:
-                    df = pd.read_csv( "{}/{}_{}.clumped".format( self.plink_clump_dir(), chrnb, output_name ),
-                                      delim_whitespace=True )
-                    new_df = df.loc[(df['CHR'] == nb)]
-                    new_df_2 = new_df[['CHR', 'SNP']]
-                    new_df_2.to_csv(
-                        "{}/{}_{}_clumped_snplist.csv".format( self.plink_clump_dir(), chrnb, output_name ), sep=' ',
-                        index=False, header=True )
-        for nb in range( 1, 23 ):
-            chrnb = "chr{}".format( nb )
-            # compare two csv files, and out put new file
-            clump_snp = pd.read_csv(
-                "{}/{}_{}_clumped_snplist.csv".format( self.plink_clump_dir(), chrnb, output_name ), sep=' ' )
-            clump_snp.rename( columns={'SNP': 'SNPID'}, inplace=True )
-            qc_snp = pd.read_csv( "{}/{}_{}.QC.csv".format( self.qc_dir(), chrnb, qc_file_name ), sep=' ' )
-            newsnplist = qc_snp[qc_snp["SNPID"].isin( clump_snp["SNPID"] )]
-            newsnplist.to_csv( "{}/{}_{}.qc_clump_snpslist.csv".format( self.qc_clump_snpslist_dir(), chrnb, output_name ),
-                               sep=' ', index=False, header=True )
-            print( "new {} snpslist has been created".format( chrnb ) )
+            try:
+                df = pd.read_csv( "{}/{}_{}.clumped".format( self.plink_clump_dir(), chrnb, output_name ), delim_whitespace=True )
+                new_df = df.loc[(df['CHR'] == nb)]
+                new_df_2 = new_df[['CHR', 'SNP']]
+                new_df_2.to_csv("{}/{}_{}_clumped_snplist.csv".format( self.plink_clump_dir(), chrnb, output_name ), sep=' ', index=False, header=True )
+            except IOError:
+                print("{}/{}_{}.clumped not found. skip".format( self.plink_clump_dir(), chrnb, output_name ))
+            try:
+                clump_snp = pd.read_csv("{}/{}_{}_clumped_snplist.csv".format( self.plink_clump_dir(), chrnb, clump_file_name ), sep=' ' )
+                clump_snp.rename( columns={'SNP': 'SNPID'}, inplace=True )
+                qc_snp = pd.read_csv( "{}/{}_{}.QC.csv".format( self.qc_dir(), chrnb, qc_file_name ), sep=' ' )
+                newsnplist = qc_snp[qc_snp["SNPID"].isin( clump_snp["SNPID"] )]
+                newsnplist.to_csv( "{}/{}_{}.qc_clump_snpslist.csv".format( self.qc_clump_snpslist_dir(), chrnb, output_name ), sep=' ', index=False, header=True )
+                print( "{} snpslist has been created".format( chrnb ) )
+            except IOError:
+                print("{}/{}_{}_clumped_snplist.csv not found. skip".format( self.plink_clump_dir(), chrnb, clump_file_name ))
         print( "All jobs are completed" )
 
-    def build_prs(self, vcf_input, output_name, symbol='.' ,columns='1 2 3', plink_modifier='no-mean-imputation'):
+    def build_prs(self, vcf_input, output_name, qc_file_name, symbol='.' ,columns='1 2 3', plink_modifier='no-mean-imputation'):
         for nb in range( 1, 23 ):
             chrnb = "chr{}".format( nb )
             for vcf_file in os.listdir( vcf_input ):
                 if vcf_file.endswith('.vcf.gz') and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and "{}{}".format(chrnb, symbol)in vcf_file:
-                    qc_file = "{}/{}_{}.qc_clump_snpslist.csv".format( self.qc_clump_snpslist_dir(), chrnb, output_name )
-                    os.system("plink2 --vcf {}/{} dosage=DS --score {} {} '{}' --out {}/{}_{}".format( self.ref, vcf_file,
+                    qc_file = "{}/{}_{}.qc_clump_snpslist.csv".format( self.qc_clump_snpslist_dir(), chrnb, qc_file_name )
+                    try:
+                        os.path.exists(qc_file)
+                        os.system("plink2 --vcf {}/{} dosage=DS --score {} {} '{}' --out {}/{}_{}".format( self.ref, vcf_file,
                                                                                                  qc_file, columns,
                                                                                                  plink_modifier,
                                                                                                  self.prs_dir(), chrnb,
                                                                                                  output_name ) )
-                    print( "{} GPRS model built!".format( chrnb ) )
+                        print( "{} GPRS model built!".format( chrnb ) )
+                    except IOError:
+                        print( "{}/{}_{}.qc_clump_snpslist.csv not found. skip".format( self.qc_clump_snpslist_dir(), chrnb, qc_file_name ) )
         print( "ALL work are complete!" )
-
-
