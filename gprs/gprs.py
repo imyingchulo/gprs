@@ -155,7 +155,7 @@ class GPRS( object ):
                     qc_file = "{}/{}_{}.qc_clump_snpslist.csv".format( self.qc_clump_snpslist_dir(), chrnb, qc_file_name )
                     try:
                         os.path.exists(qc_file)
-                        os.system("plink2 --vcf {} dosage=DS --score {} {} '{}' --out {}/{}_{}".format( vcf_input, vcf_file,
+                        os.system("plink2 --vcf {}/{} dosage=DS --score {} {} '{}' --out {}/{}_{}".format( vcf_input, vcf_file,
                                                                                                  qc_file, columns,
                                                                                                  plink_modifier,
                                                                                                  self.prs_dir(), chrnb,
