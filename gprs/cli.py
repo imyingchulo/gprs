@@ -127,10 +127,12 @@ def select_clump_snps(ref, result_dir, clump_file_name, qc_file_name,output_name
 @click.option( '--columns', metavar='<int>', default='1 2 3', help='a column index indicate the [SNPID] [ALLELE] [BETA] position; column nb starts from 1 ' )
 @click.option( '--plink_modifier', metavar='<str>', default='no-mean-imputation', help='no-mean-imputation as default in here, get more info by searching plink2.0 modifier ' )
 @click.option( '--qc_file_name', metavar='<str>', required=True, help='qc_file_name is [output_name] from [chrnb]_[output_name].QC.csv' )
+@click.option( '--memory', metavar='<int>', help='number of memory use' )
 @click.option( '--output_name', metavar='<str>', required=True, help='it is better if the output_name remain the same. output: [chrnb]_[output_name].sscore' )
-def build_prs(ref, result_dir, vcf_input, qc_file_name, columns, plink_modifier, output_name, symbol ):
+def build_prs(ref, result_dir, vcf_input, qc_file_name, columns, plink_modifier, output_name, symbol,memory ):
     gprs = GPRS( ref=ref, result_dir=result_dir )
-    gprs.build_prs( vcf_input=vcf_input,
+    gprs.build_prs( memory=memory,
+                    vcf_input=vcf_input,
                     qc_file_name=qc_file_name,
                     symbol = symbol,
                     columns=columns,

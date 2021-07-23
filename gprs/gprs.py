@@ -147,7 +147,7 @@ class GPRS( object ):
                 print("{}/{}_{}_clumped_snplist.csv not found. skip".format( self.plink_clump_dir(), chrnb, clump_file_name ))
         print( "All jobs are completed" )
 
-    def build_prs(self, vcf_input, output_name, qc_file_name, symbol='.' ,columns='1 2 3', plink_modifier='no-mean-imputation'):
+    def build_prs(self, vcf_input, output_name, qc_file_name, memory, symbol='.' ,columns='1 2 3', plink_modifier='no-mean-imputation'):
         for nb in range( 1, 23 ):
             chrnb = "chr{}".format( nb )
             for vcf_file in os.listdir( vcf_input ):
@@ -155,9 +155,9 @@ class GPRS( object ):
                     qc_file = "{}/{}_{}.qc_clump_snpslist.csv".format( self.qc_clump_snpslist_dir(), chrnb, qc_file_name )
                     try:
                         os.path.exists(qc_file)
-                        os.system("plink2 --vcf {}/{} dosage=DS --score {} {} '{}' --out {}/{}_{}".format( vcf_input, vcf_file,
+                        os.system("plink2 --vcf {}/{} dosage=DS --score {} {} '{}' --memory {} --out {}/{}_{}".format( vcf_input, vcf_file,
                                                                                                  qc_file, columns,
-                                                                                                 plink_modifier,
+                                                                                                 plink_modifier, memory,
                                                                                                  self.prs_dir(), chrnb,
                                                                                                  output_name ) )
                         print( "{} GPRS model built!".format( chrnb ) )
