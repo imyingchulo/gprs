@@ -147,5 +147,3 @@ main.add_command( generate_plink_bfiles )
 main.add_command( clump )
 main.add_command( select_clump_snps )
 main.add_command( build_prs )
-
-
