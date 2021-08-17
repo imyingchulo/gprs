@@ -16,6 +16,7 @@ Welcome to GPRS's documentation!
 
    api_reference/gprs
    api_reference/gene_atlas_model
+   api_reference/gwas_model
 
 
 Indices and tables
