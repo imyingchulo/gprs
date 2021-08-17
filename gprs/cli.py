@@ -1,7 +1,7 @@
 import click
 from gprs import GPRS
-from gprs.gwas import Gwas
-from gprs.gene_atlas import GeneAtlas
+from gprs.gwas import Gwas_model
+from gprs.gene_atlas import GeneAtlas_model
 
 
 @click.group()
@@ -26,7 +26,7 @@ def geneatlas_filter_data(ref,data_dir, result_dir, snp_id_header,
                           pvalue_header,
                           output_name,
                           pvalue):
-    gene_atlas = GeneAtlas( ref=ref, data_dir=data_dir, result_dir=result_dir )
+    gene_atlas = GeneAtlas_model( ref=ref, data_dir=data_dir, result_dir=result_dir )
     gene_atlas.filter_data( snp_id_header=snp_id_header,
                             allele_header=allele_header,
                             beta_header=beta_header,
@@ -44,6 +44,7 @@ def geneatlas_filter_data(ref,data_dir, result_dir, snp_id_header,
 @click.option( '--beta_header', metavar='<str>', required=True, help='BETA column name in GWAS catalog original file' )
 @click.option( '--se_header', metavar='<str>', required=True, help='StdErr column name in GWAS catalog original file' )
 @click.option( '--pvalue_header', metavar='<str>', required=True, help='P-value column name in GWAS catalog original file' )
+@click.option( '--file_name', metavar='<str>', default='gwas', help='raw data file name' )
 @click.option( '--output_name', metavar='<str>', default='gwas', help='output name; default: "gwas"; the output file name is [chrnb]_[output_name].csv and [chrnb]_[output_name].QC.csv' )
 @click.option( '--pvalue', metavar='<float/scientific notation>', default=0.05, help='P-value threshold for filtering SNPs' )
 def gwas_filter_data(ref, data_dir, result_dir, snp_id_header,
@@ -52,15 +53,17 @@ def gwas_filter_data(ref, data_dir, result_dir, snp_id_header,
                      se_header,
                      pvalue_header,
                      output_name,
-                     pvalue):
-    gwas = Gwas( ref=ref, data_dir=data_dir, result_dir=result_dir )
+                     pvalue,
+                     file_name):
+    gwas = Gwas_model( ref=ref, data_dir=data_dir, result_dir=result_dir )
     gwas.filter_data( snp_id_header=snp_id_header,
                       allele_header=allele_header,
                       beta_header=beta_header,
                       se_header=se_header,
                       pvalue_header=pvalue_header,
                       output_name=output_name,
-                      pvalue=pvalue )
+                      pvalue=pvalue,
+                      file_name=file_name)
 
 @click.command()
 @click.option( '--ref', metavar='<str>', required=True, help='path to population reference panel' )
@@ -139,6 +142,16 @@ def build_prs(ref, result_dir, vcf_input, qc_file_name, columns, plink_modifier,
                     plink_modifier=plink_modifier,
                     output_name=output_name )
 
+@click.command()
+@click.option( '--ref', metavar='<str>', help='path to population reference panel' )
+@click.option( '--result_dir', metavar='<str>', default='./result', help='path to output folder, default: "./result"' )
+@click.option( '--pop', metavar='<str>', required=True, help='name of .sscore, i.e. chr10_geneatlas.sscore, --pop geneatlas, '
+                                                             'if use multiple file name, separate files by ","' )
+def combine_prs(ref, result_dir, pop):
+    gprs = GPRS( ref=ref, result_dir=result_dir )
+    gprs.combine_prs( pop=pop)
+
+
 
 main.add_command( geneatlas_filter_data )
 main.add_command( gwas_filter_data )
@@ -147,3 +160,4 @@ main.add_command( generate_plink_bfiles )
 main.add_command( clump )
 main.add_command( select_clump_snps )
 main.add_command( build_prs )
+main.add_command( combine_prs )
