@@ -1,0 +1,7 @@
+Sphinx
+sphinx-autobuild
+sphinx-tabs
+myst-parser
+sphinx_rtd_theme
+sphinx-markdown-tables
+sphinx-reload
