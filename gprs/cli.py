@@ -1,7 +1,7 @@
 import click
 from gprs import GPRS
-from gprs.gwas import Gwas_model
-from gprs.gene_atlas import GeneAtlas_model
+from gprs.gwas import GwasModel
+from gprs.gene_atlas import GeneAtlasModel
 
 
 @click.group()
@@ -26,7 +26,7 @@ def geneatlas_filter_data(ref,data_dir, result_dir, snp_id_header,
                           pvalue_header,
                           output_name,
                           pvalue):
-    gene_atlas = GeneAtlas_model( ref=ref, data_dir=data_dir, result_dir=result_dir )
+    gene_atlas = GeneAtlasModel( ref=ref, data_dir=data_dir, result_dir=result_dir )
     gene_atlas.filter_data( snp_id_header=snp_id_header,
                             allele_header=allele_header,
                             beta_header=beta_header,
@@ -55,7 +55,7 @@ def gwas_filter_data(ref, data_dir, result_dir, snp_id_header,
                      output_name,
                      pvalue,
                      file_name):
-    gwas = Gwas_model( ref=ref, data_dir=data_dir, result_dir=result_dir )
+    gwas = GwasModel( ref=ref, data_dir=data_dir, result_dir=result_dir )
     gwas.filter_data( snp_id_header=snp_id_header,
                       allele_header=allele_header,
                       beta_header=beta_header,

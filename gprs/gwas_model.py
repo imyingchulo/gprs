@@ -5,7 +5,7 @@ import shutil
 from gprs.gprs import GPRS
 import collections
 
-class Gwas_model( GPRS ):
+class GwasModel( GPRS ):
     def filter_data(self, snp_id_header, allele_header, beta_header, se_header, pvalue_header, file_name,
                     output_name, pvalue=0.05):
         #unzip the genotyped files
