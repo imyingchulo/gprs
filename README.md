@@ -1,5 +1,7 @@
 # Genome-wide Polygenic Risk Score (GPRS) 
 
+[![Documentation Status](https://readthedocs.org/projects/gprs/badge/?version=latest)](https://gprs.readthedocs.io/en/latest/?badge=latest)
+
 ---
 
 This package aims to generate a PRS model from GWAS summary statistics. It is designed to deal with GWAS summary statistics from the GWAS catalog and GeneATLAS database.
