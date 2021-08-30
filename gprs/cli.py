@@ -1,7 +1,7 @@
 import click
-from gprs import GPRS
-from gprs.gwas import GwasModel
-from gprs.gene_atlas import GeneAtlasModel
+from gprs.gprs import GPRS
+from gprs.gwas_model import GwasModel
+from gprs.gene_atlas_model import GeneAtlasModel
 
 
 @click.group()
@@ -151,13 +151,36 @@ def combine_prs(ref, result_dir, pop):
     gprs = GPRS( ref=ref, result_dir=result_dir )
     gprs.combine_prs( pop=pop)
 
+@click.command()
+@click.option( '--ref', metavar='<str>', help='path to population reference panel' )
+@click.option( '--result_dir', metavar='<str>', default='./result', help='path to output folder, default: "./result"' )
+@click.option( '--score_file', metavar='<str>', required=True, help='')
+@click.option( '--pheno_file', metavar='<str>', required=True, help='')
+@click.option( '--output_name', metavar='<str>', required=True, help='')
+@click.option( '--data_set_name', metavar='<str>', required=True, help='')
+@click.option( '--filter_pvalue', metavar='<float>', required=True, help='In the filter_data step, the p-value used for data qc ')
+@click.option( '--prs_stats_R', metavar='<str>', required=True, help='indicate the')
+@click.option( '--r_command', metavar='<str>', required=True, help='use "which R" in linux, and copy the path after --r_command')
+
+def prs_statistics(ref, result_dir,score_file, pheno_file, output_name, data_set_name, filter_pvalue, prs_stats_R, r_command):
+    gprs = GPRS( ref=ref, result_dir=result_dir )
+    gprs.prs_statistics( score_file=score_file,
+                         pheno_file=pheno_file,
+                         output_name=output_name,
+                         data_set_name=data_set_name,
+                         filter_pvalue=filter_pvalue,
+                         prs_stats_R=prs_stats_R,
+                         r_command=r_command)
 
 
-main.add_command( geneatlas_filter_data )
-main.add_command( gwas_filter_data )
-main.add_command( transfer_atcg )
-main.add_command( generate_plink_bfiles )
-main.add_command( clump )
-main.add_command( select_clump_snps )
 main.add_command( build_prs )
+main.add_command( clump )
 main.add_command( combine_prs )
+main.add_command( combine_prs_stat)
+main.add_command( geneatlas_filter_data )
+main.add_command( generate_plink_bfiles )
+main.add_command( gwas_filter_data )
+main.add_command( prs_statistics )
+main.add_command( select_clump_snps )
+main.add_command( transfer_atcg )
+

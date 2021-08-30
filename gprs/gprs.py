@@ -1,7 +1,10 @@
 import os
 from pathlib import Path
 import pandas as pd
-
+import subprocess
+from subprocess import call
+import glob
+import csv
 
 class GPRS( object ):
     def __init__(self,
@@ -22,6 +25,7 @@ class GPRS( object ):
         self.create_qc_dir()
         self.create_snplists_dir()
         self.create_qc_clump_snpslist_dir()
+        self.create_stat_dir()
 
     def create_result_dir(self):
         if not os.path.exists( self.result_dir ):
@@ -33,6 +37,13 @@ class GPRS( object ):
     def create_plink_dir(self):
         if not os.path.exists( self.plink_dir() ):
             os.mkdir( self.plink_dir() )
+
+    def create_stat_dir(self):
+        if not os.path.exists( self.stat_dir() ):
+            os.mkdir( self.stat_dir() )
+
+    def stat_dir(self):
+        return '{}/{}'.format( self.result_dir, 'stat' )
 
     def plink_dir(self):
         return '{}/{}'.format( self.result_dir, 'plink' )
@@ -78,6 +89,7 @@ class GPRS( object ):
 
     def qc_clump_snpslist_dir(self):
         return '{}/{}'.format( self.plink_dir(), 'qc_and_clump_snpslist' )
+
 
     def transfer_atcg(self, qc_file_name):
         for nb in range( 1, 23 ):
@@ -176,7 +188,7 @@ class GPRS( object ):
                     qc_snp = pd.read_csv( "{}/{}.QC.csv".format( self.qc_dir(), qc_file_name ), sep=' ' )
                     newsnplist = qc_snp[qc_snp["SNPID"].isin( clump_snp["SNPID"] )]
                     newsnplist.to_csv("{}/{}_{}.qc_clump_snpslist.csv".format( self.qc_clump_snpslist_dir(), chrnb, output_name ), sep=' ', index=False, header=True )
-                    print( "{} snpslist has been created".format( chrnb ) )
+                    print( "{}x snpslist has been created".format( chrnb ) )
             except IOError:
                 print("{}/{}_{}_clumped_snplist.csv not found. skip".format( self.plink_clump_dir(), chrnb, clump_file_name ))
         print( "All jobs are completed" )
@@ -233,6 +245,7 @@ class GPRS( object ):
                         nm[id].append( float( lines[1] ) )
                         sumsc[id].append( float( lines[1] ) * float( lines[3] ) )
                         avg[id].append( float( lines[3] ) )
+                    f.close()
                 except IOError:
                     print("'File Not Found:'{}/chr{}_{}.sscore'".format(self.prs_dir(),i,p))
             # sum up scores per chromosome and output
@@ -242,3 +255,25 @@ class GPRS( object ):
                 o.write( i + '\t' + str( sum( nm[i] ) ) + '\t' + str( sum( avg[i] ) / 22 ) + '\t' + str(
                     sum( sumsc[i] ) ) + '\n' )
             o.close()
+
+    def prs_statistics(self, score_file, pheno_file, output_name, data_set_name, filter_pvalue, prs_stats_R, r_command):
+        ##USAGE Rscript --vanilla prs_stats.R [score file] [pheno file] [target pop for OR] [ref pop for OR] [graph pdf name]
+        call("{0} --vanilla {1} {2} {3} {4} {5} {7}/{6}".format(r_command, prs_stats_R, score_file, pheno_file,
+                                        data_set_name, filter_pvalue, output_name, self.stat_dir()), shell=True)
+        stat_data = pd.read_csv("{}/{}_{}_stat.txt".format(self.stat_dir(),data_set_name,filter_pvalue))
+        stat_data.to_csv(
+            "{}/{}_{}_stat.txt".format(self.stat_dir(),data_set_name,filter_pvalue),
+            index=False,
+            header=True,
+            sep='\t',
+            float_format='%.4f'
+        )
+
+    def combine_prs_stat(self,data_set_name):
+        interesting_files = glob.glob( "{}/{}*.txt".format(self.stat_dir(), data_set_name) )
+        combined_csv = pd.concat( [pd.read_csv( f ) for f in sorted( interesting_files )] )
+        combined_csv.to_csv(
+            '{}/{}_combined_stat.txt'.format( self.stat_dir(), data_set_name ),
+            index=False,
+            sep='\t'
+        )
