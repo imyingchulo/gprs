@@ -17,7 +17,7 @@ def main():
 @click.option( '--beta_header', metavar='<str>', required=True, help='BETA column name in GeneAtlas original file' )
 @click.option( '--se_header', metavar='<str>', required=True, help='StdErr column name in GeneAtlas original file' )
 @click.option( '--pvalue_header', metavar='<str>', required=True, help='P-value column name in GeneAtlas original file' )
-@click.option( '--output_name', metavar='<str>', default='geneatlas', help='output name; default: "geneatlas"; the output file name is [chrnb]_[output_name].csv and [chrnb]_[output_name].QC.csv' )
+@click.option( '--output_name', metavar='<str>', default='geneatlas_model', help='output name; default: "geneatlas"; the output file name is [chrnb]_[output_name].csv and [chrnb]_[output_name].QC.csv' )
 @click.option( '--pvalue', metavar='<float/scientific notation>', default=0.05, help='P-value threshold' )
 def geneatlas_filter_data(ref,data_dir, result_dir, snp_id_header,
                           allele_header,
@@ -44,8 +44,8 @@ def geneatlas_filter_data(ref,data_dir, result_dir, snp_id_header,
 @click.option( '--beta_header', metavar='<str>', required=True, help='BETA column name in GWAS catalog original file' )
 @click.option( '--se_header', metavar='<str>', required=True, help='StdErr column name in GWAS catalog original file' )
 @click.option( '--pvalue_header', metavar='<str>', required=True, help='P-value column name in GWAS catalog original file' )
-@click.option( '--file_name', metavar='<str>', default='gwas', help='raw data file name' )
-@click.option( '--output_name', metavar='<str>', default='gwas', help='output name; default: "gwas"; the output file name is [chrnb]_[output_name].csv and [chrnb]_[output_name].QC.csv' )
+@click.option( '--file_name', metavar='<str>', default='gwas_model', help='raw data file name' )
+@click.option( '--output_name', metavar='<str>', default='gwas_model', help='output name; default: "gwas"; the output file name is [chrnb]_[output_name].csv and [chrnb]_[output_name].QC.csv' )
 @click.option( '--pvalue', metavar='<float/scientific notation>', default=0.05, help='P-value threshold for filtering SNPs' )
 def gwas_filter_data(ref, data_dir, result_dir, snp_id_header,
                      allele_header,
@@ -154,14 +154,13 @@ def combine_prs(ref, result_dir, pop):
 @click.command()
 @click.option( '--ref', metavar='<str>', help='path to population reference panel' )
 @click.option( '--result_dir', metavar='<str>', default='./result', help='path to output folder, default: "./result"' )
-@click.option( '--score_file', metavar='<str>', required=True, help='')
-@click.option( '--pheno_file', metavar='<str>', required=True, help='')
-@click.option( '--output_name', metavar='<str>', required=True, help='')
-@click.option( '--data_set_name', metavar='<str>', required=True, help='')
+@click.option( '--score_file', metavar='<str>', required=True, help='the absolute path to combined .sscore file')
+@click.option( '--pheno_file', metavar='<str>', required=True, help='the absolute path to pheno file')
+@click.option( '--output_name', metavar='<str>', required=True, help='the output name')
+@click.option( '--data_set_name', metavar='<str>', required=True, help='the name of the data-set i.e. gout_2019_GCST008970 ')
 @click.option( '--filter_pvalue', metavar='<float>', required=True, help='In the filter_data step, the p-value used for data qc ')
-@click.option( '--prs_stats_R', metavar='<str>', required=True, help='indicate the')
+@click.option( '--prs_stats_R', metavar='<str>', required=True, help='the absolute path to "prs_stats.R"')
 @click.option( '--r_command', metavar='<str>', required=True, help='use "which R" in linux, and copy the path after --r_command')
-
 def prs_statistics(ref, result_dir,score_file, pheno_file, output_name, data_set_name, filter_pvalue, prs_stats_R, r_command):
     gprs = GPRS( ref=ref, result_dir=result_dir )
     gprs.prs_statistics( score_file=score_file,
@@ -171,6 +170,15 @@ def prs_statistics(ref, result_dir,score_file, pheno_file, output_name, data_set
                          filter_pvalue=filter_pvalue,
                          prs_stats_R=prs_stats_R,
                          r_command=r_command)
+
+@click.command()
+@click.option( '--ref', metavar='<str>', help='path to population reference panel' )
+@click.option( '--result_dir', metavar='<str>', default='./result', help='path to output folder, default: "./result"' )
+@click.option( '--data_set_name', metavar='<str>', required=True, help='the name of the data-set i.e. gout_2019_GCST008970' )
+def combine_prs_stat(ref, result_dir, data_set_name):
+    gprs = GPRS( ref=ref, result_dir=result_dir )
+    gprs.combine_prs_stat( data_set_name=data_set_name)
+
 
 
 main.add_command( build_prs )

@@ -1,14 +1,13 @@
 import os
 from pathlib import Path
 import pandas as pd
-import subprocess
 from subprocess import call
 import glob
-import csv
+
 
 class GPRS( object ):
     def __init__(self,
-                 ref,
+                 ref='',
                  data_dir='',
                  result_dir='./result'):
         self.ref = ref
@@ -260,9 +259,9 @@ class GPRS( object ):
         ##USAGE Rscript --vanilla prs_stats.R [score file] [pheno file] [target pop for OR] [ref pop for OR] [graph pdf name]
         call("{0} --vanilla {1} {2} {3} {4} {5} {7}/{6}".format(r_command, prs_stats_R, score_file, pheno_file,
                                         data_set_name, filter_pvalue, output_name, self.stat_dir()), shell=True)
-        stat_data = pd.read_csv("{}/{}_{}_stat.txt".format(self.stat_dir(),data_set_name,filter_pvalue))
+        stat_data = pd.read_csv("{}/{}_{}_stat.txt".format(self.stat_dir(),output_name,filter_pvalue))
         stat_data.to_csv(
-            "{}/{}_{}_stat.txt".format(self.stat_dir(),data_set_name,filter_pvalue),
+            "{}/{}_{}_stat.txt".format(self.stat_dir(),output_name,filter_pvalue),
             index=False,
             header=True,
             sep='\t',
