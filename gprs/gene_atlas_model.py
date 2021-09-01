@@ -5,6 +5,7 @@ from gprs.gprs import GPRS
 class GeneAtlasModel( GPRS ):
     def filter_data(self, snp_id_header, allele_header, beta_header, se_header, pvalue_header, output_name='geneatlas',
                     pvalue=0.05):
+
         #unzip the genotyped files
         gz_files = []
         for i in os.listdir( self.data_dir ):

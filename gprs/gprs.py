@@ -10,6 +10,9 @@ class GPRS( object ):
                  ref='',
                  data_dir='',
                  result_dir='./result'):
+        """
+        At the beginning of gprs package, result and sub-folders will generate automatically when the user first run the package.
+        """
         self.ref = ref
         self.data_dir = data_dir
         self.result_dir = Path( '{}/{}'.format( os.getcwd(), result_dir ) ).resolve()

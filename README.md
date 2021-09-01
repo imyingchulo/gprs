@@ -55,8 +55,8 @@ For example, if you want to run GeneAtlas, create a python file, e.g: `gene_atla
 from gprs.gene_atlas_model import GeneAtlasModel
 
 if __name__ == '__main__':
-    geneatlas = GeneAtlasModel( ref='/home1/ylo40816/1000genomes/hg19',
-                    data_dir='/home1/ylo40816/Projects/GPRS/data/2014_GWAS_Height' )
+    geneatlas = GeneAtlasModel( ref='1000genomes/hg19',
+                    data_dir='data/2014_GWAS_Height' )
 
     geneatlas.filter_data( snp_id_header='MarkerName',
                             allele_header='Allele1',
@@ -76,13 +76,13 @@ if __name__ == '__main__':
     geneatlas.select_clump_snps(output_name='2014height',clump_file_name='2014height',
                            qc_file_name='2014height')
 
-    geneatlas.build_prs( vcf_input= '/home1/ylo40816/1000genomes/hg19',
+    geneatlas.build_prs( vcf_input= '1000genomes/hg19',
                           output_name ='2014height', qc_file_name='2014height',memory='1000')
 
-    geneatlas.prs_statistics(output_name='2014height', score_file = "/home1/ylo40816/Projects/GPRS/tmp/result/plink/prs/2014height.sscore",
-        pheno_file = "/home1/ylo40816/Projects/GPRS/tmp/result/plink/prs/2014height_pheno.csv",
-        r_command='/spack/apps/linux-centos7-x86_64/gcc-8.3.0/r-4.0.0-jfy3icn4kexk7kyabcoxuio2iyyww3o7/bin/Rscript',
-        prs_stats_R="/home1/ylo40816/Projects/GPRS/gprs/prs_stats.R", data_set_name="2014height",filter_pvalue=0.04)
+    geneatlas.prs_statistics(output_name='2014height', score_file = "path to 2014height.sscore",
+        pheno_file = "path to  2014height_pheno.csv",
+        r_command='path to Rscript',
+        prs_stats_R="path to prs_stats.R", data_set_name="2014height",filter_pvalue=0.04)
 
     geneatlas.combine_prs_stat(data_set_name='2014height')
 ```
@@ -111,7 +111,7 @@ $ gprs transfer_atcg --ref [str] --qc_snplist_name [str] --output_name [str]
 
 ## Commands in gprs package:
 
-:octocat: Five commands in gprs:
+:octocat: Ten commands in gprs:
 
 1. `geneatlas-filter-data`
 
@@ -126,6 +126,12 @@ $ gprs transfer_atcg --ref [str] --qc_snplist_name [str] --output_name [str]
 6. `build-prs`
 
 7. `transfer_atcg` (optional)
+
+8. `combine-prs`
+
+9. `prs-statistics`
+
+10. `combine-prs-stat`
 
 ### Result folder
 In the first step, you need to indicate the path to creating the result folder.
@@ -152,6 +158,8 @@ This package will generate output files below:
 - `*.clump`
 - `*.qc_clump_snpslist.csv`
 - `*.sscore`
+- `*_stat.txt`
+- `*_combined_stat.txt`
 
 All output files will be named as: `[chrnb]_[name].[extension]`. 
 The chrnb will given automatically, users only have to give `[name]` while using the package.

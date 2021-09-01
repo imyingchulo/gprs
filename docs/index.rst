@@ -12,6 +12,17 @@ Welcome to GPRS's documentation!
 
 .. toctree::
    :maxdepth: 2
+   :caption: Tutorials
+
+   tutorials/general_info_about_gprs_package
+   tutorials/step1_data_format
+   tutorials/step2_generate_plink_bfiles
+   tutorials/step3_clumping
+   tutorials/step4_generate_prs_model
+   tutorials/step5_find_the_best_prs_model
+
+.. toctree::
+   :maxdepth: 2
    :caption: API Reference
 
    api_reference/gprs
