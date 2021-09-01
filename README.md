@@ -49,37 +49,42 @@ Download GWAS summary statistics from
 
 ### 1. Use python
 
-For example, if you want to run GeneAtlas, create a python file, e.g: `gene_atlas.py`. Paste the following code in the file and change the configuration to your settings. 
+For example, if you want to run GeneAtlas, create a python file, e.g: `gene_atlas_model.py`. Paste the following code in the file and change the configuration to your settings. 
 
 ```python
-from gprs import GeneAtlas
+from gprs.gene_atlas_model import GeneAtlasModel
 
 if __name__ == '__main__':
-    gene_atlas = GeneAtlas( ref='/1000genomes/hg19',
-                            data_dir='/Projects/GPRS/data/Gene_ATLAS/selfReported_n_1526' )
+    geneatlas = GeneAtlasModel( ref='/home1/ylo40816/1000genomes/hg19',
+                    data_dir='/home1/ylo40816/Projects/GPRS/data/2014_GWAS_Height' )
 
-    gene_atlas.filter_data( snp_id_header='SNP',
-                            allele_header='ALLELE',
-                            beta_header='NBETA-selfReported_n_1526',
-                            se_header='NSE-selfReported_n_1526',
-                            pvalue_header='PV-selfReported_n_1526' )
-    
-    gene_atlas.transfer_atcg(qc_file_name='geneatlas')
+    geneatlas.filter_data( snp_id_header='MarkerName',
+                            allele_header='Allele1',
+                            beta_header='b',
+                            se_header ='SE',
+                            pvalue_header='p',
+                            output_name='2014height')
 
+    geneatlas.generate_plink_bfiles(snplist_name='2014height', output_name='2014height')
 
-    gene_atlas.generate_plink_bfiles(snplist_name='geneatlas', output_name='geneatlas')
+    geneatlas.clump(output_name='2014height',
+                    clump_kb='250',
+                    clump_p1='0.02', clump_p2='0.02',
+                    qc_file_name='2014height',
+                    plink_bfile_name='2014height')
 
+    geneatlas.select_clump_snps(output_name='2014height',clump_file_name='2014height',
+                           qc_file_name='2014height')
 
-    gene_atlas.clump(output_name='geneatlas',
-                    clump_kb='10000',
-                    clump_p1='1e-3', clump_p2='1e-2',
-                    qc_file_name='geneatlas',
-                    plink_bfile_name='geneatlas')
+    geneatlas.build_prs( vcf_input= '/home1/ylo40816/1000genomes/hg19',
+                          output_name ='2014height', qc_file_name='2014height',memory='1000')
 
-    gene_atlas.select_clump_snps(output_name='geneatlas',clump_file_name='geneatlas')
+    geneatlas.prs_statistics(output_name='2014height', score_file = "/home1/ylo40816/Projects/GPRS/tmp/result/plink/prs/2014height.sscore",
+        pheno_file = "/home1/ylo40816/Projects/GPRS/tmp/result/plink/prs/2014height_pheno.csv",
+        r_command='/spack/apps/linux-centos7-x86_64/gcc-8.3.0/r-4.0.0-jfy3icn4kexk7kyabcoxuio2iyyww3o7/bin/Rscript',
+        prs_stats_R="/home1/ylo40816/Projects/GPRS/gprs/prs_stats.R", data_set_name="2014height",filter_pvalue=0.04)
 
-    gene_atlas.build_prs( vcf_input= '/1000genomes/hg19',
-                          output_name ='geneatlas')
+    geneatlas.combine_prs_stat(data_set_name='2014height')
 ```
 
 ### 2. Use Commandline Interface
@@ -90,7 +95,11 @@ $ gprs gwas-filter-data --ref [str] --data_dir [str] --result_dir [str] --snp_id
 $ gprs generate-plink-bfiles --ref [str] --snplist_name [str] --symbol [str] --output_name [str]
 $ gprs clump --ref [str] --data_dir [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_p2 [float/scientific notation] --clump_r2 [float] --clump_field [str] --clump_snp_field [str] --plink_bfile_name [str] --qc_file_name [str] --output_name [output name]
 $ gprs select-clump-snps --ref [str] --result_dir [str] --qc_file_name [str] --clump_file_name [str] --output_name [output name]
-$ gprs build-prs --ref [str] --vcf_input [str] --symbol [str] --qc_file_name [str] --columns [int] --plink_modifier [str] --output_name [output name]
+$ gprs build-prs --ref [str] --vcf_input [str] --symbol [str/int] --qc_file_name [str] --columns [int] --plink_modifier [str] --memory [int] --output_name [output name]
+$ gprs combine-prs --ref [str] --result_dur [str] --pop [str]
+$ gprs prs-statistics --ref [str] --result_dir [str] --score_file [str] --pheno_file [str] --data_set_name [str] --filter_pavlue [float] --prs_stats_R [str] --r_command [str] --output_name [str] 
+$ gprs combine-prs-stat --ref [str] --result_dir [str] --data_set_name [str]
+
 ```
 
 ### optional function
@@ -309,7 +318,68 @@ Users have to indicate the options below.
   --help                         Show this message and exit.
 ````
 #### Result:
+This option will generate `.sscore` files in `prs` folder:
+- `*.sscore`
+
+
+### `gprs combine-prs`
+
+Combine-prs option will combine all .sscore files as one .sscore file.
+
+#### Options:
+````
+  --ref <str>         path to population reference panel
+  --result_dir <str>  path to output folder, default: "./result"
+  --pop <str>         name of .sscore, i.e. chr10_geneatlas.sscore, --pop
+                      geneatlas, if use multiple file name, separate files by
+                      ","  [required]
+  --help              Show this message and exit.
+````
+#### Result:
 This option will generate one file in `prs` folder:
 - `*.sscore`
 
 
+### `gprs prs-statistics`
+
+After obtained combined sscore file, `prs-statistics` calculate BETA, AIC, AUC, PseudoR2 and OR ratio 
+
+#### Options:
+````
+  --ref <str>              path to population reference panel
+  --result_dir <str>       path to output folder, default: "./result"
+  --score_file <str>       the absolute path to combined .sscore file
+                           [required]
+  --pheno_file <str>       the absolute path to pheno file  [required]
+  --output_name <str>      the output name  [required]
+  --data_set_name <str>    the name of the data-set i.e. gout_2019_GCST008970
+                           [required]
+  --filter_pvalue <float>  In the filter_data step, the p-value used for data
+                           qc   [required]
+  --prs_stats_R <str>      the absolute path to "prs_stats.R"  [required]
+  --r_command <str>        use "which R" in linux, and copy the path after
+                           --r_command  [required]
+  --help                   Show this message and exit.
+````
+#### Result:
+This option will generate .txt file in `stat` folder:
+- `*_stat.txt`
+
+
+### `gprs combine-prs-stat`
+
+If you have more than one trained PRS model, `combine-prs-stat` function is designed to combine statistics results.
+For instance: the first PRS model was filtered with P < 0.05, the second PRS model was filtered with P < 0.0005. You will have DATA_0.05_stat.txt/DATA_0.0005_stat.txt
+Combining two statistic tables allows users easy to compare between PRS models
+
+#### Options:
+````
+  --ref <str>            path to population reference panel
+  --result_dir <str>     path to output folder, default: "./result"
+  --data_set_name <str>  the name of the data-set i.e. gout_2019_GCST008970
+                         [required]
+  --help                 Show this message and exit.
+````
+#### Result:
+This option will generate .txt file in `stat` folder:
+- `*_combined_stat.txt`
