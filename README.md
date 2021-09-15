@@ -31,6 +31,7 @@ $ source ./venv/bin/activate
 3. Install this package
 
 ```shell
+$ pip install -r requirements.txt
 $ pip install -e .
 ```
 
@@ -82,7 +83,7 @@ if __name__ == '__main__':
     geneatlas.prs_statistics(output_name='2014height', score_file = "path to 2014height.sscore",
         pheno_file = "path to  2014height_pheno.csv",
         r_command='path to Rscript',
-        prs_stats_R="path to prs_stats.R", data_set_name="2014height",filter_pvalue=0.04)
+        prs_stats_R="path to prs_stats_quantitative_phenotype.R", data_set_name="2014height",filter_pvalue=0.04)
 
     geneatlas.combine_prs_stat(data_set_name='2014height')
 ```
@@ -94,11 +95,11 @@ $ gprs geneatlas-filter-data --ref [str] --data_dir [str] --result_dir [str] --s
 $ gprs gwas-filter-data --ref [str] --data_dir [str] --result_dir [str] --snp_id_header [str] --allele_header  [str] --beta_header [str] --se_header [str] --pvalue_header [str] --pvalue [float/scientific notation] --output_name [str]  
 $ gprs generate-plink-bfiles --ref [str] --snplist_name [str] --symbol [str] --output_name [str]
 $ gprs clump --ref [str] --data_dir [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_p2 [float/scientific notation] --clump_r2 [float] --clump_field [str] --clump_snp_field [str] --plink_bfile_name [str] --qc_file_name [str] --output_name [output name]
-$ gprs select-clump-snps --ref [str] --result_dir [str] --qc_file_name [str] --clump_file_name [str] --output_name [output name]
-$ gprs build-prs --ref [str] --vcf_input [str] --symbol [str/int] --qc_file_name [str] --columns [int] --plink_modifier [str] --memory [int] --output_name [output name]
+$ gprs select-clump-snps --ref [str] --result_dir [str] --qc_file_name [str] --clump_file_name [str] --output_name [output name] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float]
+$ gprs build-prs --ref [str] --vcf_input [str] --symbol [str/int] --qc_file_name [str] --columns [int] --plink_modifier [str] --memory [int] --output_name [output name] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float]
 $ gprs combine-prs --ref [str] --result_dur [str] --pop [str]
-$ gprs prs-statistics --ref [str] --result_dir [str] --score_file [str] --pheno_file [str] --data_set_name [str] --filter_pavlue [float] --prs_stats_R [str] --r_command [str] --output_name [str] 
-$ gprs combine-prs-stat --ref [str] --result_dir [str] --data_set_name [str]
+$ gprs prs-statistics --ref [str] --result_dir [str] --score_file [str] --pheno_file [str] --data_set_name [str] --prs_stats_R [str] --r_command [str] --output_name [str]  --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float]
+$ gprs combine-prs-stat --ref [str] --result_dir [str] --data_set_name [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float]
 
 ```
 
@@ -298,6 +299,9 @@ This option will generate one file in `clump` folder:
   --qc_clump_snplists_dir <str>  path to snpslist (after qc and clumping), default:"./result/plink/qc_and_clump_snpslist"
   --clump_file_name <str>        clump_file_name is [output_name] from [chrnb]_[output_name].clump [required]
   --output_name <str>            it is better if the output_name remain the same. output: [chrnb]_[output_name]_clumped_snplist.csv [required]
+  --clump_kb                     distance(kb) parameter for clumping [required]
+  --clump_p1                     first set of P-value for clumping [required]
+  --clump_r2                     r2 value for clumping, default = 0.1
   --help                         Show this message and exit.
 ````
 
@@ -323,6 +327,9 @@ Users have to indicate the options below.
   --columns <int>                a column index indicate the [SNPID] [ALLELE] [BETA] position; column nb starts from 1
   --plink_modifier <str>         no-mean-imputation as default in here, get more info by searching plink2.0 modifier
   --output_name <str>            it is better if the output_name remain the same. output: [chrnb]_[output_name].sscore
+  --clump_kb                     distance(kb) parameter for clumping [required]
+  --clump_p1                     first set of P-value for clumping [required]
+  --clump_r2                     r2 value for clumping, default = 0.1
   --help                         Show this message and exit.
 ````
 #### Result:
@@ -341,6 +348,9 @@ Combine-prs option will combine all .sscore files as one .sscore file.
   --pop <str>         name of .sscore, i.e. chr10_geneatlas.sscore, --pop
                       geneatlas, if use multiple file name, separate files by
                       ","  [required]
+  --clump_kb          distance(kb) parameter for clumping [required]
+  --clump_p1          first set of P-value for clumping [required]
+  --clump_r2          r2 value for clumping, default = 0.1
   --help              Show this message and exit.
 ````
 #### Result:
@@ -362,8 +372,10 @@ After obtained combined sscore file, `prs-statistics` calculate BETA, AIC, AUC, 
   --output_name <str>      the output name  [required]
   --data_set_name <str>    the name of the data-set i.e. gout_2019_GCST008970
                            [required]
-  --filter_pvalue <float>  In the filter_data step, the p-value used for data
-                           qc   [required]
+  --clump_kb               distance(kb) parameter for clumping [required]
+  --clump_p1               first set of P-value for clumping [required]
+  --clump_r2               r2 value for clumping, default = 0.1
+
   --prs_stats_R <str>      the absolute path to "prs_stats.R"  [required]
   --r_command <str>        use "which R" in linux, and copy the path after
                            --r_command  [required]
@@ -386,6 +398,9 @@ Combining two statistic tables allows users easy to compare between PRS models
   --result_dir <str>     path to output folder, default: "./result"
   --data_set_name <str>  the name of the data-set i.e. gout_2019_GCST008970
                          [required]
+  --clump_kb             distance(kb) parameter for clumping [required]
+  --clump_p1             first set of P-value for clumping [required]
+  --clump_r2             r2 value for clumping, default = 0.1
   --help                 Show this message and exit.
 ````
 #### Result:
