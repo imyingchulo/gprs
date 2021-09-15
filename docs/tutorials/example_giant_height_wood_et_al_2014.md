@@ -205,7 +205,7 @@ if __name__ == '__main__':
 |---|---|---|---|---|---|---|---|---|
 |2014height |250_0.02_0.1    | 0.5632    |0.0019|0.0002|0.5396|1.3899|0.9408| 1.2972|
 
-# step5.2(optional) Combined statistics results as one table
+##s step5.2(optional) Combined statistics results as one table
 
 ```python
 from gprs.gene_atlas_model import GeneAtlasModel
@@ -229,7 +229,7 @@ if __name__ == '__main__':
 |2014height |250_0.02_0.1    | 0.5632    |0.0019|0.0002|0.5396|1.3899|0.9408| 1.2972|
 
 
-# Visualize distribution of PRS in each population 
+## Visualize distribution of PRS in each population 
 
 ```R
 # Libraries
