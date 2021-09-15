@@ -249,7 +249,7 @@ ggplot(data=data, aes(x=data$SCORE_AVG, group=data$super_pop, fill=data$super_po
 
 ```
 
-![PRS distribution plot](/Users/ying-chulo/PycharmProjects/GPRS/tmp/PRS_distribution_plot.png)
+![PRS distribution plot](/Users/ying-chulo/PycharmProjects/GPRS/docs/tutorials/PRS_distribution_plot.png)
 
 
 
