@@ -25,7 +25,7 @@ if __name__ == '__main__':
     geneatlas.prs_statistics(output_name='2014height', score_file = "path to 2014height.sscore",
         pheno_file = "path to  2014height_pheno.csv",
         r_command='path to Rscript',
-        prs_stats_R="path to prs_stats.R", data_set_name="2014height",filter_pvalue=0.04)
+        prs_stats_R="path to prs_stats_quantitative_phenotype.R", data_set_name="2014height",filter_pvalue=0.04)
 ```
 
 ## output files

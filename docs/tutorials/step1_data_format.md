@@ -25,11 +25,12 @@
 
 |-|chr info in the file name| chr info not in the file name|
 |---|---|---|
-|chr info in the column|gene_atlas_model|gwas_model|
-|chr info absent in the column|gene_atlas_model|gene_atlas_model|
+|chr info in the header|gene_atlas_model|gwas_model|
+|chr info absent in the header|gene_atlas_model|gene_atlas_model|
 
 # Step1: Filtering SNPs 
 After knowing the data format, users can choose the model (gwas or geneatlas) to filter out SNPs.
+:heavy_exclamation_mark: SNPs are extract out by RSID not chromosome position
 
 ## Function: `gprs geneatlas-filter-data`
 
