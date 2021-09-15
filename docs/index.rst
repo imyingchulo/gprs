@@ -20,6 +20,7 @@ Welcome to GPRS's documentation!
    tutorials/step3_clumping
    tutorials/step4_generate_prs_model
    tutorials/step5_find_the_best_prs_model
+   tutorials/example_giant_height_wood_et_al_2014
 
 .. toctree::
    :maxdepth: 2
