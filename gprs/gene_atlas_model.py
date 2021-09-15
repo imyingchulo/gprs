@@ -1,27 +1,28 @@
 import os
 from gprs.gprs import GPRS
+import pandas as pd
 
 
 class GeneAtlasModel( GPRS ):
     def filter_data(self, snp_id_header, allele_header, beta_header, se_header, pvalue_header, output_name='geneatlas',
                     pvalue=0.05):
 
-        #unzip the genotyped files
-        gz_files = []
-        for i in os.listdir( self.data_dir ):
-            if i.endswith( ".gz" ):
-                gz_files.append( i )
-            else:
-                print( "all files are unzipped!" )
-        if gz_files:
-            for gz_file in gz_files:
-                gz_file = "{}/{}".format( self.data_dir, gz_file )
-                unzipped_file = gz_file.replace( ".gz", "" )
-                with gzip.open( gz_file, 'rb' ) as f_in, open( unzipped_file, 'wb' ) as f_out:
-                    shutil.copyfileobj( f_in, f_out )
-        else:
-            raise ('No data files end with .gz')
-        print( "starting to extract and filter SNPs" )
+        # #unzip the genotyped files
+        # gz_files = []
+        # for i in os.listdir( self.data_dir ):
+        #     if i.endswith( ".gz" ):
+        #         gz_files.append( i )
+        #     else:
+        #         print( "all files are unzipped!" )
+        # if gz_files:
+        #     for gz_file in gz_files:
+        #         gz_file = "{}/{}".format( self.data_dir, gz_file )
+        #         unzipped_file = gz_file.replace( ".gz", "" )
+        #         with gzip.open( gz_file, 'rb' ) as f_in, open( unzipped_file, 'wb' ) as f_out:
+        #             shutil.copyfileobj( f_in, f_out )
+        # else:
+        #     raise ('No data files end with .gz')
+        # print( "starting to extract and filter SNPs" )
 
         # extract SNPs ID for filtering
         for i in os.listdir( self.data_dir ):
