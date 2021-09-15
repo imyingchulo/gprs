@@ -1,4 +1,6 @@
-# Get started: 2014 height data structure
+# Example_giant_height_wood_et_al_2014 
+## Get started: 2014 height data structure
+
 
 :octocat: Data name: GIANT_HEIGHT_Wood_et_al_2014_publicrelease_HapMapCeuFreq.txt
 
