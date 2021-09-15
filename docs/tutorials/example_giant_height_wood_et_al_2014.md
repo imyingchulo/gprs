@@ -1,8 +1,15 @@
-# Example_giant_height_wood_et_al_2014 
+# Example of giant height from Wood et al 2014 
+
+This is an example from Wood et al. 
+The example aimed to use GPRS package to replicate the Fig4A in Wood et al paper.
+
+
 ## Get started: 2014 height data structure
 
 
-:octocat: Data name: GIANT_HEIGHT_Wood_et_al_2014_publicrelease_HapMapCeuFreq.txt
+
+
+:page_facing_up: Data name: GIANT_HEIGHT_Wood_et_al_2014_publicrelease_HapMapCeuFreq.txt
 
 |MarkerName | Allele1 |Allele2 |Freq.Allele1.HapMapCEU | b| SE |p| N|
 |---|---|---|---|---|---|---|---|
