@@ -6,10 +6,10 @@ The example aimed to use GPRS package to replicate the Fig4A in Wood et al paper
 
 ## Get started: 2014 height data structure
 
+:page_facing_up: The GWAS summary statistics was downloaded from GIANT database.
+Data name: GIANT_HEIGHT_Wood_et_al_2014_publicrelease_HapMapCeuFreq.txt
 
-
-
-:page_facing_up: Data name: GIANT_HEIGHT_Wood_et_al_2014_publicrelease_HapMapCeuFreq.txt
+:page_facing_up: Here is the data structure
 
 |MarkerName | Allele1 |Allele2 |Freq.Allele1.HapMapCEU | b| SE |p| N|
 |---|---|---|---|---|---|---|---|
@@ -20,6 +20,8 @@ The example aimed to use GPRS package to replicate the Fig4A in Wood et al paper
 |rs7086391 | T|      C|       0.12|    -0.0087| 0.0038|  0.024|   248425|
 
 ## Which template to use?
+
+Before starting processing the data, we have to decided which template to use.
 
 |-|chr info in the file name| chr info not in the file name|
 |---|---|---|
