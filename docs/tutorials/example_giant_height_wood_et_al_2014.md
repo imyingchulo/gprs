@@ -76,7 +76,7 @@ The output folder will automatically generate and named as `result`
 |rs737657|
 |rs7086391|
 
--`result/qc/2014height.QC.csv`
+- `result/qc/2014height.QC.csv`
 
 |SNPID| Allele| Beta| SE |Pvalue|
 |---|---|---|---|---|

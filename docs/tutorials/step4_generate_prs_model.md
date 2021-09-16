@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
 
 # Setp 4-2: Combined PRS model
-Combined PRS model (python script create by Soyoung Jeon)
+Combined PRS model (python script create by Soyoung Jeon; update by Ying-Chu Lo))
 
 ## Function:`gprs combine-prs`
 

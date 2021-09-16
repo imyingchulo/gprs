@@ -1,5 +1,5 @@
 # Setp 5-1: Calculate statistics value of PRS model
-(Rscript create by Soyoung Jeon)
+(Rscript create by Soyoung Jeon; update by Ying-Chu Lo)
 
 ## Function: `prs-statistics`
 
