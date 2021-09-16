@@ -9,7 +9,7 @@ The example aimed to use the GPRS package to replicate the Fig4A in Wood *et al*
 The GWAS summary statistics were downloaded from the GIANT database.
 - Data name: GIANT_HEIGHT_Wood_et_al_2014_publicrelease_HapMapCeuFreq.txt
 
-### Here is the data structure:
+## Here is the data structure:
 
 |MarkerName | Allele1 |Allele2 |Freq.Allele1.HapMapCEU | b| SE |p| N|
 |---|---|---|---|---|---|---|---|
@@ -64,7 +64,7 @@ $ gprs geneatlas-filter-data --ref [str] --data_dir [str] --result_dir [str] --s
 $ gprs geneatlas-filter-data --data_dir data/2014_GWAS_Height --result_dir [str] --snp_id_header MarkerName --allele_header Allele1 --beta_header b --se_header SE --pvalue_header p --pvalue 0.05 --output_name 2014height
 ```
 
-### After preparing the data-set three files obtained
+## After preparing the data-set three files obtained
 
 The output folder will automatically generate and named as `result`
 
