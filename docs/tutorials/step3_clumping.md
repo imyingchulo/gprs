@@ -57,7 +57,7 @@ In this step, we will have new SNPs list, and use it for generate PRS model.
 Shell:
 
 ```shell
-$ gprs select-clump-snps --ref [str] --result_dir [str] --qc_file_name [str] --clump_file_name [str] --output_name [output name]
+$ gprs select-clump-snps --result_dir [str] --qc_file_name [str] --clump_file_name [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float] --output_name [output name]
 ```
 
 Python:

@@ -39,7 +39,8 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx_markdown_tables',
     'sphinx_tabs.tabs',
-    'myst_parser'
+    'myst_parser',
+    'sphinxemoji.sphinxemoji',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -68,3 +69,5 @@ source_suffix = {
     '.txt': 'markdown',
     '.md': 'markdown',
 }
+
+sphinxemoji_style = 'twemoji'

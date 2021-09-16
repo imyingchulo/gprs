@@ -2,7 +2,7 @@
 This package aims to generate a PRS model from GWAS summary statistics data-set. 
 It is designed to use GWAS summary statistics from the GWAS catalog and GeneATLAS database.
 
-:octocat: Understanding the workflow of this package:
+- Understanding the workflow of this package:
 
 1. Filter GWAS summary statistics files (remove duplicate SNPID and select significant SNPs by P-value)
 2. Generate bfiles by Plink1.9
@@ -30,7 +30,7 @@ $ source ./venv/bin/activate
 $ pip install -e .
 ```
 
-:octocat: Ten commands in gprs:
+- Ten commands in gprs:
 
 1. `geneatlas-filter-data`
 

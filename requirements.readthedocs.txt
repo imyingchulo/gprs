@@ -5,3 +5,4 @@ myst-parser
 sphinx_rtd_theme
 sphinx-markdown-tables
 sphinx-reload
+sphinxemoji

@@ -119,7 +119,7 @@ def clump(ref, data_dir, qc_file_name, result_dir, plink_bfile_name, clump_kb, c
 @click.option( '--output_name', metavar='<str>', required=True, help='it is better if the output_name remain the same. output: [chrnb]_[output_name]_clumped_snplist.csv' )
 @click.option( '--clump_kb', metavar='<int>', required=True, help='distance(kb) parameter for clumping' )
 @click.option( '--clump_p1', metavar='<float/scientific notation>', required=True, help='first set of P-value for clumping' )
-@click.option( '--clump_r2', metavar='<float>', default=0.1, help='r2 value for clumping, default = 0.1' )
+@click.option( '--clump_r2', metavar='<float>', required=True, help='r2 value for clumping' )
 def select_clump_snps(ref, result_dir, clump_file_name, qc_file_name,output_name,clump_kb,clump_p1,clump_r2):
     gprs = GPRS( ref=ref, result_dir=result_dir )
     gprs.select_clump_snps( qc_file_name=qc_file_name, clump_file_name=clump_file_name, output_name=output_name,
@@ -138,7 +138,7 @@ def select_clump_snps(ref, result_dir, clump_file_name, qc_file_name,output_name
 @click.option( '--output_name', metavar='<str>', required=True, help='it is better if the output_name remain the same. output: [chrnb]_[output_name].sscore' )
 @click.option( '--clump_kb', metavar='<int>', required=True, help='distance(kb) parameter for clumping' )
 @click.option( '--clump_p1', metavar='<float/scientific notation>', required=True, help='first set of P-value for clumping' )
-@click.option( '--clump_r2', metavar='<float>', default=0.1, help='r2 value for clumping, default = 0.1' )
+@click.option( '--clump_r2', metavar='<float>', required=True, help='r2 value for clumping' )
 def build_prs(ref, result_dir, vcf_input, qc_file_name, columns, plink_modifier, output_name, symbol,memory,clump_kb,clump_p1,clump_r2 ):
     gprs = GPRS( ref=ref, result_dir=result_dir )
     gprs.build_prs( memory=memory,

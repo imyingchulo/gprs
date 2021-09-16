@@ -56,8 +56,8 @@ For example, if you want to run GeneAtlas, create a python file, e.g: `gene_atla
 from gprs.gene_atlas_model import GeneAtlasModel
 
 if __name__ == '__main__':
-    geneatlas = GeneAtlasModel( ref='1000genomes/hg19',
-                    data_dir='data/2014_GWAS_Height' )
+    geneatlas = GeneAtlasModel( ref='/home/user/1000genomes/hg19',
+                    data_dir='/home/user/GPRS/data/2014_GWAS_Height' )
 
     geneatlas.filter_data( snp_id_header='MarkerName',
                             allele_header='Allele1',
@@ -70,22 +70,36 @@ if __name__ == '__main__':
 
     geneatlas.clump(output_name='2014height',
                     clump_kb='250',
-                    clump_p1='0.02', clump_p2='0.02',
+                    clump_p1='0.02',
+                    clump_p2='0.02',
                     qc_file_name='2014height',
                     plink_bfile_name='2014height')
 
     geneatlas.select_clump_snps(output_name='2014height',clump_file_name='2014height',
-                           qc_file_name='2014height')
+                           qc_file_name='2014height',
+                                clump_kb='250',
+                                clump_p1='0.02',
+                                clump_r2='0.1')
 
-    geneatlas.build_prs( vcf_input= '1000genomes/hg19',
-                          output_name ='2014height', qc_file_name='2014height',memory='1000')
+    geneatlas.build_prs( vcf_input= '/home/user/1000genomes/hg19',
+                         output_name ='2014height', qc_file_name='2014height',memory='1000',
+                         clump_kb='250',
+                         clump_p1='0.02',
+                         clump_r2='0.1')
 
-    geneatlas.prs_statistics(output_name='2014height', score_file = "path to 2014height.sscore",
-        pheno_file = "path to  2014height_pheno.csv",
-        r_command='path to Rscript',
-        prs_stats_R="path to prs_stats_quantitative_phenotype.R", data_set_name="2014height",filter_pvalue=0.04)
+    geneatlas.combine_prs(pop='2014height_250_0.02_0.1')
 
-    geneatlas.combine_prs_stat(data_set_name='2014height')
+    geneatlas.prs_statistics(output_name='2014height', score_file = "/home/user/GPRS/tmp/2014height_250_0.02_0.1.sscore",
+        pheno_file = "/home/user/GPRS/tmp/result/plink/prs/2014height_pheno.csv",
+        r_command='/spack/apps/linux-centos7-x86_64/gcc-8.3.0/r-4.0.0-jfy3icn4kexk7kyabcoxuio2iyyww3o7/bin/Rscript',
+        prs_stats_R="/home/user/GPRS/gprs/prs_stats_quantitative_phenotype.R", data_set_name="2014height",
+                             clump_kb='250',
+                             clump_p1='0.02',
+                             clump_r2='0.1')
+
+    geneatlas.combine_prs_stat(data_set_name='2014height',clump_kb='250',
+                         clump_p1='0.02',
+                         clump_r2='0.1')
 ```
 
 ### 2. Use Commandline Interface
@@ -94,12 +108,12 @@ if __name__ == '__main__':
 $ gprs geneatlas-filter-data --ref [str] --data_dir [str] --result_dir [str] --snp_id_header [str] --allele_header [str] --beta_header [str] --se_header [str] --pvalue_header [str] --pvalue [float/scientific notation] --output_name [str]  
 $ gprs gwas-filter-data --ref [str] --data_dir [str] --result_dir [str] --snp_id_header [str] --allele_header  [str] --beta_header [str] --se_header [str] --pvalue_header [str] --pvalue [float/scientific notation] --output_name [str]  
 $ gprs generate-plink-bfiles --ref [str] --snplist_name [str] --symbol [str] --output_name [str]
-$ gprs clump --ref [str] --data_dir [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_p2 [float/scientific notation] --clump_r2 [float] --clump_field [str] --clump_snp_field [str] --plink_bfile_name [str] --qc_file_name [str] --output_name [output name]
-$ gprs select-clump-snps --ref [str] --result_dir [str] --qc_file_name [str] --clump_file_name [str] --output_name [output name] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float]
-$ gprs build-prs --ref [str] --vcf_input [str] --symbol [str/int] --qc_file_name [str] --columns [int] --plink_modifier [str] --memory [int] --output_name [output name] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float]
-$ gprs combine-prs --ref [str] --result_dur [str] --pop [str]
-$ gprs prs-statistics --ref [str] --result_dir [str] --score_file [str] --pheno_file [str] --data_set_name [str] --prs_stats_R [str] --r_command [str] --output_name [str]  --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float]
-$ gprs combine-prs-stat --ref [str] --result_dir [str] --data_set_name [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float]
+$ gprs clump --data_dir [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_p2 [float/scientific notation] --clump_r2 [float] --clump_field [str] --clump_snp_field [str] --plink_bfile_name [str] --qc_file_name [str] --output_name [output name]
+$ gprs select-clump-snps --result_dir [str] --qc_file_name [str] --clump_file_name [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float] --output_name [output name]
+$ gprs build-prs --vcf_input [str] --symbol [str/int] --qc_file_name [str] --columns [int] --plink_modifier [str] --memory [int] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float] --output_name [output name] 
+$ gprs combine-prs --result_dur [str] --pop [str] 
+$ gprs prs-statistics --result_dir [str] --score_file [str] --pheno_file [str] --data_set_name [str] --prs_stats_R [str] --r_command [str] --output_name [str]  --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float]
+$ gprs combine-prs-stat --result_dir [str] --data_set_name [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float]
 
 ```
 
