@@ -48,6 +48,10 @@ Download GWAS summary statistics from
 
 ## Usage
 
+### Before starting:
+
+Please unzip your .gz file first.
+
 ### 1. Use python
 
 For example, if you want to run GeneAtlas, create a python file, e.g: `gene_atlas_model.py`. Paste the following code in the file and change the configuration to your settings. 
