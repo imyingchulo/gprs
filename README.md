@@ -60,49 +60,43 @@ For example, if you want to run GeneAtlas, create a python file, e.g: `gene_atla
 from gprs.gene_atlas_model import GeneAtlasModel
 
 if __name__ == '__main__':
-    geneatlas = GeneAtlasModel( ref='/home1/ylo40816/1000genomes/GRCh38',
-                    data_dir='/home1/ylo40816/Projects/GPRS/data/2014_GWAS_Height' )
+    geneatlas = GeneAtlasModel( ref='/1000genomes/GRCh38',
+                    data_dir='/Projects/GPRS/data/2014_GWAS_Height' )
 
     geneatlas.filter_data( snp_id_header='MarkerName',
                             allele_header='Allele1',
                             beta_header='b',
                             se_header ='SE',
                             pvalue_header='p',
-                            output_name='2014height_MEC')
+                            output_name='2014height')
 
-    geneatlas.generate_plink_bfiles(snplist_name='2014height_MEC', output_name='2014height_hg38',extra_commands="--vcf-half-call r" ,symbol='_GRCh38.genotypes')
+    geneatlas.generate_plink_bfiles(snplist_name='2014height', output_name='2014height',extra_commands="--vcf-half-call r" ,symbol='.genotypes')
 
-    geneatlas.subset_pop(input_data="/home1/ylo40816/1000genomes/hg19/integrated_call_samples_v3.20130502.ALL.panel",
-                         column_name="super_pop",pop = "EUR", output_name = "2014height")
+    geneatlas.subset_pop(input_data="/1000genomes/hg19/integrated_call_samples_v3.20130502.ALL.panel",
+                         column_name="super_pop",pop_info = "EUR", output_name = "2014height")
 
-    geneatlas.generate_plink_bfiles_w_individual_info(popfile_name="2014height", output_name="2014height")
+    geneatlas.generate_plink_bfiles_w_individual_info(popfile_name="2014height", output_name="2014height",bfile_name="2014height")
 
-    geneatlas.clump(output_name='2014height_MEC',
-                    clump_kb='250',
-                    clump_p1='0.02',
-                    clump_p2='0.02',
-                    clump_r2='0.5',
-                    qc_file_name='2014height_MEC',
-                    plink_bfile_name='2014height_MEC')
+    geneatlas.select_clump_snps(output_name='2014height',clump_file_name='2014height',
+                                qc_file_name='2014height',clumpfolder_name='',clump_kb='250',
+                                clump_p1='0.02', clump_r2='0.02')
 
-    geneatlas.select_clump_snps(output_name='2014height_MEC',clump_file_name='2014height_MEC',
-                           qc_file_name='2014height_MEC',
+    geneatlas.select_clump_snps(output_name='2014height',clump_file_name='2014height',
+                           qc_file_name='2014height',
                                 clump_kb='250',
                                 clump_p1='0.02',
-                                clump_r2='0.5',clumpfolder_name='2014height_MEC')
+                                clump_r2='0.5',clumpfolder_name='2014height')
 
-    geneatlas.build_prs( vcf_input= '/home1/ylo40816/1000genomes/hg19',
-                         output_name ='2014height_MEC', qc_file_name='2014height_MEC',memory='1000',
-                         clump_kb='250',
-                         clump_p1='0.02',
-                         clump_r2='0.5',qc_clump_snplist_foldername='2014height_MEC')
+    geneatlas.build_prs( vcf_input= '1000genomes/hg19',
+                         output_name ='2014height', qc_file_name='2014height',memory='1000',clump_kb='250',
+                         clump_p1='0.02', clump_r2='0.02', qc_clump_snplist_foldername='2014height')
 
-    geneatlas.combine_prs(filename="2014height_MEC",clump_r2="0.5",clump_kb="250",clump_p1="0.02")
+    geneatlas.combine_prs(filename="2014height",clump_r2="0.5",clump_kb="250",clump_p1="0.02")
 
-    geneatlas.prs_statistics(output_name='2014height', score_file = "/home1/ylo40816/Projects/GPRS/tmp/2014height_250_0.02_0.1.sscore",
-        pheno_file = "/home1/ylo40816/Projects/GPRS/tmp/result/plink/prs/2014height_pheno.csv",
-        r_command='/spack/apps/linux-centos7-x86_64/gcc-8.3.0/r-4.0.0-jfy3icn4kexk7kyabcoxuio2iyyww3o7/bin/Rscript',
-        prs_stats_R="/home1/ylo40816/Projects/GPRS/gprs/prs_stats_quantitative_phenotype.R", data_set_name="2014height",
+    geneatlas.prs_statistics(output_name='2014height', score_file = "/GPRS/tmp/2014height_250_0.02_0.1.sscore",
+        pheno_file = "prs/2014height_pheno.csv",
+        r_command='/bin/Rscript',
+        prs_stats_R="/GPRS/gprs/prs_stats_quantitative_phenotype.R", data_set_name="2014height",
                              clump_kb='250',
                              clump_p1='0.02',
                              clump_r2='0.1')
@@ -153,6 +147,10 @@ $ gprs transfer_atcg --ref [str] --qc_snplist_name [str] --output_name [str]
 9. `prs-statistics`
 
 10. `combine-prs-stat`
+
+11. `subset_pop` (optional)
+
+12. `generate_plink_bfiles_w_individual_info` (optional)
 
 ### Result folder
 In the first step, you need to indicate the path to creating the result folder.
