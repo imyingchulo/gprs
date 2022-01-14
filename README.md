@@ -4,7 +4,7 @@
 
 ---
 
-This package aims to generate a PRS model from GWAS summary statistics. It is designed to deal with GWAS summary statistics from the GWAS catalog and GeneATLAS database.
+This package aims to generate the PRS model from GWAS summary statistics. It is designed to deal with GWAS summary statistics from the GWAS catalog and GeneATLAS database.
 
 :octocat: Understanding the workflow of this package:
 
@@ -260,8 +260,8 @@ Users have to indicate ref and output_name only.
 ````
   --ref                path to population reference panel  [required]
   --output_name        output name
-  --symbol <str/int>   indicate the symbol or text after chrnb in vcf file, default = "." ; i.e. ALL.chr8.vcf.gz, you can put "." or ".vcf.gz" 
-  --snplist_name <str> snplist_name is [output_name] from [chrnb]_[output_name].csv [required]
+  --symbol             indicate the symbol or text after chrnb in vcf file, default = "." ; i.e. ALL.chr8.vcf.gz, you can put "." or ".vcf.gz" 
+  --snplist_name       snplist_name is [output_name] from [chrnb]_[output_name].csv [required]
   --help               Show this message and exit.
 ````
 
@@ -286,8 +286,8 @@ Users have to indicate the options below.
   --clump_kb                 distance(kb) parameter for clumping [required]
   --clump_p1                 first set of P-value for clumping [required]
   --clump_p2                 should equals to p1 reduce the snps [required]
-  --qc_file_name <str>       qc_file_name is [output_name] from [chrnb]_[output_name].QC.csv [required]
-  --plink_bfile_name <str>   plink_bfile_name is [output_name] from [chrnb]_[output_name].bim/bed/fam [required]
+  --qc_file_name             qc_file_name is [output_name] from [chrnb]_[output_name].QC.csv [required]
+  --plink_bfile_name         plink_bfile_name is [output_name] from [chrnb]_[output_name].bim/bed/fam [required]
   --output_name              it is better if the output_name remain the same. The clump output: [chrnb]_[output_name]_clumped_snplist.csv [required]
   --clump_r2                 r2 value for clumping, default = 0.1
   --clump_field              P-value column name, default = Pvalue
@@ -306,11 +306,11 @@ This option will generate one file in `clump` folder:
 
 #### Options:
 ```` 
-  --qc_dir <str>                 path to qc folder, default: "./result/qc", the qc files were generated from gwas_filter_data or geneatlas_filter_data options
-  --clump_output_dir <str>       path to clump output folder, default: "./result/plink/clump"
-  --qc_clump_snplists_dir <str>  path to snpslist (after qc and clumping), default:"./result/plink/qc_and_clump_snpslist"
-  --clump_file_name <str>        clump_file_name is [output_name] from [chrnb]_[output_name].clump [required]
-  --output_name <str>            it is better if the output_name remain the same. output: [chrnb]_[output_name]_clumped_snplist.csv [required]
+  --qc_dir                       path to qc folder, default: "./result/qc", the qc files were generated from gwas_filter_data or geneatlas_filter_data options
+  --clump_output_dir             path to clump output folder, default: "./result/plink/clump"
+  --qc_clump_snplists_dir        path to snpslist (after qc and clumping), default:"./result/plink/qc_and_clump_snpslist"
+  --clump_file_name              clump_file_name is [output_name] from [chrnb]_[output_name].clump [required]
+  --output_name                  it is better if the output_name remain the same. output: [chrnb]_[output_name]_clumped_snplist.csv [required]
   --clump_kb                     distance(kb) parameter for clumping [required]
   --clump_p1                     first set of P-value for clumping [required]
   --clump_r2                     r2 value for clumping, default = 0.1
@@ -332,13 +332,13 @@ Users have to indicate the options below.
 
 #### Options:
 ````
-  --symbol <str/int>             indicate the symbol or text after chrnb in vcf file, default = "." ; i.e. ALL.chr8.vcf.gz, you can put "." or ".vcf.gz"
-  --vcf_input <str>              path to vcf files  [required]
-  --qc_clump_snplist_foldername <str> the folder name of .qc_clump_snpslist.csv file. The folder name should be 
+  --symbol                       indicate the symbol or text after chrnb in vcf file, default = "." ; i.e. ALL.chr8.vcf.gz, you can put "." or ".vcf.gz"
+  --vcf_input                    path to vcf files  [required]
+  --qc_clump_snplist_foldername  the folder name of .qc_clump_snpslist.csv file. The folder name should be 
                                  the same as the output name in select_clump_snps step
-  --columns <int>                a column index indicate the [SNPID] [ALLELE] [BETA] position; column nb starts from 1
-  --plink_modifier <str>         no-mean-imputation as default in here, get more info by searching plink2.0 modifier
-  --output_name <str>            it is better if the output_name remain the same. output: [chrnb]_[output_name].sscore
+  --columns                      a column index indicate the [SNPID] [ALLELE] [BETA] position; column nb starts from 1
+  --plink_modifier               no-mean-imputation as default in here, get more info by searching plink2.0 modifier
+  --output_name                  it is better if the output_name remain the same. output: [chrnb]_[output_name].sscore
   --clump_kb                     distance(kb) parameter for clumping [required]
   --clump_p1                     first set of P-value for clumping [required]
   --clump_r2                     r2 value for clumping, default = 0.1
@@ -372,17 +372,16 @@ After obtained combined sscore file, `prs-statistics` calculate BETA, AIC, AUC, 
 
 #### Options:
 ````
-  --score_file <str>       the absolute path to combined .sscore file
-                           [required]
-  --pheno_file <str>       the absolute path to pheno file  [required]
-  --output_name <str>      the output name  [required]
-  --data_set_name <str>    the name of the data-set i.e. gout_2019_GCST008970
+  --score_file             the absolute path to combined .sscore file [required]
+  --pheno_file             the absolute path to pheno file  [required]
+  --output_name            the output name  [required]
+  --data_set_name          the name of the data-set i.e. gout_2019_GCST008970
                            [required]
   --clump_kb               distance(kb) parameter for clumping [required]
   --clump_p1               first set of P-value for clumping [required]
   --clump_r2               r2 value for clumping, default = 0.1
-  --prs_stats_R <str>      the absolute path to "prs_stats.R"  [required]
-  --r_command <str>        use "which R" in linux, and copy the path after
+  --prs_stats_R            the absolute path to "prs_stats.R"  [required]
+  --r_command              use "which R" in linux, and copy the path after
                            --r_command  [required]
   --help                   Show this message and exit.
 ````
@@ -399,8 +398,7 @@ Combining two statistic tables allows users easy to compare between PRS models
 
 #### Options:
 ````
-  --data_set_name <str>  the name of the data-set i.e. gout_2019_GCST008970
-                         [required]
+  --data_set_name        the name of the data-set i.e. gout_2019_GCST008970 [required]
   --clump_kb             distance(kb) parameter for clumping [required]
   --clump_p1             first set of P-value for clumping [required]
   --clump_r2             r2 value for clumping, default = 0.1
