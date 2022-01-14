@@ -15,7 +15,7 @@ Users have to indicate the options below.
 Shell:
 
 ```shell
-$ gprs build-prs --ref [str] --vcf_input [str] --symbol [str/int] --qc_file_name [str] --columns [int] --plink_modifier [str] --memory [int] --output_name [output name]
+$ gprs build-prs --vcf_input [str] --qc_clump_snplist_foldername [str] --symbol [str/int] --qc_file_name [str] --columns [int] --plink_modifier [str] --memory [int] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float] --output_name [output name]
 ```
 
 Python:
@@ -28,7 +28,8 @@ if __name__ == '__main__':
                     data_dir='data/2014_GWAS_Height' )
 
     geneatlas.build_prs( vcf_input= '1000genomes/hg19',
-                          output_name ='2014height', qc_file_name='2014height',memory='1000')
+                          output_name ='2014height', qc_file_name='2014height',memory='1000',clump_kb='250',
+                    clump_p1='0.02', clump_r2='0.02', qc_clump_snplist_foldername='2014height')
 ```
 
 ## output files
@@ -56,7 +57,7 @@ And calculate score average and sum per individual.
 Shell:
 
 ```shell
-$ gprs combine-prs --ref [str] --result_dur [str] --pop [str]
+$ gprs combine-prs --ref [str] --result_dur [str] 
 ```
 
 Python:
@@ -68,7 +69,7 @@ if __name__ == '__main__':
     geneatlas = GeneAtlasModel( ref='1000genomes/hg19',
                     data_dir='data/2014_GWAS_Height' )
 
-    geneatlas.combine_prs(pop='2014height')
+    geneatlas.combine_prs(filename="2014height",clump_r2="0.5",clump_kb="250",clump_p1="0.02")
 ```
 
 ## output files

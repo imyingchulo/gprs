@@ -60,50 +60,52 @@ For example, if you want to run GeneAtlas, create a python file, e.g: `gene_atla
 from gprs.gene_atlas_model import GeneAtlasModel
 
 if __name__ == '__main__':
-    geneatlas = GeneAtlasModel( ref='/home/user/1000genomes/hg19',
-                    data_dir='/home/user/GPRS/data/2014_GWAS_Height' )
+    geneatlas = GeneAtlasModel( ref='/home1/ylo40816/1000genomes/GRCh38',
+                    data_dir='/home1/ylo40816/Projects/GPRS/data/2014_GWAS_Height' )
 
     geneatlas.filter_data( snp_id_header='MarkerName',
                             allele_header='Allele1',
                             beta_header='b',
                             se_header ='SE',
                             pvalue_header='p',
-                            output_name='2014height')
+                            output_name='2014height_MEC')
 
-    geneatlas.generate_plink_bfiles(snplist_name='2014height', output_name='2014height')
+    geneatlas.generate_plink_bfiles(snplist_name='2014height_MEC', output_name='2014height_hg38',extra_commands="--vcf-half-call r" ,symbol='_GRCh38.genotypes')
 
-    geneatlas.clump(output_name='2014height',
+    geneatlas.subset_pop(input_data="/home1/ylo40816/1000genomes/hg19/integrated_call_samples_v3.20130502.ALL.panel",
+                         column_name="super_pop",pop = "EUR", output_name = "2014height")
+
+    geneatlas.generate_plink_bfiles_w_individual_info(popfile_name="2014height", output_name="2014height")
+
+    geneatlas.clump(output_name='2014height_MEC',
                     clump_kb='250',
                     clump_p1='0.02',
                     clump_p2='0.02',
-                    qc_file_name='2014height',
-                    plink_bfile_name='2014height')
+                    clump_r2='0.5',
+                    qc_file_name='2014height_MEC',
+                    plink_bfile_name='2014height_MEC')
 
-    geneatlas.select_clump_snps(output_name='2014height',clump_file_name='2014height',
-                           qc_file_name='2014height',
+    geneatlas.select_clump_snps(output_name='2014height_MEC',clump_file_name='2014height_MEC',
+                           qc_file_name='2014height_MEC',
                                 clump_kb='250',
                                 clump_p1='0.02',
-                                clump_r2='0.1')
+                                clump_r2='0.5',clumpfolder_name='2014height_MEC')
 
-    geneatlas.build_prs( vcf_input= '/home/user/1000genomes/hg19',
-                         output_name ='2014height', qc_file_name='2014height',memory='1000',
+    geneatlas.build_prs( vcf_input= '/home1/ylo40816/1000genomes/hg19',
+                         output_name ='2014height_MEC', qc_file_name='2014height_MEC',memory='1000',
                          clump_kb='250',
                          clump_p1='0.02',
-                         clump_r2='0.1')
+                         clump_r2='0.5',qc_clump_snplist_foldername='2014height_MEC')
 
-    geneatlas.combine_prs(pop='2014height_250_0.02_0.1')
+    geneatlas.combine_prs(filename="2014height_MEC",clump_r2="0.5",clump_kb="250",clump_p1="0.02")
 
-    geneatlas.prs_statistics(output_name='2014height', score_file = "/home/user/GPRS/tmp/2014height_250_0.02_0.1.sscore",
-        pheno_file = "/home/user/GPRS/tmp/result/plink/prs/2014height_pheno.csv",
+    geneatlas.prs_statistics(output_name='2014height', score_file = "/home1/ylo40816/Projects/GPRS/tmp/2014height_250_0.02_0.1.sscore",
+        pheno_file = "/home1/ylo40816/Projects/GPRS/tmp/result/plink/prs/2014height_pheno.csv",
         r_command='/spack/apps/linux-centos7-x86_64/gcc-8.3.0/r-4.0.0-jfy3icn4kexk7kyabcoxuio2iyyww3o7/bin/Rscript',
-        prs_stats_R="/home/user/GPRS/gprs/prs_stats_quantitative_phenotype.R", data_set_name="2014height",
+        prs_stats_R="/home1/ylo40816/Projects/GPRS/gprs/prs_stats_quantitative_phenotype.R", data_set_name="2014height",
                              clump_kb='250',
                              clump_p1='0.02',
                              clump_r2='0.1')
-
-    geneatlas.combine_prs_stat(data_set_name='2014height',clump_kb='250',
-                         clump_p1='0.02',
-                         clump_r2='0.1')
 ```
 
 ### 2. Use Commandline Interface
@@ -259,7 +261,6 @@ Users have to indicate ref and output_name only.
 #### Options:
 ````
   --ref                path to population reference panel  [required]
-  --result_dir         path to output folder; default:[./result]
   --output_name        output name
   --symbol <str/int>   indicate the symbol or text after chrnb in vcf file, default = "." ; i.e. ALL.chr8.vcf.gz, you can put "." or ".vcf.gz" 
   --snplist_name <str> snplist_name is [output_name] from [chrnb]_[output_name].csv [required]
@@ -284,9 +285,6 @@ Users have to indicate the options below.
 
 #### Options:
  ````
-  --ref                      path to population reference panel  [required]
-  --result_dir               path to output folder; default:[./result]
-  --data_dir                 path to GWAS catalog/GeneAtlas .csv file  [required]
   --clump_kb                 distance(kb) parameter for clumping [required]
   --clump_p1                 first set of P-value for clumping [required]
   --clump_p2                 should equals to p1 reduce the snps [required]
@@ -310,8 +308,6 @@ This option will generate one file in `clump` folder:
 
 #### Options:
 ```` 
-  --ref <str>                    path to population reference panel  [required]
-  --result_dir <str>             path to output folder; default:[./result]
   --qc_dir <str>                 path to qc folder, default: "./result/qc", the qc files were generated from gwas_filter_data or geneatlas_filter_data options
   --clump_output_dir <str>       path to clump output folder, default: "./result/plink/clump"
   --qc_clump_snplists_dir <str>  path to snpslist (after qc and clumping), default:"./result/plink/qc_and_clump_snpslist"
@@ -338,10 +334,10 @@ Users have to indicate the options below.
 
 #### Options:
 ````
-  --ref <str>                    path to population reference  [required]
-  --result_dir                   path to output folder; default:[./result]
   --symbol <str/int>             indicate the symbol or text after chrnb in vcf file, default = "." ; i.e. ALL.chr8.vcf.gz, you can put "." or ".vcf.gz"
   --vcf_input <str>              path to vcf files  [required]
+  --qc_clump_snplist_foldername <str> the folder name of .qc_clump_snpslist.csv file. The folder name should be 
+                                 the same as the output name in select_clump_snps step
   --columns <int>                a column index indicate the [SNPID] [ALLELE] [BETA] position; column nb starts from 1
   --plink_modifier <str>         no-mean-imputation as default in here, get more info by searching plink2.0 modifier
   --output_name <str>            it is better if the output_name remain the same. output: [chrnb]_[output_name].sscore
@@ -361,11 +357,7 @@ Combine-prs option will combine all .sscore files as one .sscore file.
 
 #### Options:
 ````
-  --ref <str>         path to population reference panel
-  --result_dir <str>  path to output folder, default: "./result"
-  --pop <str>         name of .sscore, i.e. chr10_geneatlas.sscore, --pop
-                      geneatlas, if use multiple file name, separate files by
-                      ","  [required]
+  --filename          name of .sscore, i.e.  chr10_geneatlas_500_1e-7_0.05.sscore, The file name here is "geneatlas"
   --clump_kb          distance(kb) parameter for clumping [required]
   --clump_p1          first set of P-value for clumping [required]
   --clump_r2          r2 value for clumping, default = 0.1
@@ -382,8 +374,6 @@ After obtained combined sscore file, `prs-statistics` calculate BETA, AIC, AUC, 
 
 #### Options:
 ````
-  --ref <str>              path to population reference panel
-  --result_dir <str>       path to output folder, default: "./result"
   --score_file <str>       the absolute path to combined .sscore file
                            [required]
   --pheno_file <str>       the absolute path to pheno file  [required]
@@ -393,7 +383,6 @@ After obtained combined sscore file, `prs-statistics` calculate BETA, AIC, AUC, 
   --clump_kb               distance(kb) parameter for clumping [required]
   --clump_p1               first set of P-value for clumping [required]
   --clump_r2               r2 value for clumping, default = 0.1
-
   --prs_stats_R <str>      the absolute path to "prs_stats.R"  [required]
   --r_command <str>        use "which R" in linux, and copy the path after
                            --r_command  [required]
@@ -412,8 +401,6 @@ Combining two statistic tables allows users easy to compare between PRS models
 
 #### Options:
 ````
-  --ref <str>            path to population reference panel
-  --result_dir <str>     path to output folder, default: "./result"
   --data_set_name <str>  the name of the data-set i.e. gout_2019_GCST008970
                          [required]
   --clump_kb             distance(kb) parameter for clumping [required]

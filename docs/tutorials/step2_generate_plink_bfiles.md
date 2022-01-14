@@ -26,7 +26,7 @@ if __name__ == '__main__':
     geneatlas = GeneAtlasModel( ref='1000genomes/hg19',
                     data_dir='data/2014_GWAS_Height' )
 
-    geneatlas.generate_plink_bfiles(snplist_name='2014height', output_name='2014height')
+    geneatlas.generate_plink_bfiles(snplist_name='2014height_MEC', output_name='2014height_hg38',extra_commands="--vcf-half-call r" ,symbol='_GRCh38.genotypes')
 ```
 
 ## output files

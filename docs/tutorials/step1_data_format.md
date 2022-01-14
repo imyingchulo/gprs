@@ -32,8 +32,8 @@
 
 Please unzip your .gz file first.
 
-# Step1: Filtering SNPs 
-After knowing the data format, users can choose the model (gwas or geneatlas) to filter out SNPs.
+# Step1: Unify the data format
+After knowing the data format, users can choose the model (gwas or geneatlas) to unify the data format and filter out SNPs(optional).
 :heavy_exclamation_mark: SNPs are extract out by RSID not chromosome position
 
 ## Function: `gprs geneatlas-filter-data`
@@ -54,7 +54,6 @@ Python:
 
 ```python
 from gprs.gene_atlas_model import GeneAtlasModel
-
 if __name__ == '__main__':
     geneatlas = GeneAtlasModel( ref='1000genomes/hg19',
                     data_dir='data/2014_GWAS_Height' )
@@ -65,6 +64,19 @@ if __name__ == '__main__':
                             se_header ='SE',
                             pvalue_header='p',
                             output_name='2014height')
+   
+from gprs.gwas_model import GwasModel
+if __name__ == '__main__':
+    gwas = GwasModel( ref='/home1/ylo40816/1000genomes/hg19',
+                 data_dir='/home1/ylo40816/Projects/GPRS/data/2019_GCST008970')
+
+    gwas.filter_data( snp_id_header='RSID',
+                   allele_header='Allele1',
+                   beta_header='Effect',
+                   se_header='StdErr',
+                   pvalue_header='P-value',
+                   output_name='GCST008970',
+                   file_name='gout_chr1_22_LQ_IQ06_mac10_all_201_rsid.csv')
 ```
 
 ## output files

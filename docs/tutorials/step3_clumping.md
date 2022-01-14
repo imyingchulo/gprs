@@ -57,7 +57,7 @@ In this step, we will have new SNPs list, and use it for generate PRS model.
 Shell:
 
 ```shell
-$ gprs select-clump-snps --result_dir [str] --qc_file_name [str] --clump_file_name [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float] --output_name [output name]
+$ gprs select-clump-snps --result_dir [str] --qc_file_name [str] --clumpfolder_name [str] --clump_file_name [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float] --output_name [output name]
 ```
 
 Python:
@@ -70,7 +70,8 @@ if __name__ == '__main__':
                     data_dir='data/2014_GWAS_Height' )
 
     geneatlas.select_clump_snps(output_name='2014height',clump_file_name='2014height',
-                           qc_file_name='2014height')
+                           qc_file_name='2014height',clumpfolder_name='',clump_kb='250',
+                    clump_p1='0.02', clump_r2='0.02')
 
 ```
 
@@ -78,7 +79,16 @@ if __name__ == '__main__':
 
 - `*.qc_clump_snpslist.csv`
 
-|CHR |SNP|
-|---|---|
-|1 |rs1967017|
-|1 |rs760077|
+## With Chromosome information:
+
+|CHR |SNP|Allele|Beta|SE|Pvalue|
+|---|---|---|---|---|---|
+|1 |rs1967017|A|-0.0736|0.0315|0.01938|
+|1 |rs760077|T|-0.1603|0.0543|0.003139|
+
+## Without Chromosome information:
+
+|SNPID|Allele|Beta|SE|Pvalue|
+|---|---|---|---|---|
+|9:98316375:A:G|A|-0.0736|0.0315|0.01938|
+|9:105570921:T:C|T|-0.1603|0.0543|0.003139|

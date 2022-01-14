@@ -4,25 +4,7 @@ import pandas as pd
 
 
 class GeneAtlasModel( GPRS ):
-    def filter_data(self, snp_id_header, allele_header, beta_header, se_header, pvalue_header, output_name='geneatlas',
-                    pvalue=0.05):
-
-        # #unzip the genotyped files
-        # gz_files = []
-        # for i in os.listdir( self.data_dir ):
-        #     if i.endswith( ".gz" ):
-        #         gz_files.append( i )
-        #     else:
-        #         print( "all files are unzipped!" )
-        # if gz_files:
-        #     for gz_file in gz_files:
-        #         gz_file = "{}/{}".format( self.data_dir, gz_file )
-        #         unzipped_file = gz_file.replace( ".gz", "" )
-        #         with gzip.open( gz_file, 'rb' ) as f_in, open( unzipped_file, 'wb' ) as f_out:
-        #             shutil.copyfileobj( f_in, f_out )
-        # else:
-        #     raise ('No data files end with .gz')
-        # print( "starting to extract and filter SNPs" )
+    def filter_data(self, snp_id_header, allele_header, beta_header, se_header, pvalue_header, output_name='geneatlas', pvalue=1):
 
         # extract SNPs ID for filtering
         for i in os.listdir( self.data_dir ):
@@ -131,9 +113,9 @@ class GeneAtlasModel( GPRS ):
             visited.add( i )
 
         visited.clear()
-        for i in os.listdir( self.data_dir ):
+        for i in os.listdir(  self.data_dir  ):
             if i not in visited:
-                if  "chr" in i:
+                if  "chr" in i and '.gz' not in i:
                     for nb in range( 1, 23 ):
                         snp_qc_file = "{}/chr{}_{}.QC.csv".format( self.qc_dir(), nb, output_name )
                         filter = open( "{}".format(snp_qc_file), "r" )
@@ -147,7 +129,8 @@ class GeneAtlasModel( GPRS ):
                             if k:
                                 Counter_filter += 1
                         snp_summary.append("chr{}_{}.QC:SNP AFTER FILTERING:{}".format(nb, output_name, Counter_filter))
-                elif "chr" not in i:
+
+                elif "chr" not in i and i.endswith('.csv') or i.endswith('.txt') and '.gz' not in i:
                     Snp_qc_file = "{}/{}.QC.csv".format( self.qc_dir(), output_name )
                     Filter = open( "{}".format( Snp_qc_file ), "r" )
                     counter_filter = 0
