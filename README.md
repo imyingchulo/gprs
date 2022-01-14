@@ -126,7 +126,7 @@ $ gprs transfer_atcg --ref [str] --qc_snplist_name [str] --output_name [str]
 
 ## Commands in gprs package:
 
-:octocat: Ten commands in gprs:
+:octocat: Twelve commands in gprs:
 
 1. `geneatlas-filter-data`
 
