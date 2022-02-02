@@ -9,7 +9,7 @@ The example aimed to use the GPRS package to replicate the Fig4A in Wood *et al*
 The GWAS summary statistics were downloaded from the GIANT database.
 - Data name: GIANT_HEIGHT_Wood_et_al_2014_publicrelease_HapMapCeuFreq.txt
 
-## Here is the data structure:
+## The data structure:
 
 |MarkerName | Allele1 |Allele2 |Freq.Allele1.HapMapCEU | b| SE |p| N|
 |---|---|---|---|---|---|---|---|
@@ -48,11 +48,12 @@ The structure of output folders are:
 `result/plink/prs`
 `result/plink/qc_and_clump_snpslist`
 
-## Step1 preparing data set
+## Step1 preparing data set - unified the data format
 
-In step one, the `filter_data` function will filter raw data with `p-value`, the default is `0.05` and gives you three output files: `snplist`, `qc'd file` and `summary`
-After preparing the data, the snplist is using to generate plink files.
-The qc'd file will re-format the file header to `|SNPID| Allele| Beta| SE |Pvalue|` and this file will be used in the clumping step.
+In step one, the `filter_data` function will filter raw data with `p-value`, the default is `1` and gives you three output files: `snplist`, `qc'd file` and `summary`
+After preparing the data, the snplist: `result/snplists/[OUTPUT_NAME].csv` will be used to generate plink files.
+
+The qc'd file `result/qc/[OUTPUT_NAME].QC.csv` is a unified file header to `|SNPID| Allele| Beta| SE |Pvalue|` and this file will be used in the clumping step.
 The summary file records the information of the SNPs number before and after data preparation.
 
 ```shell

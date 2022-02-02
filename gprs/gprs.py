@@ -9,15 +9,15 @@ class GPRS( object ):
     def __init__(self,
                  ref='',
                  data_dir='',
-                 result_dir='./result',
-                 plink='$HOME/bin/plink'):
+                 result_dir='./result'):
+                 # plink='$HOME/bin/plink'):
         """
         At the beginning of gprs package, result and sub-folders will generate automatically when the user first run the package.
         """
         self.ref = ref
         self.data_dir = data_dir
         self.result_dir = Path( '{}/{}'.format( os.getcwd(), result_dir ) ).resolve()
-        self.plink = plink
+        # self.plink = plink
         self.setup_dir()
 
     def setup_dir(self):   # The setup_dir function is automatically create 10 folders
@@ -127,7 +127,7 @@ class GPRS( object ):
                             # ex: The input should be chr1 snps-list and chr1 vcf reference
                             if i.endswith('.vcf.gz') and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and "{}{}".format(chrnb, symbol) in i:
                                 # Run plink command
-                                os.system("{} --vcf {}/{} --extract {}/{} {} --make-bed --out {}/{}_{}".format( self.plink, self.ref, i,
+                                os.system("plink --vcf {}/{} --extract {}/{} {} --make-bed --out {}/{}_{}".format( self.ref, i,
                                                                                                               self.snplists_dir(),snps,
                                                                                                               extra_commands,
                                                                                                               self.plink_bfiles_dir(),
@@ -138,7 +138,7 @@ class GPRS( object ):
                 elif "chr" not in snps and "{}.csv".format( snplist_name ) in snps:
                         for i in os.listdir( self.ref ):
                             if i.endswith('.vcf.gz' ) and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and "{}{}".format(chrnb, symbol ) in i:
-                               os.system("{} --vcf {}/{} --extract {}/{} {} --make-bed --out {}/{}_{}".format( self.plink, self.ref, i,
+                               os.system("plink --vcf {}/{} --extract {}/{} {} --make-bed --out {}/{}_{}".format( self.ref, i,
                                                                                                       self.snplists_dir(),snps,
                                                                                                       extra_commands,
                                                                                                       self.plink_bfiles_dir(),
@@ -171,8 +171,7 @@ class GPRS( object ):
                         if "{}_{}".format( chrnb, bfile_name ) in i:
                             bfile = i.split(".")[0]
                             # Run plink command
-                            os.system("{} --bfile {}/{} --keep {}/{} --make-bed --out {}/{}_{}".format( self.plink,
-                                                                                                        self.plink_bfiles_dir(),bfile,
+                            os.system("plink --bfile {}/{} --keep {}/{} --make-bed --out {}/{}_{}".format( self.plink_bfiles_dir(),bfile,
                                                                                                         self.pop_dir(),j,
                                                                                                         self.plink_bfiles_dir(),
                                                                                                         chrnb,output_name ) )
@@ -180,7 +179,7 @@ class GPRS( object ):
         print( "all jobs completed!" )
 
     # This function is doing clumping by using Plink
-    def clump(self, qc_file_name, plink_bfile_name, output_name, clump_kb, clump_p1, clump_p2, clump_r2='0.1', clump_field='Pvalue',clump_snp_field='SNPID'):
+    def clump(self, qc_file_name, plink_bfile_name, output_name, clump_kb, clump_p1, clump_p2, clump_r2='0.1', clump_field='Pvalue', clump_snp_field='SNPID'):
         # Create a C+T tag
         output_name_with_conditions = "{}_{}_{}_{}".format( output_name, clump_kb, clump_p1, clump_r2 )
         # Generate chr number (chr1-chr22)
@@ -201,8 +200,7 @@ class GPRS( object ):
                                         if os.path.exists("{}/{}".format(self.plink_clump_dir(), output_name_with_conditions)):
                                             # After defined all the input files(qc and .bed files), Run plink
                                             # NOTE: the summary statistics file has to separate by space otherwise plink can not read it
-                                            os.system( "{} --bfile {}/{} --clump {}/{} --clump-p1 {} --clump-p2 {} --clump-r2 {} --clump-kb {} --clump-field {} --clump-snp-field {} --out {}/{}/{}_{}".format(
-                                                    self.plink,
+                                            os.system( "plink --bfile {}/{} --clump {}/{} --clump-p1 {} --clump-p2 {} --clump-r2 {} --clump-kb {} --clump-field {} --clump-snp-field {} --out {}/{}/{}_{}".format(
                                                     self.plink_bfiles_dir(), plinkinput,
                                                     self.qc_dir(), qc_files,
                                                     clump_p1, clump_p2, clump_r2,
@@ -211,8 +209,7 @@ class GPRS( object ):
                                         else:
                                             # Create a folder with C+T tag under plink/clump
                                             os.mkdir("{}/{}".format(self.plink_clump_dir(), output_name_with_conditions))
-                                            os.system("{} --bfile {}/{} --clump {}/{} --clump-p1 {} --clump-p2 {} --clump-r2 {} --clump-kb {} --clump-field {} --clump-snp-field {} --out {}/{}/{}_{}".format(
-                                                    self.plink,
+                                            os.system("plink --bfile {}/{} --clump {}/{} --clump-p1 {} --clump-p2 {} --clump-r2 {} --clump-kb {} --clump-field {} --clump-snp-field {} --out {}/{}/{}_{}".format(
                                                     self.plink_bfiles_dir(), plinkinput,
                                                     self.qc_dir(), qc_files,
                                                     clump_p1, clump_p2, clump_r2,
@@ -226,9 +223,8 @@ class GPRS( object ):
                                         # Check the folder exists or not, if yes, run plink command
                                         # Check the folder exists or not, if not, jump to "else" and create the output folder
                                         if os.path.exists("{}/{}".format( self.plink_clump_dir(), output_name_with_conditions ) ):
-                                            os.system( "{} --bfile {}/{} --clump {}/{} --clump-p1 {} --clump-p2 {} --clump-r2 {} --clump-kb {} --clump-field {} --clump-snp-field {} --out {}/{}/{}_{}".format(
-                                                self.plink,
-                                                self.plink_bfiles_dir(), plinkinput,
+                                            os.system( "plink --bfile {}/{} --clump {}/{} --clump-p1 {} --clump-p2 {} --clump-r2 {} --clump-kb {} --clump-field {} --clump-snp-field {} --out {}/{}/{}_{}".format(
+                                                    self.plink_bfiles_dir(), plinkinput,
                                                     self.qc_dir(), qc_files,
                                                     clump_p1, clump_p2, clump_r2,
                                                     clump_kb, clump_field, clump_snp_field,
@@ -236,8 +232,7 @@ class GPRS( object ):
                                         else:
                                             # Create a folder with C+T tag under plink/clump
                                             os.mkdir("{}/{}".format( self.plink_clump_dir(), output_name_with_conditions ) )
-                                            os.system("{} --bfile {}/{} --clump {}/{} --clump-p1 {} --clump-p2 {} --clump-r2 {} --clump-kb {} --clump-field {} --clump-snp-field {} --out {}/{}/{}_{}".format(
-                                                    self.plink,
+                                            os.system("plink --bfile {}/{} --clump {}/{} --clump-p1 {} --clump-p2 {} --clump-r2 {} --clump-kb {} --clump-field {} --clump-snp-field {} --out {}/{}/{}_{}".format(
                                                     self.plink_bfiles_dir(), plinkinput,
                                                     self.qc_dir(), qc_files,
                                                     clump_p1, clump_p2, clump_r2,
@@ -290,7 +285,10 @@ class GPRS( object ):
         for nb in range( 1, 23 ):
             chrnb = "chr{}".format( nb )
             # Get the full path to the clump snps file
-            clump_snp_file = ("{}/{}_{}/{}_{}_{}_clumped_snplist.csv".format( self.plink_clump_dir(), clumpfolder_name,clump_conditions,chrnb, clump_file_name, clump_conditions ))
+            clump_snp_file = ("{}/{}_{}/{}_{}_{}_clumped_snplist.csv".format( self.plink_clump_dir(),
+                                                                              clumpfolder_name,
+                                                                              clump_conditions,
+                                                                              chrnb, clump_file_name, clump_conditions ))
             # Some GWAS summary statistics does not contain "chr" and some does
             # Thus, define two type of qc file as qc_file1 and qc_file2
             qc_files1 = "{}/{}_{}.QC.csv".format( self.qc_dir(), chrnb, qc_file_name )
@@ -306,7 +304,7 @@ class GPRS( object ):
                     if os.path.exists(clump_snp_file):
                         clump_snp = pd.read_csv( clump_snp_file, delim_whitespace=True  )
                         clump_snp.rename( columns={'SNP': 'SNPID'}, inplace=True )
-                        qc_snp = pd.read_csv( "{}/{}/{}_{}.QC.csv".format( self.qc_dir(), clump_conditions, chrnb, qc_file_name ), sep=' ' )
+                        qc_snp = pd.read_csv( "{}/{}/{}_{}.QC.csv".format( self.qc_dir(), clump_conditions, chrnb, qc_file_name ), delim_whitespace=True )
                         newsnplist = qc_snp[qc_snp["SNPID"].isin( clump_snp["SNPID"] )]
                         newsnplist.to_csv( "{}/{}_{}/{}_{}_{}.qc_clump_snpslist.csv".format( self.qc_clump_snpslist_dir(),clumpfolder_name, clump_conditions, chrnb, output_name, clump_conditions ), sep=' ', index=False, header=True )
                         print( "{}_{} snpslist created".format( chrnb,clump_snp_file ) )
@@ -318,7 +316,7 @@ class GPRS( object ):
                     if os.path.exists(clump_snp_file):
                         clump_snp = pd.read_csv( clump_snp_file, delim_whitespace=True  )
                         clump_snp.rename( columns={'SNP': 'SNPID'}, inplace=True )
-                        qc_snp = pd.read_csv( "{}/{}.QC.csv".format( self.qc_dir(), qc_file_name ), sep=' ' )
+                        qc_snp = pd.read_csv( "{}/{}.QC.csv".format( self.qc_dir(), qc_file_name ), delim_whitespace=True )
                         newsnplist = qc_snp[qc_snp["SNPID"].isin( clump_snp["SNPID"] )]
                         newsnplist.to_csv("{}/{}_{}/{}_{}_{}.qc_clump_snpslist.csv".format( self.qc_clump_snpslist_dir(),clumpfolder_name, clump_conditions, chrnb, output_name, clump_conditions ), sep=' ', index=False, header=True )
                         print( "{}_{} snpslist created".format( chrnb,clump_snp_file ))
@@ -327,7 +325,7 @@ class GPRS( object ):
         print( "All jobs are completed" )
 
     # Use build_prs to generate the prs model
-    def build_prs(self, vcf_input, output_name, qc_clump_snplist_foldername, qc_file_name, memory, clump_kb, clump_p1, clump_r2, symbol='.' ,columns='1 2 3', plink_modifier='no-mean-imputation'):
+    def build_prs(self, vcf_input, output_name, qc_clump_snplist_foldername, memory, clump_kb, clump_p1, clump_r2, symbol='.' ,columns='1 2 3', plink_modifier='no-mean-imputation'):
         # Create a C+T tag
         clump_conditions = "{}_{}_{}".format(clump_kb, clump_p1, clump_r2 )
         # Check the folder exists or not, if not create the folder
@@ -337,20 +335,25 @@ class GPRS( object ):
             os.mkdir( "{}/{}_{}".format( self.prs_dir(), output_name, clump_conditions ) )
         for nb in range( 1, 23 ):
             chrnb = "chr{}".format( nb )
-            for vcf_file in os.listdir( vcf_input ):
-                # Define the input files (vcf and qc files)
-                if vcf_file.endswith('.vcf.gz') and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and "{}{}".format(chrnb, symbol) in vcf_file:
-                    qc_file = "{}/{}_{}/{}_{}_{}.qc_clump_snpslist.csv".format( self.qc_clump_snpslist_dir(),qc_clump_snplist_foldername,clump_conditions, chrnb, qc_file_name, clump_conditions )
-                    try:
-                        os.path.exists(qc_file)
-                        os.system("plink2 --vcf {}/{} dosage=DS --score {} {} '{}' --memory {} --out {}/{}_{}/{}_{}_{}".format( vcf_input, vcf_file,
-                                                                                                 qc_file, columns, plink_modifier,
-                                                                                                 memory,
-                                                                                                 self.prs_dir(), output_name, clump_conditions,
-                                                                                                 chrnb, output_name, clump_conditions ) )
-                        print( "{} GPRS model built!".format( chrnb ) )
-                    except IOError:
-                        print( "{}/{}/{}_{}_{}.qc_clump_snpslist.csv not found. skip".format( self.qc_clump_snpslist_dir(), clump_conditions, chrnb, qc_file_name, clump_conditions ) )
+            # check file status
+            if os.path.exists("{}/{}_{}/{}_{}_{}.sscore".format(self.prs_dir(), output_name, clump_conditions, chrnb, output_name, clump_conditions)):
+                print("{}_{}_{}.sscore already finished!".format(chrnb, output_name, clump_conditions))
+            else:
+                for vcf_file in os.listdir( vcf_input ):
+                    # Define the input files (vcf and qc files)
+                    if vcf_file.endswith('.vcf.gz') and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and "{}{}".format(chrnb, symbol) in vcf_file:
+                        qc_file = "{}/{}_{}/{}_{}_{}.qc_clump_snpslist.csv".format( self.qc_clump_snpslist_dir(), qc_clump_snplist_foldername, clump_conditions, chrnb, qc_clump_snplist_foldername, clump_conditions )
+                        try:
+                            os.path.exists(qc_file)
+                            os.system("plink2 --vcf {}/{} dosage=DS --score {} {} '{}' --memory {} --out {}/{}_{}/{}_{}_{}".format( vcf_input, vcf_file,
+                                                                                                     qc_file, columns, plink_modifier,
+                                                                                                     memory,
+                                                                                                     self.prs_dir(), output_name, clump_conditions,
+                                                                                                     chrnb, output_name, clump_conditions ) )
+                            print( "{} GPRS model built!".format( chrnb ) )
+                        except IOError:
+                            print( "{}/{}/{}_{}_{}.qc_clump_snpslist.csv not found. skip".format( self.qc_clump_snpslist_dir(), clump_conditions, chrnb, qc_clump_snplist_foldername, clump_conditions ) )
+                print("{}_{}_{}.sscore completed!".format(chrnb, output_name, clump_conditions))
         print( "ALL work are complete!" )
 
     def combine_prs(self,filename,clump_kb,clump_p1,clump_r2):
@@ -421,14 +424,16 @@ class GPRS( object ):
         lines=[]
         for i in range(1,23):
             try:
-                file = "{}/{}_{}/chr{}_{}_{}.qc_clump_snpslist.csv".format(self.qc_clump_snpslist_dir(),data_set_name,filter_condition,i,data_set_name,filter_condition)
+                file = "{}/{}_{}/chr{}_{}_{}.qc_clump_snpslist.csv".format(self.qc_clump_snpslist_dir(),
+                                                                           data_set_name,filter_condition,i,data_set_name,filter_condition)
                 df = pd.read_csv("{}".format(file))
                 # print("{}/{}".format(self.qc_clump_snpslist_dir(),file))
                 index = df.index
                 number_of_rows = len(index)
                 lines.append(number_of_rows)
             except IOError:
-             print( "{}/{}_{}/chr{}_{}_{}.qc_clump_snpslist.csv Not Found".format(self.qc_clump_snpslist_dir(),data_set_name,filter_condition,i,data_set_name,filter_condition) )
+             print( "{}/{}_{}/chr{}_{}_{}.qc_clump_snpslist.csv Not Found".format(self.qc_clump_snpslist_dir(),
+                                                                                  data_set_name,filter_condition,i,data_set_name,filter_condition) )
 
         if os.path.exists(score_file):
             # The R script is written by Soyoung Jeon

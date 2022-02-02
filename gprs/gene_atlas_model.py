@@ -8,8 +8,8 @@ class GeneAtlasModel( GPRS ):
 
         # extract SNPs ID for filtering
         for i in os.listdir( self.data_dir ):
-            if "chr" in i:
-                print( "chromosome number were found in file name, continue to extract SNPs by chromosomes" )
+            if "chr" in i and i.endswith( ".csv" ) or i.endswith( ".txt" ):
+                print( "chromosome number were found in the file name, continue to extract SNPs by chromosomes" )
                 for nb in range( 1, 23 ):
                     chrnb = "chr{}".format( nb )
                     if i.endswith( ".csv" ) or i.endswith( ".txt" ) and ".gz" not in i and chrnb in i:
@@ -43,8 +43,8 @@ class GeneAtlasModel( GPRS ):
                         snps.to_csv( "{}/{}_{}.csv".format( self.snplists_dir(), chrnb, output_name ), sep=' ',
                                      index=False, header=True )
 
-            elif "chr" not in i:
-                print( "chromosome number were NOT found in file name, consider a mix file, continue..." )
+            elif "chr" not in i and i.endswith( ".csv" ) or i.endswith( ".txt" ):
+                print( "chromosome number were NOT found in the file name, consider as a mix file" )
                 if i.endswith( ".csv" ) or i.endswith( ".txt" ) and ".gz" not in i:
                     # print("without chr"+":"+i)
                     df = pd.read_csv( "{}/{}".format( self.data_dir, i ), delim_whitespace=True )
@@ -53,7 +53,7 @@ class GeneAtlasModel( GPRS ):
                                         allele_header: 'Allele',
                                         beta_header: 'Beta',
                                         se_header: 'SE',
-                                        pvalue_header: 'Pvalue'}, inplace=True )
+                                        pvalue_header: 'Pvalue'}, inplace=True)
 
                     # IMPORTANT!!! Change column name before run the script
                     # extract the SNP information, notice: column name have to check
@@ -78,7 +78,7 @@ class GeneAtlasModel( GPRS ):
         snp_summary=[]
         visited = set()
         for i in os.listdir( self.data_dir ):
-            if  "chr" in i:
+            if "chr" in i and i.endswith( ".csv" ) or i.endswith( ".txt" ):
                 for nb in range( 1, 23 ):
                     chrnb = 'chr{}'.format( nb )
                     if i not in visited and i.endswith( ".csv" ) or i.endswith( ".txt" ) and ".gz" not in i and chrnb in i:
@@ -96,7 +96,7 @@ class GeneAtlasModel( GPRS ):
                                 Counter_filter += 1
                         snp_summary.append("{}:SNP BEFORE FILTERING:{}".format(i, Counter_filter))
 
-            elif "chr" not in i:
+            elif "chr" not in i and i.endswith( ".csv" ) or i.endswith( ".txt" ):
                 if i not in visited and i.endswith('.csv') or i.endswith('.txt') and '.gz' not in i:
                     Snp_file = "{}/{}".format( self.data_dir, i )
                     Filter = open( "{}".format( Snp_file ), "r" )
@@ -115,7 +115,7 @@ class GeneAtlasModel( GPRS ):
         visited.clear()
         for i in os.listdir(  self.data_dir  ):
             if i not in visited:
-                if  "chr" in i and '.gz' not in i:
+                if "chr" in i and '.gz' not in i:
                     for nb in range( 1, 23 ):
                         snp_qc_file = "{}/chr{}_{}.QC.csv".format( self.qc_dir(), nb, output_name )
                         filter = open( "{}".format(snp_qc_file), "r" )

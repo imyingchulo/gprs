@@ -149,7 +149,6 @@ def select_clump_snps(clump_file_name, qc_file_name,output_name,clump_kb,clump_p
 @click.option( '--vcf_input', metavar='<str>', required=True, help='path to vcf files' )
 @click.option( '--output_name', metavar='<str>', required=True, help='it is better if the output_name remain the same. output: [chrnb]_[output_name].sscore' )
 @click.option('--qc_clump_snplist_foldername',metavar='<str>', required=True, help='folder name for .qc_clump_snpslist.csv files, i.e. LAT is the name of LAT_250_1e-5_0.5 folder')
-@click.option( '--qc_file_name', metavar='<str>', required=True, help='qc_file_name is [output_name] from [chrnb]_[output_name].QC.csv' )
 @click.option( '--memory', metavar='<int>', help='number of memory use' )
 @click.option( '--clump_kb', metavar='<int>', required=True, help='distance(kb) parameter for clumping' )
 @click.option( '--clump_p1', metavar='<float/scientific notation>', required=True, help='first set of P-value for clumping' )
@@ -157,11 +156,10 @@ def select_clump_snps(clump_file_name, qc_file_name,output_name,clump_kb,clump_p
 @click.option( '--symbol', metavar='<str/int>', required=True,default='.', help='indicate the symbol or text after chrnb in vcf file, default = "." ; i.e. ALL.chr8.vcf.gz, you can put "." or ".vcf.gz"' )
 @click.option( '--columns', metavar='<int>', default='1 2 3', help='a column index indicate the [SNPID] [ALLELE] [BETA] position; column nb starts from 1 ' )
 @click.option( '--plink_modifier', metavar='<str>', default='no-mean-imputation', help='no-mean-imputation as default in here, get more info by searching plink2.0 modifier ' )
-def build_prs(vcf_input, qc_file_name, columns, plink_modifier, output_name, symbol,memory,clump_kb,clump_p1,clump_r2,qc_clump_snplist_foldername ):
+def build_prs(vcf_input, columns, plink_modifier, output_name, symbol,memory,clump_kb,clump_p1,clump_r2,qc_clump_snplist_foldername ):
     gprs = GPRS()
     gprs.build_prs( memory=memory,
                     vcf_input=vcf_input,
-                    qc_file_name=qc_file_name,
                     symbol = symbol,
                     columns=columns,
                     plink_modifier=plink_modifier,

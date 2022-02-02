@@ -88,7 +88,7 @@ if __name__ == '__main__':
                                 clump_r2='0.5',clumpfolder_name='2014height')
 
     geneatlas.build_prs( vcf_input= '1000genomes/hg19',
-                         output_name ='2014height', qc_file_name='2014height',memory='1000',clump_kb='250',
+                         output_name ='2014height', memory='1000',clump_kb='250',
                          clump_p1='0.02', clump_r2='0.02', qc_clump_snplist_foldername='2014height')
 
     geneatlas.combine_prs(filename="2014height",clump_r2="0.5",clump_kb="250",clump_p1="0.02")
@@ -110,7 +110,7 @@ $ gprs gwas-filter-data --ref [str] --data_dir [str] --result_dir [str] --snp_id
 $ gprs generate-plink-bfiles --ref [str] --snplist_name [str] --symbol [str] --output_name [str]
 $ gprs clump --data_dir [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_p2 [float/scientific notation] --clump_r2 [float] --clump_field [str] --clump_snp_field [str] --plink_bfile_name [str] --qc_file_name [str] --output_name [output name]
 $ gprs select-clump-snps --result_dir [str] --qc_file_name [str] --clump_file_name [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float] --output_name [output name]
-$ gprs build-prs --vcf_input [str] --symbol [str/int] --qc_file_name [str] --columns [int] --plink_modifier [str] --memory [int] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float] --output_name [output name] 
+$ gprs build-prs --vcf_input [str] --symbol [str/int] --columns [int] --plink_modifier [str] --memory [int] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float] --output_name [output name] 
 $ gprs combine-prs --result_dur [str] --pop [str] 
 $ gprs prs-statistics --result_dir [str] --score_file [str] --pheno_file [str] --data_set_name [str] --prs_stats_R [str] --r_command [str] --output_name [str]  --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float]
 $ gprs combine-prs-stat --result_dir [str] --data_set_name [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float]
