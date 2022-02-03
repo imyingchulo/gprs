@@ -1,6 +1,6 @@
-# About gprs package:
-This package aims to generate a PRS model from GWAS summary statistics data-set. 
-It is designed to use GWAS summary statistics from the GWAS catalog and GeneATLAS database.
+# About gprs package
+This package aims to generate the PRS model from GWAS summary statistics. 
+It is designed to deal with the data format based on the GWAS catalog and GeneATLAS database GWAS summary statistics data.
 
 - Understanding the workflow of this package:
 

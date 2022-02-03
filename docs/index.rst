@@ -24,12 +24,17 @@ Welcome to GPRS's documentation!
 
 .. toctree::
    :maxdepth: 2
+   :caption: Examples
+
+   examples/GIANT_height_wood_et_al_2014/giant_height_wood_et_al_2014
+
+.. toctree::
+   :maxdepth: 2
    :caption: API Reference
 
    api_reference/gprs
    api_reference/gene_atlas_model
    api_reference/gwas_model
-
 
 Indices and tables
 ==================
