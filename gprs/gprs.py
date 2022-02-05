@@ -111,7 +111,6 @@ class GPRS( object ):
             df.to_csv( "{}/{}_{}.QC.csv".format( self.qc_dir(), chrnb, qc_file_name ), sep=' ', index=False, header=True )
         print("transfer completed!")
 
-
     # Using plink to generate bfiles fam/bim/bed.
     def generate_plink_bfiles(self, snplist_name, output_name, symbol='.' ,extra_commands=" "):
         # Generate chr with different numbers, i.e. chr1, chr2, chr3 ... chr22

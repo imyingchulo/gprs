@@ -73,14 +73,13 @@ def transfer_atcg(qc_file_name):
     gprs = GPRS()
     gprs.transfer_atcg( qc_file_name=qc_file_name )
 
-
 @click.command()
 @click.option( '--ref', metavar='<str>', required=True, help='path to population reference panel' )
 @click.option( '--snplist_name', metavar='<str>', required=True, help='snplist_name is [output_name] from [chrnb]_[output_name].csv' )
 @click.option( '--output_name', metavar='<str>', required=True, help='it is better if the output name should be the same as snplist file name' )
 @click.option( '--symbol', metavar='<str/int>', required=True, default='.', help='indicate the symbol or text after chrnb in vcf file, default = "." ; i.e. ALL.chr8.vcf.gz, you can put "." or ".vcf.gz"' )
 @click.option( '--extra_commands', metavar='<str>', default=' ', help='a space to add new functions for generate the plink bfiles' )
-def generate_plink_bfiles(ref, result_dir, snplist_name, output_name, symbol,extra_commands):
+def generate_plink_bfiles(ref, snplist_name, output_name, symbol,extra_commands):
     gprs = GPRS( ref=ref)
     gprs.generate_plink_bfiles( output_name=output_name, symbol = symbol, snplist_name=snplist_name, extra_commands=extra_commands )
 

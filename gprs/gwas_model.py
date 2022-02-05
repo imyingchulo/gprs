@@ -5,27 +5,7 @@ import collections
 
 class GwasModel( GPRS ):
     def filter_data(self, snp_id_header, allele_header, beta_header, se_header, pvalue_header, file_name,output_name, pvalue=1):
-        # #unzip the genotyped files
-        # gz_files = []
-        # for i in os.listdir( self.data_dir ):
-        #     if i.endswith( ".gz" ):
-        #         gz_files.append( i )
-        #     else:
-        #         print( "all files are unzipped!" )
-        # if gz_files:
-        #     for gz_file in gz_files:
-        #         gz_file = "{}/{}".format( self.data_dir, gz_file )
-        #         unzipped_file = gz_file.replace( ".gz", "" )
-        #         with gzip.open( gz_file, 'rb' ) as f_in, open( unzipped_file, 'wb' ) as f_out:
-        #             shutil.copyfileobj( f_in, f_out )
-        # else:
-        #     raise ('No data files end with .gz')
-        # print( "starting to extract and filter SNPs" )
-
-        #extract SNPs ID for filtering
-        # for i in os.listdir( self.data_dir ):
-        #     if i.endswith(".csv") or i.endswith(".txt"):
-        # read colnames by sep
+        # read colnames
         df = pd.read_csv( "{}/{}".format( self.data_dir, file_name ), delim_whitespace=True )
 
         # change column name
@@ -67,8 +47,7 @@ class GwasModel( GPRS ):
             snps = filtered_df_2['SNPID']
 
             # output new csv files with chr number and SNPs ID with header
-            snps.to_csv( "{}/chr{}_{}.csv".format( self.snplists_dir(), nb, output_name ), sep=' ', index=False,
-                         header=True )
+            snps.to_csv( "{}/chr{}_{}.csv".format( self.snplists_dir(), nb, output_name ), sep=' ', index=False, header=True )
         print("SNPs list are ready")
 
         df = pd.read_csv( "{}/{}".format( self.data_dir,file_name), delim_whitespace=True )

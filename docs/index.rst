@@ -27,6 +27,7 @@ Welcome to GPRS's documentation!
    :caption: Examples
 
    examples/GIANT_height_wood_et_al_2014/giant_height_wood_et_al_2014
+   examples/MEC_America_Africans/MEC_AA.md
 
 .. toctree::
    :maxdepth: 2

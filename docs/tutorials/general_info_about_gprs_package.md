@@ -30,7 +30,7 @@ $ source ./venv/bin/activate
 $ pip install -e .
 ```
 
-- Ten commands in gprs:
+- Twelve commands in gprs:
 
 1. `geneatlas-filter-data`
 
@@ -44,10 +44,14 @@ $ pip install -e .
 
 6. `build-prs`
 
-7. `transfer_atcg` (optional)
+7. `combine-prs`
 
-8. `combine-prs`
+8. `prs-statistics`
 
-9. `prs-statistics`
+9. `combine-prs-stat`
 
-10. `combine-prs-stat`
+10. `transfer_atcg` (optional)
+
+11. `sub-setpop` (optional)
+
+12. `generate_plink_bfiles_w_individual_info` (optional)
