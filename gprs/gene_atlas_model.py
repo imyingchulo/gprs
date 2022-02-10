@@ -1,5 +1,5 @@
 import os
-from gprs.gprs import GPRS
+from gprs.gprs_main import GPRS
 import pandas as pd
 
 

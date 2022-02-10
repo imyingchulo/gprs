@@ -1,5 +1,5 @@
 import click
-from gprs.gprs import GPRS
+from gprs.gprs_main import GPRS
 from gprs.gwas_model import GwasModel
 from gprs.gene_atlas_model import GeneAtlasModel
 

@@ -1,13 +1,12 @@
-import json
 import os
-from pathlib import Path
-import pandas as pd
-from subprocess import call
 import glob
+import pandas as pd
+from pathlib import Path
+from subprocess import call
 from timeit import default_timer as timer
 from collections import defaultdict
 
-# Built a class name GPRS
+
 class GPRS(object):
     def __init__(self,
                  ref='',

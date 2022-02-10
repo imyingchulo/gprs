@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from gprs.gprs import GPRS
+from gprs.gprs_main import GPRS
 import collections
 
 class GwasModel( GPRS ):

@@ -4,7 +4,6 @@
 
 from setuptools import setup, find_packages
 
-
 setup(
     name='gprs',
     version='0.1.0',
