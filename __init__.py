@@ -1,0 +1,2 @@
+class GeneAtlasModel:
+    pass

@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 import pandas as pd
@@ -5,8 +6,6 @@ from subprocess import call
 import glob
 from timeit import default_timer as timer
 from collections import defaultdict
-
-
 
 # Built a class name GPRS
 class GPRS(object):
@@ -122,11 +121,9 @@ class GPRS(object):
                 # Get a snplist file without "chr". Take one snplist file each time and run plink command
                 elif "chr" not in snps and "{}.csv".format(snplist_name) in snps:
                     for i in os.listdir(self.ref):
-                        if i.endswith(
-                                '.vcf.gz') and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and "{}{}".format(
+                        if i.endswith('.vcf.gz') and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and "{}{}".format(
                                 chrnb, symbol) in i:
-                            os.system(
-                                "plink --vcf {}/{} --extract {}/{} {} --make-bed --out {}/{}_{}".format(self.ref, i,
+                            os.system("plink --vcf {}/{} --extract {}/{} {} --make-bed --out {}/{}_{}".format(self.ref, i,
                                                                                                         self.snplists_dir,
                                                                                                         snps,
                                                                                                         extra_commands,
@@ -160,7 +157,6 @@ class GPRS(object):
                                 chrnb, output_name))
                         print("with chr: {}_{} is finished!".format(chrnb, bfile_name))
         print("all jobs completed!")
-
 
     def clump(self, qc_file_name, plink_bfile_name, output_name, clump_kb, clump_p1, clump_p2, clump_r2='0.1',
               clump_field='Pvalue', clump_snp_field='SNPID'):
@@ -301,35 +297,28 @@ class GPRS(object):
                     print("{} not found skip".format(clump_snp_file))
         print("All jobs are completed")
 
-
     def build_prs(self, vcf_input, output_name, qc_clump_snplist_foldername, memory, clump_kb, clump_p1, clump_r2, symbol='.', columns='1 2 3', plink_modifier='no-mean-imputation'):
-        time_record = []
         # Create a C+T tag
-        start_tag = timer()
         clump_conditions = "{}_{}_{}".format(clump_kb, clump_p1, clump_r2)
-        end_tag = timer()
-        total_time_tag = (end_tag - start_tag)
-        time_record.append("create tag time spend:{}".format(total_time_tag))
+        timer_output = open("{}/{}_{}_time_table.txt".format(self.prs_dir, output_name, clump_conditions), 'w')
 
         # Check the folder exists or not, if not create the folder
-        start_mkdir = timer()
         if os.path.exists("{}/{}_{}".format(self.prs_dir, output_name, clump_conditions)):
             print("{}/{}_{} exists".format(self.prs_dir, output_name, clump_conditions))
             pass
         else:
             print("{}/{}_{} not exists, going to create one".format(self.prs_dir, output_name, clump_conditions))
             os.mkdir("{}/{}_{}".format(self.prs_dir, output_name, clump_conditions))
-        end_mkdir = timer()
-        total_mkdir_tag = (end_mkdir - start_mkdir)
-        time_record.append("mkdir time spend:{}".format(total_mkdir_tag))
 
-        start_prs = timer()
         visited = set()
+        outer_loop_start = timer()
         for nb in range(1, 23):
             chrnb = "chr{}".format(nb)
+            inner_loop_start = timer()
             for vcf_file in os.listdir(vcf_input):
                 # Define the input files (vcf and qc files)
                 if vcf_file.endswith('.vcf.gz') and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and "{}{}".format(chrnb, symbol) in vcf_file:
+                    plink_start = timer()
                     qc_file = "{}/{}_{}/{}_{}_{}.qc_clump_snpslist.csv".format(self.qc_clump_snpslist_dir,
                                                                                qc_clump_snplist_foldername, clump_conditions,
                                                                                chrnb, qc_clump_snplist_foldername, clump_conditions)
@@ -341,18 +330,18 @@ class GPRS(object):
                                                                                 self.prs_dir,
                                                                                 output_name, clump_conditions,
                                                                                 chrnb, output_name, clump_conditions))
-                        end_prs = timer()
-                        total_time = (end_prs - start_prs)
                         print("{}_{}_{}.sscore completed!".format(chrnb, output_name, clump_conditions))
-                        time_record.append("{}_{}_{}.sscore completed! Total time coast:{}".format(chrnb, output_name, clump_conditions, total_time))
                     else:
                         print("{} not found. skip".format(qc_file))
                     visited.add("{}".format(qc_file))
-
-        with open("{}/{}_{}_timepoint.txt".format(self.prs_dir,output_name,clump_conditions), 'w') as fout:
-            df = '\n'.join(time_record)
-            fout.write(df)
+                    plink_end = timer()
+                    timer_output.write('[plink] {}: {}\n'.format(qc_file, plink_end - plink_start))
+            inner_loop_end = timer()
+            timer_output.write('[inner_loop_end] {}: {}\n'.format(chrnb, inner_loop_end - inner_loop_start))
         print("ALL work are complete!")
+        outer_loop_end = timer()
+        timer_output.write('[total_time]: {}\n'.format(outer_loop_end - outer_loop_start))
+        timer_output.close()
 
     def combine_prs(self, filename, clump_kb, clump_p1, clump_r2):
         # Create a C+T tag
