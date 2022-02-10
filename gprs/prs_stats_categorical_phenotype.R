@@ -40,7 +40,6 @@ prs.r2 <- as.numeric(PseudoR2(logit,which="Nagelkerke"))
 
 # print(paste("this is degree_of_freedom:",prs.degree_of_freedom),quote=F)
 
-
 #odds ratio
 prs$decile <- ntile(prs$SCORE_SUM,100)
 prs$decile_top2 <- ntile(prs$SCORE_SUM,100)
@@ -87,7 +86,6 @@ print(cont.table1)
 print(cont.table2)
 print(cont.table3)
 print(cont.table4)
-
 
 OR1<-OddsRatio(cont.table1)
 OR2<-OddsRatio(cont.table2)

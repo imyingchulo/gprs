@@ -36,7 +36,7 @@ prs.beta <- as.numeric(prs.coef[1])
 prs.aic <- as.numeric(summary(logit)$aic)
 prs.p <- as.numeric(prs.coef[4])
 prs.r2 <- as.numeric(PseudoR2(logit,which="Nagelkerke"))
-summary(logit)
+#summary(logit)
 
 stat <- as.data.frame(stat)
 output_name <- as.character(args[5])
