@@ -16,6 +16,7 @@ phenof <- args[2]
 input_file_name <- args[3]
 filter_condition <- args[4]
 snps_nb <- args[5]
+
 print(paste("score file= ",scoref),quote=F)
 print(paste("pheno file= ",phenof),quote=F)
 print(paste("input_file_name= ",input_file_name),quote=F)
@@ -27,7 +28,7 @@ cat("\n")
 pheno <- read.table(phenof,header=T)
 pheno$pheno <- as.factor(pheno$pheno)
 score <- read.table(scoref,header = T)
-prs <- inner_join(score[,c(1,4)], pheno, by="id")
+prs <- inner_join(score[,c(1,3)], pheno, by="id")
 logit <- glm(pheno~., data=prs[,-c(1)], family="binomial")
 
 prs.degree_of_freedom <-summary(logit)$df[2]
