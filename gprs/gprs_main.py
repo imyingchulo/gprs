@@ -378,7 +378,7 @@ class GPRS(object):
 
         with open("{}/{}_{}_combined.sscore".format(self.prs_dir, filename, clump_conditions), 'w') as fout:
             fout.write(combined_prs)
-        call("rm -rf {}/{}_{}".format(self.prs_dir, filename, clump_conditions), shell=True)
+        # call("rm -rf {}/{}_{}".format(self.prs_dir, filename, clump_conditions), shell=True)
         print('Combined all the sscore file. Original sscore files deleted')
 
     # Calculate the PRS statistical results and output the statistics summary
@@ -407,6 +407,7 @@ class GPRS(object):
             call("{0} --vanilla {1} {2} {3} {4} {5} {6} {8}/{7}".format(r_command, prs_stats_R, score_file, pheno_file,
                                                                         data_set_name, filter_condition, sum(lines),
                                                                         output_name, self.stat_dir), shell=True)
+
             # Read the statistics result and reformat it
             # Reformat: separator = tab, change float into scientific notation
             stat_data = pd.read_csv("{}/{}_{}_stat.txt".format(self.stat_dir, output_name, filter_condition))

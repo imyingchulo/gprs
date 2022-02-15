@@ -103,7 +103,7 @@ stat <- data.frame(data=input_file_name,filter_pvalue=filter_pvalue, snps_nb=snp
 
 new_stat <- as.data.frame(stat)
 output_name <- as.character(args[6])
-filename <- paste(output_name, filter_pvalue, "stat.txt", sep="_")
+filename <- paste(output_name,  , "stat.txt", sep="_")
 write.csv(new_stat, file = filename, row.names = FALSE)
 
 

@@ -16,12 +16,14 @@ phenof <- args[2]
 input_file_name <- args[3]
 filter_condition <- args[4]
 snps_nb <- args[5]
-remove_column <- args[6]
+output_name <- as.character(args[6])
 
 print(paste("score file= ",scoref),quote=F)
 print(paste("pheno file= ",phenof),quote=F)
 print(paste("input_file_name= ",input_file_name),quote=F)
-print(paste("filter_conditions= ",filter_conditions),quote=F)
+print(paste("filter_conditions= ",filter_condition),quote=F)
+print(paste("snps_nb= ",snps_nb),quote=F)
+print(paste("output_name= ",output_name),quote=F)
 cat("\n")
 
 ##logistic regression
@@ -31,6 +33,7 @@ score <- read.table(scoref,header = T)
 prs <- inner_join(score[,c(1,4)], pheno, by="id")
 logit <- glm(pheno~., data=prs[,-c(1)], family="binomial")
 
+prs.degree_of_freedom <-summary(logit)$df[2]
 prs.coef <- summary(logit)$coeff["SCORE_SUM",]
 prs.beta <- as.numeric(prs.coef[1])
 prs.aic <- as.numeric(summary(logit)$aic)
@@ -39,13 +42,10 @@ prs.r2 <- as.numeric(PseudoR2(logit,which="Nagelkerke"))
 #summary(logit)
 
 stat <- as.data.frame(stat)
-output_name <- as.character(args[5])
-
 stat <- data.frame(data=input_file_name,filter_condition=filter_condition, snps_nb=snps_nb, P=prs.p,
                    BETA=prs.beta, Degree_of_freedom=prs.degree_of_freedom , PseudoR2=prs.r2)
 new_stat <- as.data.frame(stat)
-output_name <- as.character(args[6])
-filename <- paste(output_name, filter_pvalue, "stat.txt", sep="_")
+filename <- paste(output_name, filter_condition, "stat.txt", sep="_")
 write.csv(stat, file = filename, row.names = FALSE)
 
 
