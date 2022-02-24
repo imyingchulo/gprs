@@ -35,6 +35,11 @@ $ pip install -r requirements.txt
 $ pip install -e .
 ```
 
+For USC users
+```shell
+$ pip install . --user 
+```
+
 ## Additional requirements
 Install both version 1.9 and 2.0 plink.  https://zzz.bwh.harvard.edu/plink/download.shtml
 

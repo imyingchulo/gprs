@@ -3,11 +3,13 @@ from gprs.gprs_main import GPRS
 from gprs.gwas_model import GwasModel
 from gprs.gene_atlas_model import GeneAtlasModel
 
-
 @click.group()
 def main():
     pass
 
+@click.command()
+def test():
+    print("hello world")
 
 @click.command()
 @click.option( '--ref', metavar='<str>', help='path to population reference panel' )
@@ -35,7 +37,6 @@ def geneatlas_filter_data(ref,data_dir, result_dir, snp_id_header,
                             pvalue_header=pvalue_header,
                             output_name=output_name,
                             pvalue=pvalue )
-
 
 @click.command()
 @click.option( '--ref', metavar='<str>', help='path to population reference panel' )
@@ -68,12 +69,6 @@ def gwas_filter_data(ref, data_dir, result_dir, snp_id_header,
                       file_name=file_name)
 
 @click.command()
-@click.option( '--qc_file_name', metavar='<str>', help='qc_file_name is [output_name] from [chrnb]_[output_name].QC.csv' )
-def transfer_atcg(qc_file_name):
-    gprs = GPRS()
-    gprs.transfer_atcg( qc_file_name=qc_file_name )
-
-@click.command()
 @click.option( '--ref', metavar='<str>', required=True, help='path to population reference panel' )
 @click.option( '--snplist_name', metavar='<str>', required=True, help='snplist_name is [output_name] from [chrnb]_[output_name].csv' )
 @click.option( '--output_name', metavar='<str>', required=True, help='it is better if the output name should be the same as snplist file name' )
@@ -82,30 +77,6 @@ def transfer_atcg(qc_file_name):
 def generate_plink_bfiles(ref, snplist_name, output_name, symbol,extra_commands):
     gprs = GPRS( ref=ref)
     gprs.generate_plink_bfiles( output_name=output_name, symbol = symbol, snplist_name=snplist_name, extra_commands=extra_commands )
-
-
-## New function here
-@click.command()
-@click.option( '--input_data', metavar='<str>', required=True, help='The full path to phenotype file (contains the population information)' )
-@click.option( '--column_name', metavar='<str>', required=True, help='The header of population column' )
-@click.option( '--pop_info', metavar='<str>', required=True, help='The target population to extract' )
-@click.option( '--output_name', metavar='<str>', required=True, help='file name for subset population' )
-def subset_pop(input_data, pop_info, output_name, column_name):
-    gprs = GPRS()
-    gprs.subset_pop( column_name=column_name,
-                      input_data=input_data,
-                      output_name=output_name,
-                      pop_info=pop_info)
-
-
-@click.command()
-@click.option( '--popfile_name', metavar='<str>', required=True, help='the pop file name' )
-@click.option( '--bfile_name', metavar='<str>', required=True, help='the bfile name' )
-@click.option( '--output_name', metavar='<str>', help='output name for sub-set population bfile' )
-def generate_plink_bfiles_w_individual_info(popfile_name, bfile_name, output_name):
-    gprs = GPRS()
-    gprs.generate_plink_bfiles_w_individual_info( output_name=output_name,bfile_name=bfile_name, popfile_name=popfile_name )
-
 
 @click.command()
 @click.option( '--plink_bfile_name', metavar='<str>', required=True, help='plink_bfile_name is [output_name] from [chrnb]_[output_name].bim/bed/fam' )
@@ -129,7 +100,6 @@ def clump(qc_file_name, plink_bfile_name, clump_kb, clump_p1, clump_p2, output_n
                 clump_field=clump_field,
                 clump_snp_field=clump_snp_field )
 
-
 @click.command()
 @click.option( '--qc_file_name', metavar='<str>', required=True, help='qc_file_name is [output_name] from [chrnb]_[output_name].QC.csv' )
 @click.option( '--clump_file_name', metavar='<str>', required=True, help='clump_file_name is [output_name] from [chrnb]_[output_name].clump' )
@@ -142,7 +112,6 @@ def select_clump_snps(clump_file_name, qc_file_name,output_name,clump_kb,clump_p
     gprs = GPRS()
     gprs.select_clump_snps( qc_file_name=qc_file_name, clump_file_name=clump_file_name, output_name=output_name,
                             clump_kb=clump_kb,clump_p1=clump_p1,clump_r2=clump_r2,clumpfolder_name=clumpfolder_name)
-
 
 @click.command()
 @click.option( '--vcf_input', metavar='<str>', required=True, help='path to vcf files' )
@@ -168,7 +137,6 @@ def build_prs(vcf_input, columns, plink_modifier, output_name, symbol,memory,clu
                     clump_r2=clump_r2,
                     qc_clump_snplist_foldername=qc_clump_snplist_foldername)
 
-
 @click.command()
 @click.option( '--filename', metavar='<str>', required=True, help='name of .sscore, i.e.  chr10_geneatlas_500_1e-7_0.05.sscore, The file name here is "geneatlas"')
 @click.option( '--clump_kb', metavar='<int>', required=True, help='distance(kb) parameter for clumping' )
@@ -177,7 +145,6 @@ def build_prs(vcf_input, columns, plink_modifier, output_name, symbol,memory,clu
 def combine_prs(filename,clump_kb,clump_p1,clump_r2):
     gprs = GPRS()
     gprs.combine_prs( filename=filename,clump_kb=clump_kb,clump_p1=clump_p1,clump_r2=clump_r2)
-
 
 @click.command()
 @click.option( '--score_file', metavar='<str>', required=True, help='the absolute path to combined .sscore file')
@@ -199,7 +166,6 @@ def prs_statistics(score_file, pheno_file, output_name, data_set_name, prs_stats
                          r_command=r_command,
                          clump_kb=clump_kb,clump_p1=clump_p1,clump_r2=clump_r2)
 
-
 @click.command()
 @click.option( '--data_set_name', metavar='<str>', required=True, help='the name of the data-set i.e. gout_2019_GCST008970' )
 @click.option( '--clump_kb', metavar='<int>', required=True, help='distance(kb) parameter for clumping' )
@@ -211,6 +177,50 @@ def combine_prs_stat(data_set_name,clump_kb,clump_p1,clump_r2):
                            clump_kb=clump_kb,clump_p1=clump_p1,clump_r2=clump_r2)
 
 
+## Optional function here
+@click.command()
+@click.option('--qc_file_name', metavar='<str>', help='qc_file_name is [output_name] from [chrnb]_[output_name].QC.csv')
+def transfer_atcg(qc_file_name):
+    gprs = GPRS()
+    gprs.transfer_atcg(qc_file_name=qc_file_name)
+
+@click.command()
+@click.option('--input_data', metavar='<str>', required=True,
+              help='The full path to phenotype file (contains the population information)')
+@click.option('--column_name', metavar='<str>', required=True, help='The header of population column')
+@click.option('--pop_info', metavar='<str>', required=True, help='The target population to extract')
+@click.option('--output_name', metavar='<str>', required=True, help='file name for subset population')
+def subset_pop(input_data, pop_info, output_name, column_name):
+    gprs = GPRS()
+    gprs.subset_pop(column_name=column_name,
+                    input_data=input_data,
+                    output_name=output_name,
+                    pop_info=pop_info)
+
+@click.command()
+@click.option('--popfile_name', metavar='<str>', required=True, help='the pop file name')
+@click.option('--bfile_name', metavar='<str>', required=True, help='the bfile name')
+@click.option('--output_name', metavar='<str>', help='output name for sub-set population bfile')
+def generate_plink_bfiles_w_individual_info(popfile_name, bfile_name, output_name):
+    gprs = GPRS()
+    gprs.generate_plink_bfiles_w_individual_info(output_name=output_name, bfile_name=bfile_name,
+                                                 popfile_name=popfile_name)
+
+@click.command()
+@click.option('--fam_dir', metavar='<str>', required=True, help='the path to .fam')
+@click.option('--fam_filename', metavar='<str>', required=True, help='name of fam file(without chr number) ')
+@click.option('--samplesize', metavar='<int>', required=True, help='number of subset samples')
+@click.option('--vcf_input', metavar='<str>', required=True, help='path to vcf files')
+@click.option('--symbol', metavar='<str/int>', required=True, default='.', help='indicate the symbol or text after chrnb in vcf file, default = "." ; i.e. ALL.chr8.vcf.gz, you can put "." or ".vcf.gz"' )
+def subset_vcf_w_random_sample(fam_dir, fam_filename, samplesize, vcf_input, symbol):
+    gprs = GPRS()
+    gprs.subset_vcf_w_random_sample(fam_dir=fam_dir,
+                                    fam_filename=fam_filename,
+                                    samplesize=samplesize,
+                                    vcf_input=vcf_input,
+                                    symbol=symbol)
+
+main.add_command( test )
 main.add_command( build_prs )
 main.add_command( clump )
 main.add_command( combine_prs )
@@ -222,4 +232,5 @@ main.add_command( gwas_filter_data )
 main.add_command( prs_statistics )
 main.add_command( select_clump_snps )
 main.add_command( transfer_atcg )
+main.add_command( subset_vcf_w_random_sample )
 

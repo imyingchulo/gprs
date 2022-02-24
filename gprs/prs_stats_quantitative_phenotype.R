@@ -30,7 +30,7 @@ cat("\n")
 pheno <- read.table(phenof,header=T)
 pheno$pheno <- as.factor(pheno$pheno)
 score <- read.table(scoref,header = T)
-prs <- inner_join(score[,c(1,4)], pheno, by="id")
+prs <- inner_join(score[,c(1,3)], pheno, by="id")
 logit <- glm(pheno~., data=prs[,-c(1)], family="binomial")
 
 prs.degree_of_freedom <-summary(logit)$df[2]

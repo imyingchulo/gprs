@@ -1,5 +1,6 @@
 import os
 import glob
+import random
 import pandas as pd
 from pathlib import Path
 from subprocess import call
@@ -20,6 +21,7 @@ class GPRS(object):
         self.result_dir = Path('{}/{}'.format(os.getcwd(), result_dir)).resolve()
         self.plink_dir = '{}/{}'.format(self.result_dir, 'plink')
         self.pop_dir = '{}/{}'.format(self.result_dir, 'pop')
+        self.random_draw_sample_dir = '{}/{}'.format(self.result_dir, 'random_draw_sample')
         self.stat_dir = '{}/{}'.format(self.result_dir, 'stat')
         self.plink_bfiles_dir = '{}/{}'.format(self.plink_dir, 'bfiles')
         self.plink_clump_dir = '{}/{}'.format(self.plink_dir, 'clump')
@@ -40,6 +42,7 @@ class GPRS(object):
         self.create_qc_clump_snpslist_dir()
         self.create_stat_dir()
         self.create_pop_dir()
+        self.create_random_draw_sample_dir()
 
     def create_result_dir(self):  # A function to create result folder
         if not os.path.exists(self.result_dir):
@@ -81,15 +84,9 @@ class GPRS(object):
         if not os.path.exists(self.qc_clump_snpslist_dir):
             os.mkdir(self.qc_clump_snpslist_dir)
 
-
-    # Transfer a t c g into capital A T C G
-    def transfer_atcg(self, qc_file_name):
-        for nb in range(1, 23):
-            chrnb = "chr{}".format(nb)
-            df = pd.read_csv("{}/{}_{}.QC.csv".format(self.qc_dir, chrnb, qc_file_name), sep=' ')
-            df.loc[:, 'Allele'] = df['Allele'].apply({'a': 'A', 't': 'T', 'c': 'C', 'g': 'G'}.get)
-            df.to_csv("{}/{}_{}.QC.csv".format(self.qc_dir, chrnb, qc_file_name), sep=' ', index=False, header=True)
-        print("transfer completed!")
+    def create_random_draw_sample_dir(self):
+        if not os.path.exists(self.random_draw_sample_dir):
+            os.mkdir(self.random_draw_sample_dir)
 
     # Using plink to generate bfiles fam/bim/bed.
     def generate_plink_bfiles(self, snplist_name, output_name, symbol='.', extra_commands=" "):
@@ -108,8 +105,7 @@ class GPRS(object):
                                 '.vcf.gz') and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and "{}{}".format(
                                 chrnb, symbol) in i:
                             # Run plink command
-                            os.system(
-                                "plink --vcf {}/{} --extract {}/{} {} --make-bed --out {}/{}_{}".format(self.ref, i,
+                            os.system("plink --vcf {}/{} --extract {}/{} {} --make-bed --out {}/{}_{}".format(self.ref, i,
                                                                                                         self.snplists_dir,
                                                                                                         snps,
                                                                                                         extra_commands,
@@ -130,31 +126,6 @@ class GPRS(object):
                                                                                                         chrnb,
                                                                                                         output_name))
                         print("no chr: {}_{} is finished!".format(chrnb, output_name))
-        print("all jobs completed!")
-
-    def subset_pop(self, input_data, column_name, pop_info, output_name):
-        file = pd.read_csv("{}".format(input_data), delim_whitespace=True)
-        subset_file = file.loc[(file["{}".format(column_name)] == "{}".format(pop_info))]
-        subset_file.to_csv("{}".format(output_name), sep='\t', index=False, header=True)
-
-    def generate_plink_bfiles_w_individual_info(self, popfile_name, bfile_name, output_name):
-        # Generate chr number (chr1-chr22)
-        for nb in range(1, 23):
-            chrnb = "chr{}".format(nb)
-            # Find the popfile from pop directory
-            for j in os.listdir(self.pop_dir):
-                if "{}.txt".format(popfile_name) in j:
-                    # Get the original Plink bfiles list from plink/bfile directory
-                    for i in os.listdir(self.plink_bfiles_dir):
-                        if "{}_{}".format(chrnb, bfile_name) in i:
-                            bfile = i.split(".")[0]
-                            # Run plink command
-                            os.system("plink --bfile {}/{} --keep {}/{} --make-bed --out {}/{}_{}".format(
-                                self.plink_bfiles_dir, bfile,
-                                self.pop_dir, j,
-                                self.plink_bfiles_dir,
-                                chrnb, output_name))
-                        print("with chr: {}_{} is finished!".format(chrnb, bfile_name))
         print("all jobs completed!")
 
     def clump(self, qc_file_name, plink_bfile_name, output_name, clump_kb, clump_p1, clump_p2, clump_r2='0.1',
@@ -299,7 +270,6 @@ class GPRS(object):
     def build_prs(self, vcf_input, output_name, qc_clump_snplist_foldername, memory, clump_kb, clump_p1, clump_r2, symbol='.', columns='1 2 3', plink_modifier='no-mean-imputation'):
         # Create a C+T tag
         clump_conditions = "{}_{}_{}".format(clump_kb, clump_p1, clump_r2)
-        timer_output = open("{}/{}_{}_time_table.txt".format(self.prs_dir, output_name, clump_conditions), 'w')
 
         # Check the folder exists or not, if not create the folder
         if os.path.exists("{}/{}_{}".format(self.prs_dir, output_name, clump_conditions)):
@@ -310,14 +280,11 @@ class GPRS(object):
             os.mkdir("{}/{}_{}".format(self.prs_dir, output_name, clump_conditions))
 
         visited = set()
-        outer_loop_start = timer()
         for nb in range(1, 23):
             chrnb = "chr{}".format(nb)
-            inner_loop_start = timer()
             for vcf_file in os.listdir(vcf_input):
                 # Define the input files (vcf and qc files)
                 if vcf_file.endswith('.vcf.gz') and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and "{}{}".format(chrnb, symbol) in vcf_file:
-                    plink_start = timer()
                     qc_file = "{}/{}_{}/{}_{}_{}.qc_clump_snpslist.csv".format(self.qc_clump_snpslist_dir,
                                                                                qc_clump_snplist_foldername, clump_conditions,
                                                                                chrnb, qc_clump_snplist_foldername, clump_conditions)
@@ -333,14 +300,7 @@ class GPRS(object):
                     else:
                         print("{} not found. skip".format(qc_file))
                     visited.add("{}".format(qc_file))
-                    plink_end = timer()
-                    timer_output.write('[plink] {}: {}\n'.format(qc_file, plink_end - plink_start))
-            inner_loop_end = timer()
-            timer_output.write('[inner_loop_end] {}: {}\n'.format(chrnb, inner_loop_end - inner_loop_start))
         print("ALL work are complete!")
-        outer_loop_end = timer()
-        timer_output.write('[total_time]: {}\n'.format(outer_loop_end - outer_loop_start))
-        timer_output.close()
 
     def combine_prs(self, filename, clump_kb, clump_p1, clump_r2):
         # Create a C+T tag
@@ -431,3 +391,91 @@ class GPRS(object):
         combined_csv = pd.concat([pd.read_csv(f) for f in target_files])
         # Export to csv
         combined_csv.to_csv("{}/combined_{}.txt".format(self.stat_dir, data_set_name), index=False, header=True, sep=' ')
+
+    # Optional functions
+    def subset_pop(self, input_data, column_name, pop_info, output_name):
+        file = pd.read_csv("{}".format(input_data), delim_whitespace=True)
+        subset_file = file.loc[(file["{}".format(column_name)] == "{}".format(pop_info))]
+        subset_file.to_csv("{}".format(output_name), sep='\t', index=False, header=True)
+
+    def generate_plink_bfiles_w_individual_info(self, popfile_name, bfile_name, output_name):
+        for nb in range(1, 23):
+            chrnb = "chr{}".format(nb)
+            for j in os.listdir(self.pop_dir):
+                if "{}.txt".format(popfile_name) in j:
+                    for i in os.listdir(self.plink_bfiles_dir):
+                        if "{}_{}".format(chrnb, bfile_name) in i:
+                            bfile = i.split(".")[0]
+                            os.system("plink --bfile {}/{} --keep {}/{} --make-bed --out {}/{}_{}".format(
+                                self.plink_bfiles_dir, bfile,
+                                self.pop_dir, j,
+                                self.plink_bfiles_dir,
+                                chrnb, output_name))
+                        print("with chr: {}_{} is finished!".format(chrnb, bfile_name))
+        print("all jobs completed!")
+
+    # Transfer a t c g into capital A T C G
+    def transfer_atcg(self, qc_file_name):
+        for nb in range(1, 23):
+            chrnb = "chr{}".format(nb)
+            df = pd.read_csv("{}/{}_{}.QC.csv".format(self.qc_dir, chrnb, qc_file_name), sep=' ')
+            df.loc[:, 'Allele'] = df['Allele'].apply({'a': 'A', 't': 'T', 'c': 'C', 'g': 'G'}.get)
+            df.to_csv("{}/{}_{}.QC.csv".format(self.qc_dir, chrnb, qc_file_name), sep=' ', index=False, header=True)
+        print("transfer completed!")
+
+    def subset_vcf_w_random_sample(self, fam_dir, fam_filename, samplesize, vcf_input, symbol):
+        def random_draw_samples():
+            list = []
+            print("start to subset the samples")
+            with open(fam_input, 'r') as fin:
+                lines = fin.readlines()
+                for index, cols in enumerate(lines):
+                    col = cols.split(" ")
+                    list.append("{}_{}".format(col[0], col[1]))
+
+            with open("{}/{}.txt".format(self.random_draw_sample_dir, fam_name), 'w') as fin:
+                random_sample = random.sample(list, samplesize)
+                final_list = '\n'.join(random_sample)
+                fin.write(final_list)
+                print("random sample list created {}.txt".format(fam_name))
+            fin.close()
+
+        # get fam input
+        if any("chr" in file for file in os.listdir(fam_dir)):
+            print("chr information found, process to read the file")
+            for nb in range(1, 23):
+                chrnb = "chr{}_".format(nb)
+                for f in os.listdir(fam_dir):
+                    if f.endswith(".fam") and chrnb in f and fam_filename in f:
+                        fam_input = "{}/{}".format(fam_dir, f)
+                        fam_name = f.split(".fam")[0]
+                        random_draw_samples()
+        else:
+            print("chr information not found, read file without chromosomes")
+            for f in os.listdir(fam_dir):
+                if f.endswith(".fam") and fam_filename in f:
+                    fam_input = "{}/{}".format(fam_dir, f)
+                    fam_name = f.split(".fam")[0]
+                    random_draw_samples()
+
+        # use subset file to create a new vcf file
+        def build_new_vcf():
+            print("start to subset vcf file")
+            call("bcftools view -Oz -S {} {} > {}/subset_{}_{}.vcf.gz".format(sample_input,
+                                                                    vcfinput,
+                                                                    self.random_draw_sample_dir,
+                                                                    sample_name, samplesize),shell=True)
+            print("finished subset subset_{}_{}.vcf.gz file".format(sample_name, samplesize))
+
+        vcfinput = ""
+        for nb in range(1, 23):
+            chrnb = "chr{}".format(nb)
+            for vcf_file in os.listdir(vcf_input):
+                if vcf_file.endswith('.vcf.gz') and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and "{}{}".format(chrnb, symbol) in vcf_file:
+                    vcfinput = "{}/{}".format(vcf_input, vcf_file)
+            for j in os.listdir(self.random_draw_sample_dir):
+                if j.endswith(".txt") and "{}_".format(chrnb) in j:
+                    sample_input = "{}/{}".format(self.random_draw_sample_dir, j)
+                    sample_name = j.split(".txt")[0]
+                    print("vcf input:{} sample input:{}".format(vcfinput, sample_input))
+                    build_new_vcf()
