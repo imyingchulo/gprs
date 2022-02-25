@@ -101,8 +101,7 @@ class GPRS(object):
                     for i in os.listdir(self.ref):
                         # The if condition here is to exclude chr X, Y, and MT, and make sure all inputs are consistent
                         # ex: The input should be chr1 snps-list and chr1 vcf reference
-                        if i.endswith(
-                                '.vcf.gz') and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and "{}{}".format(
+                        if i.endswith('.vcf.gz') and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and "{}{}".format(
                                 chrnb, symbol) in i:
                             # Run plink command
                             os.system("plink --vcf {}/{} --extract {}/{} {} --make-bed --out {}/{}_{}".format(self.ref, i,
@@ -464,7 +463,7 @@ class GPRS(object):
             call("bcftools view -Oz -S {} {} > {}/subset_{}_{}.vcf.gz".format(sample_input,
                                                                     vcfinput,
                                                                     self.random_draw_sample_dir,
-                                                                    sample_name, samplesize),shell=True)
+                                                                      sample_name, samplesize),shell=True)
             print("finished subset subset_{}_{}.vcf.gz file".format(sample_name, samplesize))
 
         vcfinput = ""

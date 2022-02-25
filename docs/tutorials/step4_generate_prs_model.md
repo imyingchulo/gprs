@@ -36,12 +36,12 @@ if __name__ == '__main__':
 
 - `*.sscore`
 
-|IID|NMISS_ALLELE_CT |NAMED_ALLELE_DOSAGE_SUM |SCORE1_AVG|
-|---|---|---|---|
-|HG00096 |130     |116    |-0.00131555|
-|HG00097 |130     |114     |-0.00133961|
-|HG00099 |130     |119    |-0.00137718|
-|HG00100 |130     |110     |-0.00125486|
+|IID|ALLELE_CT |NAMED_ALLELE_DOSAGE_SUM |
+|---|---|---|
+|HG00096 |130     |116    |
+|HG00097 |130     |114     |
+|HG00099 |130     |119    |
+|HG00100 |130     |110     |
 
 
 # Setp 4-2: Combined PRS model

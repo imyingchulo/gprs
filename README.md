@@ -4,13 +4,14 @@
 
 ---
 
-This package aims to generate the PRS model from GWAS summary statistics. It is designed to deal with GWAS summary statistics from the GWAS catalog and GeneATLAS database.
+This package aims to generate the PRS model from GWAS summary statistics. 
+It is designed to deal with GWAS summary statistics from the GWAS catalog and GeneATLAS database or similar format datasets.
 
 :octocat: Understanding the workflow of this package:
 
-1. Filter GWAS summary statistics files (remove duplicate SNPID and select significant SNPs by P-value)
+1. Filter GWAS summary statistics files (unify the data format. optional: remove duplicate SNPID and select significant SNPs by P-value)
 2. Generate bfiles by Plink1.9
-3. Do clumping by Plink1.9
+3. Do clumping and thresholding by Plink1.9
 4. Generate PRS model by Plink2.0
 
 
@@ -35,7 +36,7 @@ $ pip install -r requirements.txt
 $ pip install -e .
 ```
 
-For USC users
+If you are USC users
 ```shell
 $ pip install . --user 
 ```
@@ -43,6 +44,15 @@ $ pip install . --user
 ## Additional requirements
 Install both version 1.9 and 2.0 plink.  https://zzz.bwh.harvard.edu/plink/download.shtml
 
+If you are USC users:
+Please load the plink modules by using:
+```shell
+$ module load plink2
+```
+```shell
+$ module load gcc/11.2.0
+$ module load plink/1.9-beta6.24
+```
 
 ## Prepare dataset
 Download GWAS summary statistics from
@@ -50,23 +60,22 @@ Download GWAS summary statistics from
 (The GWAS summary statistics should have contains the information: SNPID, ALLELE, BETA, P-value, and StdErr)
 
 
-
-## Usage
-
+## Usage guidance
 ### Before starting:
+If your GWAS summary statistics data are zipped, please unzip your .gz file first.
 
-Please unzip your .gz file first.
+## Two ways to run the package: Python or Commandline Interface
+### 1. Use Python
 
-### 1. Use python
-
-For example, if you want to run GeneAtlas, create a python file, e.g: `gene_atlas_model.py`. Paste the following code in the file and change the configuration to your settings. 
+For example, if you want to run GeneAtlas, create a python file, e.g: `gene_atlas_model.py`. 
+Paste the following code in the file and change the configuration to your settings. 
 
 ```python
 from gprs.gene_atlas_model import GeneAtlasModel
 
 if __name__ == '__main__':
-    geneatlas = GeneAtlasModel( ref='/1000genomes/GRCh38',
-                    data_dir='/Projects/GPRS/data/2014_GWAS_Height' )
+    geneatlas = GeneAtlasModel( ref='/home/1000genomes/GRCh38',
+                    data_dir='/home/Projects/GPRS/data/2014_GWAS_Height' )
 
     geneatlas.filter_data( snp_id_header='MarkerName',
                             allele_header='Allele1',
@@ -77,34 +86,41 @@ if __name__ == '__main__':
 
     geneatlas.generate_plink_bfiles(snplist_name='2014height', output_name='2014height',extra_commands="--vcf-half-call r" ,symbol='.genotypes')
 
-    geneatlas.subset_pop(input_data="/1000genomes/hg19/integrated_call_samples_v3.20130502.ALL.panel",
-                         column_name="super_pop",pop_info = "EUR", output_name = "2014height")
+    geneatlas.clump(output_name='2014height',plink_bfile_name='2014height',
+                    qc_file_name='2014height',clump_kb='250',
+                    clump_p1='0.02',clump_p2='0.02', clump_r2='0.02')
 
-    geneatlas.generate_plink_bfiles_w_individual_info(popfile_name="2014height", output_name="2014height",bfile_name="2014height")
-
-    geneatlas.select_clump_snps(output_name='2014height',clump_file_name='2014height',
-                                qc_file_name='2014height',clumpfolder_name='',clump_kb='250',
-                                clump_p1='0.02', clump_r2='0.02')
-
-    geneatlas.select_clump_snps(output_name='2014height',clump_file_name='2014height',
-                           qc_file_name='2014height',
+    geneatlas.select_clump_snps(output_name='2014height',
+                                clump_file_name='2014height',
+                                qc_file_name='2014height',
                                 clump_kb='250',
                                 clump_p1='0.02',
                                 clump_r2='0.5',clumpfolder_name='2014height')
 
-    geneatlas.build_prs( vcf_input= '1000genomes/hg19',
+    geneatlas.build_prs( vcf_input= 'home/1000genomes/hg19',
                          output_name ='2014height', memory='1000',clump_kb='250',
                          clump_p1='0.02', clump_r2='0.02', qc_clump_snplist_foldername='2014height')
 
-    geneatlas.combine_prs(filename="2014height",clump_r2="0.5",clump_kb="250",clump_p1="0.02")
+    geneatlas.combine_prs(filename="2014height",
+                          clump_r2="0.5",clump_kb="250",clump_p1="0.02")
 
-    geneatlas.prs_statistics(output_name='2014height', score_file = "/GPRS/tmp/2014height_250_0.02_0.1.sscore",
-        pheno_file = "prs/2014height_pheno.csv",
-        r_command='/bin/Rscript',
-        prs_stats_R="/GPRS/gprs/prs_stats_quantitative_phenotype.R", data_set_name="2014height",
+    geneatlas.prs_statistics(output_name='2014height', score_file = "home/GPRS/tmp/2014height_250_0.02_0.1.sscore",
+                             pheno_file = "prs/2014height_pheno.csv",
+                             r_command='/bin/Rscript',
+                             prs_stats_R="/GPRS/gprs/prs_stats_quantitative_phenotype.R", 
+                             data_set_name="2014height",
                              clump_kb='250',
                              clump_p1='0.02',
                              clump_r2='0.1')
+    
+    geneatlas.subset_pop(input_data="home/1000genomes/hg19/integrated_call_samples_v3.20130502.ALL.panel",
+                         column_name="super_pop",pop_info = "EUR", output_name = "2014height")
+
+    geneatlas.generate_plink_bfiles_w_individual_info(popfile_name="2014height", output_name="2014height",bfile_name="2014height")
+    
+    geneatlas.subset_vcf_w_random_sample(fam_dir="/home/result/plink/bfiles", fam_filename="2014height", samplesize=50, vcf_input="1000genomes/hg19", symbol=".")
+    
+
 ```
 
 ### 2. Use Commandline Interface
@@ -112,26 +128,29 @@ if __name__ == '__main__':
 ```shell
 $ gprs geneatlas-filter-data --ref [str] --data_dir [str] --result_dir [str] --snp_id_header [str] --allele_header [str] --beta_header [str] --se_header [str] --pvalue_header [str] --pvalue [float/scientific notation] --output_name [str]  
 $ gprs gwas-filter-data --ref [str] --data_dir [str] --result_dir [str] --snp_id_header [str] --allele_header  [str] --beta_header [str] --se_header [str] --pvalue_header [str] --pvalue [float/scientific notation] --output_name [str]  
-$ gprs generate-plink-bfiles --ref [str] --snplist_name [str] --symbol [str] --output_name [str]
-$ gprs clump --data_dir [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_p2 [float/scientific notation] --clump_r2 [float] --clump_field [str] --clump_snp_field [str] --plink_bfile_name [str] --qc_file_name [str] --output_name [output name]
-$ gprs select-clump-snps --result_dir [str] --qc_file_name [str] --clump_file_name [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float] --output_name [output name]
-$ gprs build-prs --vcf_input [str] --symbol [str/int] --columns [int] --plink_modifier [str] --memory [int] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float] --output_name [output name] 
-$ gprs combine-prs --result_dur [str] --pop [str] 
-$ gprs prs-statistics --result_dir [str] --score_file [str] --pheno_file [str] --data_set_name [str] --prs_stats_R [str] --r_command [str] --output_name [str]  --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float]
-$ gprs combine-prs-stat --result_dir [str] --data_set_name [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float]
+$ gprs generate-plink-bfiles --ref [str] --snplist_name [str] --output_name [str] --symbol [str] --extra_commands [str] 
+$ gprs clump --plink_bfile_name [str] --output_name [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_p2 [float/scientific notation] --clump_r2 [float] --clump_field [str] --qc_file_name [str] --clump_snp_field [str]   
+$ gprs select-clump-snps --qc_file_name [str] --clump_file_name [str] --output_name [output name] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float] --clumpfolder_name [str]
+$ gprs build-prs --vcf_input [str] --output_name [str] --qc_clump_snplist_foldername [str] --memory [int] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float] --symbol [str/int] --columns [int] --plink_modifier [str]  
+$ gprs combine-prs --filename [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float]
+$ gprs prs-statistics --score_file [str] --pheno_file [str] --output_name [str] --data_set_name [str] --prs_stats_R [str] --r_command [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float]
+$ gprs combine-prs-stat --data_set_name [str] --clump_kb [int] --clump_p1 [float/scientific notation] --clump_r2 [float]
 
 ```
 
 ### optional function
 If alleles are a, t, c, g instead of capital A, T, C, G it might affect the further analysis. 
 ```shell
-$ gprs transfer_atcg --ref [str] --qc_snplist_name [str] --output_name [str]
+$ gprs transfer_atcg --qc_file_name [str]
+$ gprs subset_pop --input_data [str] --column_name [str] --pop_info [str] --output_name [str]
+$ gprs generate-plink-bfiles-w-individual-info --popfile_name [str] --bfile_name [str] --output_name [str]
+$ gprs subset-vcf-w-random-sample --fam_dir [str] --fam_filename [str] --samplesize [int] --vcf_input [str] --symbol [str/int]
 ```
 
 
 ## Commands in gprs package:
 
-:octocat: Twelve commands in gprs:
+:octocat: Thirteen commands in gprs:
 
 1. `geneatlas-filter-data`
 
@@ -145,17 +164,19 @@ $ gprs transfer_atcg --ref [str] --qc_snplist_name [str] --output_name [str]
 
 6. `build-prs`
 
-7. `transfer_atcg` (optional)
+7. `combine-prs`
 
-8. `combine-prs`
+8. `prs-statistics`
 
-9. `prs-statistics`
+9. `combine-prs-stat`
 
-10. `combine-prs-stat`
+10. `subset_pop` (optional)
 
-11. `subset_pop` (optional)
+11. `generate_plink_bfiles_w_individual_info` (optional)
 
-12. `generate_plink_bfiles_w_individual_info` (optional)
+12. `transfer_atcg` (optional)
+
+13. `subset_vcf_w_random_sample` (optional)
 
 ### Result folder
 In the first step, you need to indicate the path to creating the result folder.
@@ -167,6 +188,8 @@ Five folders will automatically generate under the result folder by script.
 - clump folder: `./result/plink/clump`
 - qc_and_clump_snpslist folder: `./result/plink/qc_and_clump_snpslist`
 - prs folder: `./result/plink/prs`
+- pop folder: `./result/pop/`
+- random_draw_sample folder: `./result/random_draw_sample/`
 
 :heavy_exclamation_mark: Users have to indicate reference and result directories every time when using the command interface.
 

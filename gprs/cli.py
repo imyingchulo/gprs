@@ -7,9 +7,9 @@ from gprs.gene_atlas_model import GeneAtlasModel
 def main():
     pass
 
-@click.command()
-def test():
-    print("hello world")
+# @click.command()
+# def test():
+#     print("hello world")
 
 @click.command()
 @click.option( '--ref', metavar='<str>', help='path to population reference panel' )
@@ -185,8 +185,7 @@ def transfer_atcg(qc_file_name):
     gprs.transfer_atcg(qc_file_name=qc_file_name)
 
 @click.command()
-@click.option('--input_data', metavar='<str>', required=True,
-              help='The full path to phenotype file (contains the population information)')
+@click.option('--input_data', metavar='<str>', required=True, help='The full path to phenotype file (contains the population information)')
 @click.option('--column_name', metavar='<str>', required=True, help='The header of population column')
 @click.option('--pop_info', metavar='<str>', required=True, help='The target population to extract')
 @click.option('--output_name', metavar='<str>', required=True, help='file name for subset population')
@@ -208,7 +207,7 @@ def generate_plink_bfiles_w_individual_info(popfile_name, bfile_name, output_nam
 
 @click.command()
 @click.option('--fam_dir', metavar='<str>', required=True, help='the path to .fam')
-@click.option('--fam_filename', metavar='<str>', required=True, help='name of fam file(without chr number) ')
+@click.option('--fam_filename', metavar='<str>', required=True, help='name of fam file(without chr number)')
 @click.option('--samplesize', metavar='<int>', required=True, help='number of subset samples')
 @click.option('--vcf_input', metavar='<str>', required=True, help='path to vcf files')
 @click.option('--symbol', metavar='<str/int>', required=True, default='.', help='indicate the symbol or text after chrnb in vcf file, default = "." ; i.e. ALL.chr8.vcf.gz, you can put "." or ".vcf.gz"' )
@@ -220,7 +219,7 @@ def subset_vcf_w_random_sample(fam_dir, fam_filename, samplesize, vcf_input, sym
                                     vcf_input=vcf_input,
                                     symbol=symbol)
 
-main.add_command( test )
+# main.add_command( test )
 main.add_command( build_prs )
 main.add_command( clump )
 main.add_command( combine_prs )
@@ -233,4 +232,5 @@ main.add_command( prs_statistics )
 main.add_command( select_clump_snps )
 main.add_command( transfer_atcg )
 main.add_command( subset_vcf_w_random_sample )
+main.add_command( subset_pop )
 
