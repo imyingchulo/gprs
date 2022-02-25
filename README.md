@@ -290,6 +290,7 @@ Users have to indicate ref and output_name only.
   --output_name        output name
   --symbol             indicate the symbol or text after chrnb in vcf file, default = "." ; i.e. ALL.chr8.vcf.gz, you can put "." or ".vcf.gz" 
   --snplist_name       snplist_name is [output_name] from [chrnb]_[output_name].csv [required]
+  --extra_commands     put your extract function if needed, otherwise no need to specify this argument,
   --help               Show this message and exit.
 ````
 
