@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to GPRS's documentation!
+Welcome to GPRS documentation!
 ================================
 
 .. toctree::
@@ -27,7 +27,7 @@ Welcome to GPRS's documentation!
    :caption: Examples
 
    examples/GIANT_height_wood_et_al_2014/giant_height_wood_et_al_2014
-   examples/MEC_America_Africans/MEC_AA.md
+   examples/MEC_America_Africans/MEC_AA
 
 .. toctree::
    :maxdepth: 2
