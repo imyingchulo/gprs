@@ -103,7 +103,7 @@ class GPRS(object):
             # Generate chr number (chr1-chr22)
             for nb in range(1, 23):
                 chrnb = "chr{}".format(nb)
-                snp = "{}/{}_{}.csv".format(self.qc_dir, chrnb, snplist_name)
+                snp = "{}/{}_{}.csv".format(self.snplists_dir, chrnb, snplist_name)
                 output = "{}/{}_{}".format(self.plink_bfiles_dir, chrnb, output_name)
                 for i in os.listdir(self.ref):
                         # The if condition here is to exclude chr X, Y, and MT, and make sure all inputs are consistent
@@ -114,7 +114,7 @@ class GPRS(object):
                             run_plink_bfiles()
         else:
             print("chromosome information are NOT found in snplists")
-            snp = "{}/{}.csv".format(self.qc_dir, snplist_name)
+            snp = "{}/{}.csv".format(self.snplists_dir, snplist_name)
             for nb in range(1, 23):
                 chrnb = "chr{}".format(nb)
                 output = "{}/{}_{}".format(self.plink_bfiles_dir, chrnb, output_name)
