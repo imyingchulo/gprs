@@ -90,41 +90,39 @@ class GPRS(object):
 
     # Using plink to generate bfiles fam/bim/bed.
     def generate_plink_bfiles(self, snplist_name, output_name, symbol='.', extra_commands=" "):
-        # Generate chr with different numbers, i.e. chr1, chr2, chr3 ... chr22
-        for nb in range(1, 23):
-            chrnb = "chr{}".format(nb)
-            # Get a list of snplist files from the directory
-            for snps in os.listdir(self.snplists_dir):
-                # Get a snplist file with "chr". Take one snplist file each time and run plink command
-                if "chr" and "{}_{}.csv".format(chrnb, snplist_name) in snps:
-                    # Get the list of  reference files from self.ref
-                    for i in os.listdir(self.ref):
+        def run_plink_bfiles():
+            visited = set()
+            if "{}_{}".format(chrnb, output_name)not in visited:
+                print("strat to generate {}_{} bfiles".format(chrnb, output_name))
+                os.system("plink --vcf {} --extract {} {} --make-bed --out {}".format(vcfinput, snp, extra_commands, output))
+            print("{}_{} bfile is ready!".format(chrnb, output_name))
+            visited.add("{}_{}".format(chrnb, output_name))
+
+        if any("chr" in file and "{}".format(snplist_name) in file for file in os.listdir(self.snplists_dir)):
+            print("chromosome information are found in snplists")
+            # Generate chr number (chr1-chr22)
+            for nb in range(1, 23):
+                chrnb = "chr{}".format(nb)
+                snp = "{}/{}_{}.csv".format(self.qc_dir, chrnb, snplist_name)
+                output = "{}/{}_{}".format(self.plink_bfiles_dir, chrnb, output_name)
+                for i in os.listdir(self.ref):
                         # The if condition here is to exclude chr X, Y, and MT, and make sure all inputs are consistent
                         # ex: The input should be chr1 snps-list and chr1 vcf reference
-                        if i.endswith('.vcf.gz') and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and "{}{}".format(
-                                chrnb, symbol) in i:
-                            # Run plink command
-                            os.system("plink --vcf {}/{} --extract {}/{} {} --make-bed --out {}/{}_{}".format(self.ref, i,
-                                                                                                        self.snplists_dir,
-                                                                                                        snps,
-                                                                                                        extra_commands,
-                                                                                                        self.plink_bfiles_dir,
-                                                                                                        chrnb,
-                                                                                                        output_name))
-                        print("with chr: {}_{} is finished!".format(chrnb, output_name))
-                # Get a snplist file without "chr". Take one snplist file each time and run plink command
-                elif "chr" not in snps and "{}.csv".format(snplist_name) in snps:
-                    for i in os.listdir(self.ref):
-                        if i.endswith('.vcf.gz') and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and "{}{}".format(
-                                chrnb, symbol) in i:
-                            os.system("plink --vcf {}/{} --extract {}/{} {} --make-bed --out {}/{}_{}".format(self.ref, i,
-                                                                                                        self.snplists_dir,
-                                                                                                        snps,
-                                                                                                        extra_commands,
-                                                                                                        self.plink_bfiles_dir,
-                                                                                                        chrnb,
-                                                                                                        output_name))
-                        print("no chr: {}_{} is finished!".format(chrnb, output_name))
+                        if i.endswith('.vcf.gz') and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and "{}{}".format(chrnb, symbol) in i:
+                            vcfinput = "{}/{}".format(self.ref, i)
+                            print("snplist: {}, output: {}, vcfinput:{}\n start to generate bfiles".format(snp, output, vcfinput))
+                            run_plink_bfiles()
+        else:
+            print("chromosome information are NOT found in snplists")
+            snp = "{}/{}.csv".format(self.qc_dir, snplist_name)
+            for nb in range(1, 23):
+                chrnb = "chr{}".format(nb)
+                output = "{}/{}_{}".format(self.plink_bfiles_dir, chrnb, output_name)
+                for i in os.listdir(self.ref):
+                    if i.endswith('.vcf.gz') and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and "{}{}".format(chrnb, symbol) in i:
+                        vcfinput = "{}/{}".format(self.ref, i)
+                        print("snplist: {}, output: {}, vcfinput:{}\n start to generate bfiles".format(snp, output, vcfinput))
+                        run_plink_bfiles()
         print("all jobs completed!")
 
     def clump(self, qc_file_name, plink_bfile_name, output_name, clump_kb, clump_p1, clump_p2, clump_r2='0.1',
