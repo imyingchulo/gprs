@@ -25,7 +25,7 @@ class GPRS(object):
         self.stat_dir = '{}/{}'.format(self.result_dir, 'stat')
         self.plink_bfiles_dir = '{}/{}'.format(self.plink_dir, 'bfiles')
         self.plink_clump_dir = '{}/{}'.format(self.plink_dir, 'clump')
-        self.prs_dir = '{}/{}'.format(self.plink_dir, 'prs')
+        self.prs_dir = '{}/{}'.format(self.result_dir, 'prs')
         self.qc_dir = '{}/{}'.format(self.result_dir, 'qc')
         self.snplists_dir = '{}/{}'.format(self.result_dir, 'snplists')
         self.qc_clump_snpslist_dir = '{}/{}'.format(self.plink_dir, 'qc_and_clump_snpslist')
@@ -263,6 +263,23 @@ class GPRS(object):
                 else:
                     print("{} not found skip".format(clump_snp_file))
         print("All jobs are completed")
+
+    #make beta list for multiple_prs function.
+    def beta_list(self, beta_dirs, out):
+        beta_dirs = beta_dirs.split()
+        print('Iterating {} beta directoreis..'.format( len(beta_dirs)))
+        allmodels={}
+        for beta_dir in beta_dirs:
+            #get list of directories in given path
+            models=[ x for x in os.listdir(beta_dir) if os.path.isdir( os.path.join(beta_dir, x)) ]
+            print('- {} models found in {}\n\n'.format( len(models), beta_dir))
+            for model in sorted(models):
+                allmodels[model] = '{}/{}'.format(beta_dir, model)
+        #write .list
+        with open('{}/{}.list'.format(self.prs_dir, out), 'w') as o:
+            for x in allmodels.keys():
+                o.write('{}\t{}\n'.format(x, allmodels[x]))
+        print('{}.list saved!\n'.format(out))
 
     def build_prs(self, vcf_input, output_name, qc_clump_snplist_foldername, memory, clump_kb, clump_p1, clump_r2, symbol='.', columns='1 2 3', plink_modifier='no-mean-imputation'):
         # Create a C+T tag
