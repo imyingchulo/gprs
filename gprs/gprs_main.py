@@ -1,11 +1,11 @@
-import os
 import glob
+import os
 import random
-import pandas as pd
+from collections import defaultdict
 from pathlib import Path
 from subprocess import call
-from timeit import default_timer as timer
-from collections import defaultdict
+
+import pandas as pd
 
 
 class GPRS(object):
@@ -305,24 +305,27 @@ class GPRS(object):
         data_dir = "{}/{}_{}".format(self.prs_dir,filename, clump_conditions)
         table = defaultdict(list)
 
-        for i in os.listdir(data_dir):
-            if i.endswith(".sscore"):
-                if os.path.exists("{}/{}".format(data_dir, i)):
-                    print("start to extract the id, allele nb and score from {}/{}".format(data_dir, i))
-                    with open("{}/{}".format(data_dir, i), 'r') as sscorein:
-                        for index, rows in enumerate(sscorein.readlines()):
-                            # use split to separate each row, and access the data by using row[0], row[1]...
-                            row = rows.split()
-                            # skip the header
-                            if index > 0:
-                                key = "{}".format(row[0])
-                                # append data with select columns
-                                nb = float(row[1])
-                                score = float(row[3]) * nb
-                                table[key].append((nb, score))
-                    print("finished to extract the id, allele nb and score from {}/{}".format(data_dir, i))
-                else:
-                    print("{}/{} not found. Skip".format(data_dir, i))
+        if os.path.exists(data_dir):
+            for i in os.listdir(data_dir):
+                if i.endswith(".sscore"):
+                    if os.path.exists("{}/{}".format(data_dir, i)):
+                        print("start to extract the id, allele nb and score from {}/{}".format(data_dir, i))
+                        with open("{}/{}".format(data_dir, i), 'r') as sscorein:
+                            for index, rows in enumerate(sscorein.readlines()):
+                                # use split to separate each row, and access the data by using row[0], row[1]...
+                                row = rows.split()
+                                # skip the header
+                                if index > 0:
+                                    key = "{}".format(row[0])
+                                    # append data with select columns
+                                    nb = float(row[1])
+                                    score = float(row[3]) * nb
+                                    table[key].append((nb, score))
+                        print("finished to extract the id, allele nb and score from {}/{}".format(data_dir, i))
+                    else:
+                        print("{}/{} not found. Skip".format(data_dir, i))
+        else:
+            print("{} did not found".format(data_dir))
 
         result = ['id\tALLELE_CT\tSCORE_SUM']
         # take the value from dictionary
