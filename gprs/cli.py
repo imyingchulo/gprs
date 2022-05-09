@@ -114,28 +114,59 @@ def select_clump_snps(clump_file_name, qc_file_name,output_name,clump_kb,clump_p
                             clump_kb=clump_kb,clump_p1=clump_p1,clump_r2=clump_r2,clumpfolder_name=clumpfolder_name)
 
 @click.command()
-@click.option( '--vcf_input', metavar='<str>', required=True, help='path to vcf files' )
-@click.option( '--output_name', metavar='<str>', required=True, help='it is better if the output_name remain the same. output: [chrnb]_[output_name].sscore' )
-@click.option('--qc_clump_snplist_foldername',metavar='<str>', required=True, help='folder name for .qc_clump_snpslist.csv files, i.e. LAT is the name of LAT_250_1e-5_0.5 folder')
+@click.option( '--beta_dirs', metavar='<str>', required=True, help='list of beta directories to compute PRS with, separated by space')
+@click.option( '--out',metavar='<str>', required=True, help='prefix for output .list file')
+def beta_list(beta_dirs, out):
+    gprs = GPRS()
+    gprs.beta_list( beta_dirs=beta_dirs, out=out)
+
+@click.command()
+@click.option( '--vcf_dir', metavar='<str>', required=True, help='path to directories containing vcf files')
+@click.option( '--beta_dir_list', metavar='<str>', required=True, help='list of beta directories created from beta-list function')
+@click.option( '--slurm_name', metavar='<str>', required=True, help='slurm job name')
+@click.option( '--slurm_account', metavar='<str>', required=True, default='chia657_28', help='slurm job account; default="chia657_28" ')
+@click.option( '--slurm_time', metavar='<str>', required=True, default='12:00:00', help='slurm job time; default="12:00:00" ')
+@click.option( '--memory', metavar='<int>',required=True, default=10, help='slurm job memory in GB; default="10" ')
+@click.option( '--symbol', metavar='<str>', required=True, default='.', help='symbol or text after chrnb in vcf file, default = "." ; i.e. ALL.chr8.vcf.gz, you can put "." or ".vcf.gz"')
+@click.option( '--columns', metavar='<int>', default='1 4 6', help='a column index indicate the [SNPID] [ALLELE] [BETA] position; column nb starts from 1; default="1 4 6"' )
+@click.option( '--plink_modifier', metavar='<str>', required=True, default="'no-mean-imputation' 'cols='nmissallele,dosagesum,scoresums", help='plink2 modifier for score function')
+@click.option( '--combine', metavar='<str>', required=True, default='T', help='whether to combine scores per chromosomes to generate a final genome-wide PRS (T/F); default="T" ')
+@click.option( '--out', metavar='<str>', required=True, default='', help='directory name to output PRS')
+def multiple_prs(vcf_dir, beta_dir_list, slurm_name, slurm_account, slurm_time, memory, symbol, columns, plink_modifier, combine, out):
+    gprs=GPRS()
+    gprs.multiple_prs( vcf_dir=vcf_dir,
+                        beta_dir_list=beta_dir_list,
+                        slurm_name=slurm_name,
+                        slurm_account=slurm_account,
+                        slurm_time=slurm_time,
+                        memory=memory,
+                        symbol=symbol,
+                        columns=columns,
+                        plink_modifier=plink_modifier,
+                        combine=combine,
+                        out=out)
+
+@click.command()
+@click.option( '--vcf_dir', metavar='<str>', required=True, help='path to vcf files' )
+@click.option( '--model', metavar='<str>', required=True, help='model to use to generate PRS')
+@click.option( '--beta_dir_list', metavar='<str>', required=True, help='list of beta directories created from beta-list function, used to look up the path for specified PRS model')
 @click.option( '--memory', metavar='<int>', help='number of memory use' )
-@click.option( '--clump_kb', metavar='<int>', required=True, help='distance(kb) parameter for clumping' )
-@click.option( '--clump_p1', metavar='<float/scientific notation>', required=True, help='first set of P-value for clumping' )
-@click.option( '--clump_r2', metavar='<float>', required=True, help='r2 value for clumping' )
+@click.option( '--out', metavar='<str>', required=True, default='', help='directory name to output PRS')
 @click.option( '--symbol', metavar='<str/int>', required=True,default='.', help='indicate the symbol or text after chrnb in vcf file, default = "." ; i.e. ALL.chr8.vcf.gz, you can put "." or ".vcf.gz"' )
 @click.option( '--columns', metavar='<int>', default='1 2 3', help='a column index indicate the [SNPID] [ALLELE] [BETA] position; column nb starts from 1 ' )
 @click.option( '--plink_modifier', metavar='<str>', default='no-mean-imputation', help='no-mean-imputation as default in here, get more info by searching plink2.0 modifier ' )
-def build_prs(vcf_input, columns, plink_modifier, output_name, symbol,memory,clump_kb,clump_p1,clump_r2,qc_clump_snplist_foldername ):
+@click.option( '--combine', metavar='<str>', required=True, default='T', help='whether to combine scores per chromosomes to generate a final genome-wide PRS (T/F); default="T" ')
+def build_prs(vcf_dir, model, beta_dir_list, memory, out, symbol, columns, plink_modifier, combine):
     gprs = GPRS()
-    gprs.build_prs( memory=memory,
-                    vcf_input=vcf_input,
-                    symbol = symbol,
+    gprs.build_prs( vcf_dir=vcf_dir,
+                    model=model,
+                    beta_dir_list=beta_dir_list,
+                    memory=memory,
+                    out=out,
+                    symbol=symbol,
                     columns=columns,
                     plink_modifier=plink_modifier,
-                    output_name=output_name,
-                    clump_kb=clump_kb,
-                    clump_p1=clump_p1,
-                    clump_r2=clump_r2,
-                    qc_clump_snplist_foldername=qc_clump_snplist_foldername)
+                    combine=combine)
 
 @click.command()
 @click.option( '--filename', metavar='<str>', required=True, help='name of .sscore, i.e.  chr10_geneatlas_500_1e-7_0.05.sscore, The file name here is "geneatlas"')
@@ -220,6 +251,7 @@ def subset_vcf_w_random_sample(fam_dir, fam_filename, samplesize, vcf_input, sym
                                     symbol=symbol)
 
 # main.add_command( test )
+main.add_command( beta_list )
 main.add_command( build_prs )
 main.add_command( clump )
 main.add_command( combine_prs )
@@ -228,6 +260,7 @@ main.add_command( geneatlas_filter_data )
 main.add_command( generate_plink_bfiles )
 main.add_command( generate_plink_bfiles_w_individual_info )
 main.add_command( gwas_filter_data )
+main.add_command( multiple_prs)
 main.add_command( prs_statistics )
 main.add_command( select_clump_snps )
 main.add_command( transfer_atcg )

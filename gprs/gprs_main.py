@@ -279,81 +279,183 @@ class GPRS(object):
         with open('{}/{}.list'.format(self.prs_dir, out), 'w') as o:
             for x in allmodels.keys():
                 o.write('{}\t{}\n'.format(x, allmodels[x]))
-        print('{}.list saved!\n'.format(out))
+        print('File {}.list saved!\n'.format(out))
 
-    def build_prs(self, vcf_input, output_name, qc_clump_snplist_foldername, memory, clump_kb, clump_p1, clump_r2, symbol='.', columns='1 2 3', plink_modifier='no-mean-imputation'):
-        # Create a C+T tag
-        clump_conditions = "{}_{}_{}".format(clump_kb, clump_p1, clump_r2)
+    def multiple_prs(self, vcf_dir, beta_dir_list,
+                slurm_name, slurm_account='chia657_28', slurm_time='12:00:00', memory=10,
+                symbol='.',
+                columns='1 4 6', plink_modifier='no-mean-imputation cols=nmissallele,dosagesum,scoresums',
+                combine='T', out=''):
+    # read in list of beta directories and path dictionary
+        print('Reading list of beta directories..{}'.format(beta_dir_list))
+        beta_list_file = pd.read_csv(beta_dir_list, header=None, sep='\t', index_col=0, squeeze=True)
+        beta_list = beta_list_file.T.to_dict()
+        print('{} models found'.format( len(beta_list)))
 
-        # Check the folder exists or not, if not create the folder
-        if os.path.exists("{}/{}_{}".format(self.prs_dir, output_name, clump_conditions)):
-            print("{}/{}_{} exists".format(self.prs_dir, output_name, clump_conditions))
-            pass
+        # create output folder
+        if out == '':
+            out = self.prs_dir
+            print('Warning: output directory not defined. Will be saved in {}'.format(self.prs_dir))
         else:
-            print("{}/{}_{} not exists, going to create one".format(self.prs_dir, output_name, clump_conditions))
-            os.mkdir("{}/{}_{}".format(self.prs_dir, output_name, clump_conditions))
+            out = "{}/{}".format( self.prs_dir, out )
+            os.makedirs(out, exist_ok=True)
+            print('Output will be saved in {}'.format(out))
 
-        visited = set()
+        # compile args for build_prs
+        args = "--beta_dir_list {} --memory {} --symbol {} --columns '{}' --plink_modifier '{}' --combine {} --out {}".format(
+                beta_dir_list, memory*1000, symbol, columns, plink_modifier, combine, out)
+
+        # write slurm script
+        command = """#!/bin/sh
+#SBATCH --ntasks=1
+#SBATCH --nodes=1
+#SBATCH --account={}
+#SBATCH --time={}
+#SBATCH --mem-per-cpu={}gb
+#SBATCH --job-name={}
+#SBATCH --output=slurm.%x.%j.out
+#SBATCH --error=slurm.%x.%j.err
+#SBATCH --array=0-{}\n
+module load usc
+module load plink2
+arr=( {} )\n
+
+source ./venv/bin/activate\n
+
+gprs build-prs --vcf_dir {} --model""".format(
+                    slurm_account, slurm_time, memory, slurm_name, len(beta_list)-1, 
+                    ' '.join(beta_list.keys()), 
+                    vcf_dir)
+        command+= ' ${arr[$SLURM_ARRAY_TASK_ID]} '
+        command+= args+'\n'
+
+        with open('build-prs.sh','w') as o:
+            o.writelines(command)
+        os.system('sbatch build-prs.sh')
+
+    def build_prs(self, vcf_dir, model, beta_dir_list, memory, out,
+                    symbol='.',
+                    columns='1 4 6', plink_modifier="no-mean-imputation cols=nmissallele,dosagesum,scoresums",
+                    combine='T'):            
+        # create output folder per model with same name
+        os.mkdir("{}/{}".format(out, model))
+        # read in list of beta directories and path dictionary
+        beta_list_file = pd.read_csv(beta_dir_list, header=None, sep='\t', index_col=0, squeeze=True)
+        beta_list = beta_list_file.T.to_dict()
+        print('Building PRS for "{}" model in {}...'.format(model, beta_list[model]))
+        # master score dataframe
+        all=pd.DataFrame(columns=['#IID'])
+
         for nb in range(1, 23):
             chrnb = "chr{}".format(nb)
-            for vcf_file in os.listdir(vcf_input):
-                # Define the input files (vcf and qc files)
-                if vcf_file.endswith('.vcf.gz') and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and "{}{}".format(chrnb, symbol) in vcf_file:
-                    qc_file = "{}/{}_{}/{}_{}_{}.qc_clump_snpslist.csv".format(self.qc_clump_snpslist_dir,
-                                                                               qc_clump_snplist_foldername, clump_conditions,
-                                                                               chrnb, qc_clump_snplist_foldername, clump_conditions)
-                    if os.path.exists(qc_file) and "{}".format(qc_file) not in visited:
-                        os.system("plink2 --vcf {}/{} dosage=DS --score {} {} '{}' --memory {} --out {}/{}_{}/{}_{}_{}".format(
-                                                                                vcf_input, vcf_file,
-                                                                                qc_file, columns, plink_modifier,
-                                                                                memory,
-                                                                                self.prs_dir,
-                                                                                output_name, clump_conditions,
-                                                                                chrnb, output_name, clump_conditions))
-                        print("{}_{}_{}.sscore completed!".format(chrnb, output_name, clump_conditions))
-                    else:
-                        print("{} not found. skip".format(qc_file))
-                    visited.add("{}".format(qc_file))
-        print("ALL work are complete!")
+            # Define and check number of beta file
+            beta_file = list( filter( lambda x: x.startswith("{}{}".format(chrnb, "_")) and x.endswith(".weight"), os.listdir(beta_list[model])))
+            if len(beta_file) < 1 :
+                print("{} beta file in {} not found. skip".format(chrnb, model))
+            elif len(beta_file) > 1 :
+                raise Exception("Multiple {} beta files in {}. Skip".format(chrnb, model))
+            else:
+                # only if there's one beta file
+                beta_file=beta_file[0]
+                # Define vcf file
+                for vcf_file in os.listdir(vcf_dir):
+                    if vcf_file.endswith('.vcf.gz') and "{}{}".format(chrnb, symbol) in vcf_file:
+                        os.system("plink2 --vcf {}/{} dosage=DS --score {}/{} {} {} --memory {} --out {}/{}/{}_{}".format(
+                                                                            vcf_dir, vcf_file,
+                                                                            beta_list[model], beta_file, columns, plink_modifier,
+                                                                            memory,
+                                                                            out,model, chrnb, model))
+                        print("{}_{}.sscore saved in {}/{}".format(chrnb, model, out, model))
+                        file = pd.read_csv('{}/{}/{}_{}.sscore'.format(out, model, chrnb, model), sep='\t')
+                        file.rename(columns={'SCORE1_SUM':'SCORE_{}'.format(chrnb), 'NMISS_ALLELE_CT':'ALLELE_CT_{}'.format(chrnb)}, inplace=True)
+                        if len(all) == 0:
+                            all=all.merge(file[['#IID','SCORE_{}'.format(chrnb), 'ALLELE_CT_{}'.format(chrnb)]], how='right')
+                        else:
+                            all=all.merge(file[['#IID','SCORE_{}'.format(chrnb), 'ALLELE_CT_{}'.format(chrnb)]], on='#IID')
+                
+        if combine == 'T':
+            print('\nOption to combine scores per chromsome is ON')
+            all['SCORE_SUM']=all.filter(like='SCORE').sum(axis=1)
+            all['TOTAL_ALLELE_CT']=all.filter(like='ALLELE_CT').sum(axis=1)
+            print('Summary for scores...')
+            print(all[['SCORE_SUM']].describe())
+            all[['#IID', 'SCORE_SUM', 'TOTAL_ALLELE_CT']].to_csv('{}/{}.sscore'.format(out, model), index=False, sep='\t')
+            print('Done! Combined score for "{}" model saved'.format(model))
 
-    def combine_prs(self, filename, clump_kb, clump_p1, clump_r2):
-        # Create a C+T tag
-        clump_conditions = "{}_{}_{}".format(clump_kb, clump_p1, clump_r2)
-        data_dir = "{}/{}_{}".format(self.prs_dir,filename, clump_conditions)
-        table = defaultdict(list)
 
-        for i in os.listdir(data_dir):
-            if i.endswith(".sscore"):
-                if os.path.exists("{}/{}".format(data_dir, i)):
-                    print("start to extract the id, allele nb and score from {}/{}".format(data_dir, i))
-                    with open("{}/{}".format(data_dir, i), 'r') as sscorein:
-                        for index, rows in enumerate(sscorein.readlines()):
-                            # use split to separate each row, and access the data by using row[0], row[1]...
-                            row = rows.split()
-                            # skip the header
-                            if index > 0:
-                                key = "{}".format(row[0])
-                                # append data with select columns
-                                nb = float(row[1])
-                                score = float(row[3]) * nb
-                                table[key].append((nb, score))
-                    print("finished to extract the id, allele nb and score from {}/{}".format(data_dir, i))
-                else:
-                    print("{}/{} not found. Skip".format(data_dir, i))
+    # def build_prs(self, vcf_input, output_name, qc_clump_snplist_foldername, memory, clump_kb, clump_p1, clump_r2, symbol='.', columns='1 2 3', plink_modifier='no-mean-imputation'):
+    #     # Create a C+T tag
+    #     clump_conditions = "{}_{}_{}".format(clump_kb, clump_p1, clump_r2)
 
-        result = ['id\tALLELE_CT\tSCORE_SUM']
-        # take the value from dictionary
-        for key, value in table.items():
-            unzip_value = list(zip(*value))
-            allele_ct = sum(list(unzip_value[0]))
-            score_sum = sum(list(unzip_value[1]))
-            result.append("{}\t{}\t{}".format(key, allele_ct, score_sum))
-        combined_prs = '\n'.join(result)
+    #     # Check the folder exists or not, if not create the folder
+    #     if os.path.exists("{}/{}_{}".format(self.prs_dir, output_name, clump_conditions)):
+    #         print("{}/{}_{} exists".format(self.prs_dir, output_name, clump_conditions))
+    #         pass
+    #     else:
+    #         print("{}/{}_{} not exists, going to create one".format(self.prs_dir, output_name, clump_conditions))
+    #         os.mkdir("{}/{}_{}".format(self.prs_dir, output_name, clump_conditions))
 
-        with open("{}/{}_{}_combined.sscore".format(self.prs_dir, filename, clump_conditions), 'w') as fout:
-            fout.write(combined_prs)
-        # call("rm -rf {}/{}_{}".format(self.prs_dir, filename, clump_conditions), shell=True)
-        print('Combined all the sscore file. Original sscore files deleted')
+    #     visited = set()
+    #     for nb in range(1, 23):
+    #         chrnb = "chr{}".format(nb)
+    #         for vcf_file in os.listdir(vcf_input):
+    #             # Define the input files (vcf and qc files)
+    #             if vcf_file.endswith('.vcf.gz') and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and "{}{}".format(chrnb, symbol) in vcf_file:
+    #                 qc_file = "{}/{}_{}/{}_{}_{}.qc_clump_snpslist.csv".format(self.qc_clump_snpslist_dir,
+    #                                                                            qc_clump_snplist_foldername, clump_conditions,
+    #                                                                            chrnb, qc_clump_snplist_foldername, clump_conditions)
+    #                 if os.path.exists(qc_file) and "{}".format(qc_file) not in visited:
+    #                     os.system("plink2 --vcf {}/{} dosage=DS --score {} {} '{}' --memory {} --out {}/{}_{}/{}_{}_{}".format(
+    #                                                                             vcf_input, vcf_file,
+    #                                                                             qc_file, columns, plink_modifier,
+    #                                                                             memory,
+    #                                                                             self.prs_dir,
+    #                                                                             output_name, clump_conditions,
+    #                                                                             chrnb, output_name, clump_conditions))
+    #                     print("{}_{}_{}.sscore completed!".format(chrnb, output_name, clump_conditions))
+    #                 else:
+    #                     print("{} not found. skip".format(qc_file))
+    #                 visited.add("{}".format(qc_file))
+    #     print("ALL work are complete!")
+
+    # def combine_prs(self, filename, clump_kb, clump_p1, clump_r2):
+    #     # Create a C+T tag
+    #     clump_conditions = "{}_{}_{}".format(clump_kb, clump_p1, clump_r2)
+    #     data_dir = "{}/{}_{}".format(self.prs_dir,filename, clump_conditions)
+    #     table = defaultdict(list)
+
+    #     for i in os.listdir(data_dir):
+    #         if i.endswith(".sscore"):
+    #             if os.path.exists("{}/{}".format(data_dir, i)):
+    #                 print("start to extract the id, allele nb and score from {}/{}".format(data_dir, i))
+    #                 with open("{}/{}".format(data_dir, i), 'r') as sscorein:
+    #                     for index, rows in enumerate(sscorein.readlines()):
+    #                         # use split to separate each row, and access the data by using row[0], row[1]...
+    #                         row = rows.split()
+    #                         # skip the header
+    #                         if index > 0:
+    #                             key = "{}".format(row[0])
+    #                             # append data with select columns
+    #                             nb = float(row[1])
+    #                             score = float(row[3]) * nb
+    #                             table[key].append((nb, score))
+    #                 print("finished to extract the id, allele nb and score from {}/{}".format(data_dir, i))
+    #             else:
+    #                 print("{}/{} not found. Skip".format(data_dir, i))
+
+    #     result = ['id\tALLELE_CT\tSCORE_SUM']
+    #     # take the value from dictionary
+    #     for key, value in table.items():
+    #         unzip_value = list(zip(*value))
+    #         allele_ct = sum(list(unzip_value[0]))
+    #         score_sum = sum(list(unzip_value[1]))
+    #         result.append("{}\t{}\t{}".format(key, allele_ct, score_sum))
+    #     combined_prs = '\n'.join(result)
+
+    #     with open("{}/{}_{}_combined.sscore".format(self.prs_dir, filename, clump_conditions), 'w') as fout:
+    #         fout.write(combined_prs)
+    #     # call("rm -rf {}/{}_{}".format(self.prs_dir, filename, clump_conditions), shell=True)
+    #     print('Combined all the sscore file. Original sscore files deleted')
 
     # Calculate the PRS statistical results and output the statistics summary
     def prs_statistics(self, score_file, pheno_file, output_name, data_set_name, prs_stats_R, r_command, clump_kb, clump_p1, clump_r2):
