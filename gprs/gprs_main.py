@@ -29,6 +29,7 @@ class GPRS(object):
         self.qc_dir = '{}/{}'.format(self.result_dir, 'qc')
         self.snplists_dir = '{}/{}'.format(self.result_dir, 'snplists')
         self.qc_clump_snpslist_dir = '{}/{}'.format(self.plink_dir, 'qc_and_clump_snpslist')
+        self.ldpred2_dir = '{}/{}'.format(self.result_dir, 'ldpred2')
         self.setup_dir()
 
     def setup_dir(self):  # The setup_dir function is automatically create 10 folders
@@ -43,6 +44,7 @@ class GPRS(object):
         self.create_stat_dir()
         self.create_pop_dir()
         self.create_random_draw_sample_dir()
+        self.create_ldpred2_dir()
 
     def create_result_dir(self):  # A function to create result folder
         if not os.path.exists(self.result_dir):
@@ -87,6 +89,10 @@ class GPRS(object):
     def create_random_draw_sample_dir(self):
         if not os.path.exists(self.random_draw_sample_dir):
             os.mkdir(self.random_draw_sample_dir)
+
+    def create_ldpred2_dir(self):
+        if not os.path.exists(self.ldpred2_dir):
+            os.mkdir(self.ldpred2_dir)
 
     # Using plink to generate bfiles fam/bim/bed.
     def generate_plink_bfiles(self, snplist_name, output_name, symbol='.', extra_commands=" "):
@@ -263,6 +269,17 @@ class GPRS(object):
                 else:
                     print("{} not found skip".format(clump_snp_file))
         print("All jobs are completed")
+
+    def ldpred2_train(self, bfile, sumstat, output_dir, h2='', ldref='', ldmatrix='./tmp-data/LD_matrix'):
+        command="Rscript --vanilla ./gprs/ldpred2.R --train {} --sumstat {} --output_dir {}/{}".format(bfile, sumstat,self.ldpred2_dir, output_dir)                                                                                        
+        if len(ldref) > 0 :
+            command += " --LDref {}".format(ldref)
+        if ldmatrix != './tmp-data/LD_matrix':
+            command += " --LDmatrix {}".format(ldmatrix)
+        if len(h2) > 0 :
+            command += " --h2 {}".format(h2)
+
+        call(command, shell=True)
 
     #make beta list for multiple_prs function.
     def beta_list(self, beta_dirs, out):
