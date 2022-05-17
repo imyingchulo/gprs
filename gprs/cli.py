@@ -219,6 +219,17 @@ def subset_vcf_w_random_sample(fam_dir, fam_filename, samplesize, vcf_input, sym
                                     vcf_input=vcf_input,
                                     symbol=symbol)
 
+@click.command()
+@click.option('--fam_dir', metavar='<str>', required=True, help='the path to .fam')
+@click.option('--fam_filename', metavar='<str>', required=True, help='name of fam file(without chr number)')
+@click.option('--samplesize', metavar='<int>', required=True, help='number of subset samples')
+@click.option('--tag', metavar='<str>', required=True, help='extract tag for output file name, i.e. LD_preference, training_individuals' )
+def random_draw_samples_from_fam(fam_dir, fam_filename, samplesize, tag):
+    gprs = GPRS()
+    gprs.random_draw_samples_from_fam(fam_dir=fam_dir,
+                                    fam_filename=fam_filename,
+                                    samplesize=samplesize,tag=tag)
+
 # main.add_command( test )
 main.add_command( build_prs )
 main.add_command( clump )
@@ -233,4 +244,4 @@ main.add_command( select_clump_snps )
 main.add_command( transfer_atcg )
 main.add_command( subset_vcf_w_random_sample )
 main.add_command( subset_pop )
-
+main.add_command( random_draw_samples_from_fam )

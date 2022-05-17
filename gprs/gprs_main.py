@@ -431,10 +431,10 @@ class GPRS(object):
                 lines = fin.readlines()
                 for index, cols in enumerate(lines):
                     col = cols.split(" ")
-                    list.append("{}_{}".format(col[0], col[1]))
+                    list.append("{}".format(col[0]))
 
             with open("{}/{}.txt".format(self.random_draw_sample_dir, fam_name), 'w') as fin:
-                random_sample = random.sample(list, samplesize)
+                random_sample = random.sample(list, int(samplesize))
                 final_list = '\n'.join(random_sample)
                 fin.write(final_list)
                 print("random sample list created {}.txt".format(fam_name))
@@ -479,3 +479,47 @@ class GPRS(object):
                     sample_name = j.split(".txt")[0]
                     print("vcf input:{} sample input:{}".format(vcfinput, sample_input))
                     build_new_vcf()
+
+    def random_draw_samples_from_fam(self, fam_dir, fam_filename, samplesize, tag):
+        list =[]
+        def process_data():
+            print("start to subset the samples")
+            with open(fam_input, 'r') as fin:
+                lines = fin.readlines()
+                for index, cols in enumerate(lines):
+                    col = cols.split(" ")
+                    list.append("{}".format(col[0]))
+
+            with open("{}/{}.txt".format(self.random_draw_sample_dir, fam_name), 'w') as fin:
+                random_sample = random.sample(list, int(samplesize))
+                final_list = '\n'.join(random_sample)
+                fin.write(final_list)
+                print("random sample list created {}.txt".format(fam_name))
+            fin.close()
+
+        if any("chr1" in file for file in os.listdir(fam_dir)):
+            print("chr1 information found, process to read the file")
+            chrnb = "chr1_"
+            for f in os.listdir(fam_dir):
+                if f.endswith(".fam") and chrnb in f and fam_filename in f:
+                    fam_input = "{}/{}".format(fam_dir, f)
+                    fam_name = "{}_{}".format(f.split(".fam")[0].split("chr1_")[1], tag)
+                    print("input:{}".format(fam_input))
+                    process_data()
+        elif any("chr2" in file for file in os.listdir(fam_dir)):
+            print("chr2 information found, process to read the file")
+            chrnb = "chr2_"
+            for f in os.listdir(fam_dir):
+                if f.endswith(".fam") and chrnb in f and fam_filename in f:
+                    fam_input = "{}/{}".format(fam_dir, f)
+                    fam_name = "{}_{}".format(f.split(".fam")[0].split("chr2_")[1], tag)
+                    print("input:{}".format(fam_input))
+                    process_data()
+        else:
+            print("chr information not found, read file without chromosomes")
+            for f in os.listdir(fam_dir):
+                if f.endswith(".fam") and fam_filename in f:
+                    fam_input = "{}/{}".format(fam_dir, f)
+                    fam_name = "{}_{}".format(f.split(".fam")[0], tag)
+                    print("input:{}".format(fam_input))
+                    process_data()
