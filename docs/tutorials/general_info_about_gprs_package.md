@@ -55,3 +55,7 @@ $ pip install -e .
 11. `sub-setpop` (optional)
 
 12. `generate_plink_bfiles_w_individual_info` (optional)
+
+13. `random_draw_samples_from_fam` (optional)
+
+14. `subset_vcf_w_random_sample` (optional)
