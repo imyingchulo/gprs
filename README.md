@@ -120,9 +120,10 @@ if __name__ == '__main__':
     
     geneatlas.subset_vcf_w_random_sample(fam_dir="/home/result/plink/bfiles", fam_filename="2014height", samplesize=50, vcf_input="1000genomes/hg19", symbol=".")
     
+    geneatlas.random_draw_samples_from_fam(fam_dir="/home/result/plink/bfiles",fam_filename="2014height", samplesize= "500", tag="LD_reference") 
 
 ```
-
+ 
 ### 2. Use Commandline Interface
 
 ```shell
@@ -145,6 +146,7 @@ $ gprs transfer_atcg --qc_file_name [str]
 $ gprs subset_pop --input_data [str] --column_name [str] --pop_info [str] --output_name [str]
 $ gprs generate-plink-bfiles-w-individual-info --popfile_name [str] --bfile_name [str] --output_name [str]
 $ gprs subset-vcf-w-random-sample --fam_dir [str] --fam_filename [str] --samplesize [int] --vcf_input [str] --symbol [str/int]
+$ gprs random_draw_samples_from_fam --fam_dir [str] --fam_filename [str] --samplesize [int] --tag [str]
 ```
 
 
