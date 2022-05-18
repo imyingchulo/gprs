@@ -21,7 +21,7 @@ class GPRS(object):
         self.result_dir = Path('{}/{}'.format(os.getcwd(), result_dir)).resolve()
         self.plink_dir = '{}/{}'.format(self.result_dir, 'plink')
         self.pop_dir = '{}/{}'.format(self.result_dir, 'pop')
-        self.random_draw_sample_dir = '{}/{}'.format(self.result_dir, 'random_draw_sample')
+        # self.random_draw_sample_dir = '{}/{}'.format(self.result_dir, 'random_draw_sample')
         self.stat_dir = '{}/{}'.format(self.result_dir, 'stat')
         self.plink_bfiles_dir = '{}/{}'.format(self.plink_dir, 'bfiles')
         self.plink_clump_dir = '{}/{}'.format(self.plink_dir, 'clump')
@@ -42,7 +42,7 @@ class GPRS(object):
         self.create_qc_clump_snpslist_dir()
         self.create_stat_dir()
         self.create_pop_dir()
-        self.create_random_draw_sample_dir()
+        # self.create_random_draw_sample_dir()
 
     def create_result_dir(self):  # A function to create result folder
         if not os.path.exists(self.result_dir):
@@ -84,9 +84,9 @@ class GPRS(object):
         if not os.path.exists(self.qc_clump_snpslist_dir):
             os.mkdir(self.qc_clump_snpslist_dir)
 
-    def create_random_draw_sample_dir(self):
-        if not os.path.exists(self.random_draw_sample_dir):
-            os.mkdir(self.random_draw_sample_dir)
+    # def create_random_draw_sample_dir(self):
+    #     if not os.path.exists(self.random_draw_sample_dir):
+    #         os.mkdir(self.random_draw_sample_dir)
 
     # Using plink to generate bfiles fam/bim/bed.
     def generate_plink_bfiles(self, snplist_name, output_name, symbol='.', extra_commands=" "):
@@ -433,7 +433,7 @@ class GPRS(object):
                     col = cols.split(" ")
                     list.append("{} {}".format(col[0],col[1]))
 
-            with open("{}/{}.txt".format(self.random_draw_sample_dir, fam_name), 'w') as fin:
+            with open("{}/{}.txt".format(self.pop_dir, fam_name), 'w') as fin:
                 random_sample = random.sample(list, int(samplesize))
                 final_list = '\n'.join(random_sample)
                 fin.write(final_list)
@@ -488,9 +488,9 @@ class GPRS(object):
                 lines = fin.readlines()
                 for index, cols in enumerate(lines):
                     col = cols.split(" ")
-                    list.append("{} {}".format(col[0],col[1]))
+                    list.append("{} {}".format(col[0], col[1]))
 
-            with open("{}/{}.txt".format(self.random_draw_sample_dir, fam_name), 'w') as fin:
+            with open("{}/{}.txt".format(self.pop_dir, fam_name), 'w') as fin:
                 random_sample = random.sample(list, int(samplesize))
                 final_list = '\n'.join(random_sample)
                 fin.write(final_list)
