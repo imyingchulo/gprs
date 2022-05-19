@@ -432,7 +432,7 @@ class GPRS(object):
                 lines = fin.readlines()
                 for index, cols in enumerate(lines):
                     col = cols.split(" ")
-                    list.append("{} {}".format(col[0],col[1]))
+                    list.append("{}".format(col[1]))
 
             with open("{}/{}.txt".format(self.pop_dir, fam_name), 'w') as fin:
                 random_sample = random.sample(list, int(samplesize))
