@@ -270,7 +270,7 @@ class GPRS(object):
 
         # Check the folder exists or not, if not create the folder
         if os.path.exists("{}/{}_{}".format(self.prs_dir, output_name, clump_conditions)):
-            print("{}/{}_{} exists".format(self.prs_dir, output_name, clump_conditions))
+            print("{}/{}_{} exists keep processing".format(self.prs_dir, output_name, clump_conditions))
             pass
         else:
             print("{}/{}_{} not exists, going to create one".format(self.prs_dir, output_name, clump_conditions))
@@ -280,7 +280,6 @@ class GPRS(object):
         for nb in range(1, 23):
             chrnb = "chr{}".format(nb)
             for vcf_file in os.listdir(vcf_input):
-                # Define the input files (vcf and qc files)
                 if vcf_file.endswith('.vcf.gz') and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and "{}{}".format(chrnb, symbol) in vcf_file:
                     qc_file = "{}/{}_{}/{}_{}_{}.qc_clump_snpslist.csv".format(self.qc_clump_snpslist_dir,
                                                                                qc_clump_snplist_foldername, clump_conditions,
