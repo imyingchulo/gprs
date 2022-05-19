@@ -176,7 +176,6 @@ def combine_prs_stat(data_set_name,clump_kb,clump_p1,clump_r2):
     gprs.combine_prs_stat( data_set_name=data_set_name,
                            clump_kb=clump_kb,clump_p1=clump_p1,clump_r2=clump_r2)
 
-
 ## Optional function here
 @click.command()
 @click.option('--qc_file_name', metavar='<str>', help='qc_file_name is [output_name] from [chrnb]_[output_name].QC.csv')
@@ -199,11 +198,12 @@ def subset_pop(input_data, pop_info, output_name, column_name):
 @click.command()
 @click.option('--popfile_name', metavar='<str>', required=True, help='the pop file name')
 @click.option('--bfile_name', metavar='<str>', required=True, help='the bfile name')
+@click.option('--plink_command', metavar='<str>', required=True, help='--keep or --exclude')
 @click.option('--output_name', metavar='<str>', help='output name for sub-set population bfile')
-def generate_plink_bfiles_w_individual_info(popfile_name, bfile_name, output_name):
+def generate_plink_bfiles_w_individual_info(popfile_name, bfile_name, output_name, plink_command):
     gprs = GPRS()
     gprs.generate_plink_bfiles_w_individual_info(output_name=output_name, bfile_name=bfile_name,
-                                                 popfile_name=popfile_name)
+                                                 popfile_name=popfile_name, plink_command=plink_command)
 
 @click.command()
 @click.option('--fam_dir', metavar='<str>', required=True, help='the path to .fam')

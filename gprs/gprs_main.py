@@ -398,7 +398,7 @@ class GPRS(object):
         subset_file = file.loc[(file["{}".format(column_name)] == "{}".format(pop_info))]
         subset_file.to_csv("{}".format(output_name), sep='\t', index=False, header=True)
 
-    def generate_plink_bfiles_w_individual_info(self, popfile_name, bfile_name, output_name):
+    def generate_plink_bfiles_w_individual_info(self, popfile_name, bfile_name, plink_command, output_name):
         for nb in range(1, 23):
             chrnb = "chr{}".format(nb)
             for j in os.listdir(self.pop_dir):
@@ -406,8 +406,9 @@ class GPRS(object):
                     for i in os.listdir(self.plink_bfiles_dir):
                         if "{}_{}".format(chrnb, bfile_name) in i:
                             bfile = i.split(".")[0]
-                            os.system("plink --bfile {}/{} --keep {}/{} --make-bed --out {}/{}_{}".format(
+                            os.system("plink --bfile {}/{} {} {}/{} --make-bed --out {}/{}_{}".format(
                                 self.plink_bfiles_dir, bfile,
+                                plink_command,
                                 self.pop_dir, j,
                                 self.plink_bfiles_dir,
                                 chrnb, output_name))
