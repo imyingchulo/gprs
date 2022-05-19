@@ -21,7 +21,7 @@ class GPRS(object):
         self.result_dir = Path('{}/{}'.format(os.getcwd(), result_dir)).resolve()
         self.plink_dir = '{}/{}'.format(self.result_dir, 'plink')
         self.pop_dir = '{}/{}'.format(self.result_dir, 'pop')
-        # self.random_draw_sample_dir = '{}/{}'.format(self.result_dir, 'random_draw_sample')
+        self.random_draw_sample_dir = '{}/{}'.format(self.result_dir, 'random_draw_sample')
         self.stat_dir = '{}/{}'.format(self.result_dir, 'stat')
         self.plink_bfiles_dir = '{}/{}'.format(self.plink_dir, 'bfiles')
         self.plink_clump_dir = '{}/{}'.format(self.plink_dir, 'clump')
@@ -42,7 +42,7 @@ class GPRS(object):
         self.create_qc_clump_snpslist_dir()
         self.create_stat_dir()
         self.create_pop_dir()
-        # self.create_random_draw_sample_dir()
+        self.create_random_draw_sample_dir()
 
     def create_result_dir(self):  # A function to create result folder
         if not os.path.exists(self.result_dir):
@@ -84,9 +84,9 @@ class GPRS(object):
         if not os.path.exists(self.qc_clump_snpslist_dir):
             os.mkdir(self.qc_clump_snpslist_dir)
 
-    # def create_random_draw_sample_dir(self):
-    #     if not os.path.exists(self.random_draw_sample_dir):
-    #         os.mkdir(self.random_draw_sample_dir)
+    def create_random_draw_sample_dir(self):
+        if not os.path.exists(self.random_draw_sample_dir):
+            os.mkdir(self.random_draw_sample_dir)
 
     # Using plink to generate bfiles fam/bim/bed.
     def generate_plink_bfiles(self, snplist_name, output_name, symbol='.', extra_commands=" "):
@@ -474,9 +474,9 @@ class GPRS(object):
             for vcf_file in os.listdir(vcf_input):
                 if vcf_file.endswith('.vcf.gz') and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and "{}{}".format(chrnb, symbol) in vcf_file:
                     vcfinput = "{}/{}".format(vcf_input, vcf_file)
-            for j in os.listdir(self.random_draw_sample_dir):
-                if j.endswith(".txt") and "{}_".format(chrnb) in j:
-                    sample_input = "{}/{}".format(self.random_draw_sample_dir, j)
+            for j in os.listdir(self.pop_dir):
+                if j.endswith(".txt") and "{}_".format(chrnb) in j and "{}".format(fam_filename) in j:
+                    sample_input = "{}/{}".format(self.pop_dir, j)
                     sample_name = j.split(".txt")[0]
                     print("vcf input:{} sample input:{}".format(vcfinput, sample_input))
                     build_new_vcf()
