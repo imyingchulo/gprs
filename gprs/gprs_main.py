@@ -462,7 +462,7 @@ class GPRS(object):
         # use subset file to create a new vcf file
         def build_new_vcf():
             print("start to subset vcf file")
-            call("bcftools view -Oz -S {} {} > {}/subset_{}_{}.vcf.gz".format(sample_input,
+            call("bcftools view -Oz -S {} {} > {}/{}_subset_{}.vcf.gz".format(sample_input,
                                                                     vcfinput,
                                                                     self.random_draw_sample_dir,
                                                                       sample_name, samplesize),shell=True)
