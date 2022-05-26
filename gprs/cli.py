@@ -12,6 +12,34 @@ def main():
 #     print("hello world")
 
 @click.command()
+@click.option('--file/--dir', default=True, help='Whether summary statistics is given as one file, or as a directory with 22 chromosome files with --sumstat')
+@click.option('--sumstat', metavar='<str>', required=True, help='Path to one summary statistic file(default), or a directory with 22 chromosome files (use with --dir flag in this case)')
+@click.option('--comment', metavar='<str>', default='', help='In summary statistic file(s), indicate the text for lines that should not be parsed (for example, "#" for snptest results)')
+@click.option('--symbol', metavar='<str>', default='.', help='When giving summary statistics DIRECTORY, indicate the symbol or text after chromosome number in each file, default = "." ')
+@click.option('--out', metavar='<str>', required=True, help='Output prefix for 22 processed summary statistics, deposited in sumstat folder')
+@click.option('--snpid', metavar='<str>', default=None, help='Column header name for SNP ID in sumstat')
+@click.option('--chr', metavar='<str>', default=None, help='Column header name for CHROMOSOME in sumstat')
+@click.option('--pos', metavar='<str>', default=None, help='Column header name for POSITION in sumstat')
+@click.option('--ea', metavar='<str>', default=None, help='Column header name for EFFECT ALLELE in sumstat')
+@click.option('--nea', metavar='<str>', default=None, help='Column header name for NON-EFFECT ALLELE in sumstat')
+@click.option('--beta', metavar='<str>', default=None, help='Column header name for BETA(EFFECT SIZE) for EFFECT ALLELE in sumstat')
+@click.option('--se', metavar='<str>', default=None, help='Column header name for STANDARD ERROR in sumstat')
+@click.option('--pval', metavar='<str>', default=None, help='Column header name for P-VALUE in sumstat')
+@click.option('--neff', metavar='<str>', default=None, help='Column header name for EFFECTIVE SAMPLE SIZE in sumstat')
+@click.option('--total', metavar='<int>', default=0, help='Total sample size for continuous trait; DO NOT use with --Neff or --case_control')
+@click.option('--case_control', metavar='<int>', nargs=2, default=(0,0), help='Case and control sample size for binary trait, separated by a space (order does not matter); DO NOT use with --Neff or --total')
+
+def prepare_sumstat( file, sumstat, comment, symbol, out, snpid, chr, pos, ea, nea,  beta, se, pval, neff, total, case_control ):
+   gprs = GPRS()
+   gprs.prepare_sumstat(file=file,
+                        sumstat=sumstat,
+                        comment=comment,
+                        out=out,
+                        symbol=symbol,
+                        snpid=snpid, chr=chr, pos=pos, ea=ea, nea=nea, beta=beta, se=se, pval=pval, neff=neff,
+                        total=total, case_control=case_control)
+
+@click.command()
 @click.option( '--ref', metavar='<str>', help='path to population reference panel' )
 @click.option( '--data_dir', metavar='<str>', required=True, help='The directory of GeneAtlas .csv files (all chromosomes)' )
 @click.option( '--result_dir', metavar='<str>', default='./result', help='path to output folder; default:[./result]' )
@@ -99,6 +127,22 @@ def clump(qc_file_name, plink_bfile_name, clump_kb, clump_p1, clump_p2, output_n
                 clump_r2=clump_r2,
                 clump_field=clump_field,
                 clump_snp_field=clump_snp_field )
+
+@click.command()
+@click.option( '--bfile', metavar='<str>', required=True, help='prefix to training PLINK files including full path')
+@click.option( '--LDref', metavar='<str>', default='', help='path to directory containing external LD reference PLINK files')
+@click.option( '--LDmatrix', metavar='<str>', default='./tmp-data/LD_matrix', help='Path to LD matrix directory')
+@click.option( '--sumstat', metavar='<str>', required=True, help='prefix to GWAS summary statistics including full path')
+@click.option( '--output_dir', metavar='<str>', required=True, help='directory name to output beta files')
+@click.option( '--h2', metavar='<float>', default='', help='heritability estimate')
+def ldpred2_train(bfile, ldref, ldmatrix, sumstat, output_dir, h2):
+    gprs=GPRS()
+    gprs.ldpred2_train(bfile=bfile, 
+                        ldref=ldref,
+                        ldmatrix=ldmatrix,
+                        sumstat=sumstat,
+                        output_dir=output_dir,
+                        h2=h2)
 
 @click.command()
 @click.option( '--qc_file_name', metavar='<str>', required=True, help='qc_file_name is [output_name] from [chrnb]_[output_name].QC.csv' )
@@ -260,7 +304,9 @@ main.add_command( geneatlas_filter_data )
 main.add_command( generate_plink_bfiles )
 main.add_command( generate_plink_bfiles_w_individual_info )
 main.add_command( gwas_filter_data )
-main.add_command( multiple_prs)
+main.add_command( ldpred2_train )
+main.add_command( multiple_prs )
+main.add_command( prepare_sumstat )
 main.add_command( prs_statistics )
 main.add_command( select_clump_snps )
 main.add_command( transfer_atcg )

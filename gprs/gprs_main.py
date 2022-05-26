@@ -1,3 +1,4 @@
+import sys
 import os
 import glob
 import random
@@ -6,6 +7,8 @@ from pathlib import Path
 from subprocess import call
 from timeit import default_timer as timer
 from collections import defaultdict
+
+from sklearn.utils import column_or_1d
 
 
 class GPRS(object):
@@ -19,6 +22,7 @@ class GPRS(object):
         self.ref = ref
         self.data_dir = data_dir
         self.result_dir = Path('{}/{}'.format(os.getcwd(), result_dir)).resolve()
+        self.sumstat_dir = '{}/{}'.format(self.result_dir, 'sumstat')
         self.plink_dir = '{}/{}'.format(self.result_dir, 'plink')
         self.pop_dir = '{}/{}'.format(self.result_dir, 'pop')
         self.random_draw_sample_dir = '{}/{}'.format(self.result_dir, 'random_draw_sample')
@@ -34,6 +38,7 @@ class GPRS(object):
 
     def setup_dir(self):  # The setup_dir function is automatically create 10 folders
         self.create_result_dir()
+        self.create_sumstat_dir()
         self.create_plink_dir()
         self.create_plink_bfiles_dir()
         self.create_plink_clump_dir()
@@ -49,6 +54,10 @@ class GPRS(object):
     def create_result_dir(self):  # A function to create result folder
         if not os.path.exists(self.result_dir):
             os.mkdir(self.result_dir)
+
+    def create_sumstat_dir(self): # A function to create sumstat folder
+        if not os.path.exists(self.sumstat_dir):
+            os.mkdir(self.sumstat_dir)
 
     def create_plink_dir(self):  # A function to create plink folder
         if not os.path.exists(self.plink_dir):
@@ -93,6 +102,104 @@ class GPRS(object):
     def create_ldpred2_dir(self):
         if not os.path.exists(self.ldpred2_dir):
             os.mkdir(self.ldpred2_dir)
+
+    # Unify sumstat format
+    def prepare_sumstat(self, file, sumstat, out, symbol='.', comment='',
+                        snpid=None, chr=None, pos=None, ea=None, nea=None, beta=None, se=None, pval=None, neff=None,
+                        total=0, case_control=(0,0)):
+        # dict for column name mapping        
+        columns = {
+            'SNPID': snpid,
+            'CHR': chr ,
+            'POS': pos,
+            'Effect_Allele': ea,
+            'NonEffect_Allele': nea,
+            'Beta': beta,
+            'SE': se,
+            'Pvalue': pval,
+            'N_eff': neff
+        }       
+        col_exist = {value: key for (key, value) in columns.items() if value != None }
+        
+        # function to unify format
+        def unify(df, columns, neff, total, case_control):
+            #fill in N_eff if given as number
+            if neff == None:
+                if total != 0:
+                    print('Inserting {} as effective sample size. Make sure it is TOTAL Sample size if you are using continuous trait, or EFFECTIVE Sample size if binary trait\n'.format(total))
+                    df['N_eff'] = total
+                elif case_control != (0,0):
+                    cs, ct = case_control 
+                    print('\nUsing {} and {} to calculate effective sample size. Make sure you are using BINARY trait'.format(cs,ct))
+                    print('Formula: 4 / (1 / case + 1 / control)\n')
+                    df['N_eff'] = int(4/(1/cs + 1/ct))
+            # fill in missing column as NA
+            for col in columns.keys():
+                if col not in list(df):
+                    print('WARNING: Header for {} not provided (will be recorded as NA)'.format(col))
+                    df[col]='NA'                
+
+            # filter, re-order, unify dtypes columns
+            df = df[['SNPID','CHR','POS','Effect_Allele','NonEffect_Allele','Beta','SE','Pvalue','N_eff' ]]
+            pd.set_option('mode.chained_assignment', None)
+            df[['Effect_Allele','NonEffect_Allele']] = df[['Effect_Allele','NonEffect_Allele']].astype(str).apply(lambda x: x.str.upper())
+            df = df.astype( dtype= {'CHR': int, 'POS': int, 'N_eff': int}, errors='raise')  
+            return df
+        
+        # sumstat given as one file
+        if file:
+            if not os.path.isfile(sumstat):
+                sys.exit('ERROR: {} is not a file. Check help page.\n'.format(sumstat))
+            print('Processing one summary statistics file...')
+            if len(comment) == 0:         
+                df=pd.read_csv(sumstat, delim_whitespace=True)
+            else:
+                df=pd.read_csv(sumstat, delim_whitespace=True, comment=comment)
+            df.rename(columns=col_exist, inplace=True)
+            #chr column missing --> look for it in SNP ID
+            if chr == None:
+                if snpid == None:
+                    sys.exit('ERROR: both chromosome and SNP ID header not provided')
+                else:
+                    print('Looking for chromosome information from SNP ID...Make sure it is in chr:pos:allele1:allele2 format.\n')                    
+                    df[['CHR','POS','A1','A2']] =  df['SNPID'].str.split(pat=':',expand=True)
+                    if sum( df['CHR'].str.contains("chr") ) == len(df):
+                       df['CHR']= df['CHR'].apply(lambda x: x[3:])
+                    elif sum( df['CHR'].str.contains("chr") ) != 0:
+                        print('ERROR: SNP ID format not consistent.\n')
+            df = unify(df, columns, neff, total, case_control)
+            #write into 22 sumstat files
+            for chrnb in range(1,23):
+                outfile="{}/{}_chr{}.csv".format(self.sumstat_dir, out, chrnb)
+                df[df.CHR == chrnb].to_csv(outfile, index=False, sep='\t', header=True)
+
+        #sumstat given as directory  
+        else:
+            if not os.path.isdir(sumstat):
+                sys.exit('Error: {} is not a directory. Check help page.\n'.format(sumstat))
+            print('Directory for summary statistic files provided...')
+            for chrnb in range(1,23):
+                chr_symbol='chr{}{}'.format(chrnb,symbol)
+                for i in os.listdir(sumstat):
+                    if chr_symbol in i:
+                        sumstat_chr=i
+                        if len(comment) == 0:
+                            df = pd.read_csv( "{}/{}".format(sumstat, sumstat_chr), delim_whitespace=True)
+                        else:
+                            df = pd.read_csv( "{}/{}".format(sumstat, sumstat_chr), delim_whitespace=True, comment=comment)                
+                        df.rename(columns=col_exist, inplace=True)
+
+                        #fill in chromosome from filename
+                        if chr == None:
+                            print('WARNING: chromosome header not provided. Looking for it in filename..')
+                            df['CHR']=chrnb
+                        df = unify(df, columns, neff, total, case_control)
+                        print('Processing chromosome {} done\n'.format(chrnb))
+                        outfile="{}/{}_chr{}.csv".format(self.sumstat_dir, out, chrnb)
+                        df[df.CHR == chrnb].to_csv(outfile, index=False, sep='\t', header=True)
+
+        print('\nProcessing Done. 22 summary statistics saved in result/sumstat folder!\n')
+    
 
     # Using plink to generate bfiles fam/bim/bed.
     def generate_plink_bfiles(self, snplist_name, output_name, symbol='.', extra_commands=" "):
