@@ -431,25 +431,28 @@ class GPRS(object):
                 lines = fin.readlines()
                 for index, cols in enumerate(lines):
                     col = cols.split(" ")
-                    list.append("{}".format(col[1]))
+                    list.append("{}\n".format(col[1]))
 
-            with open("{}/{}.txt".format(self.pop_dir, fam_name), 'w') as fin:
+            with open("{}/{}_subset{}.txt".format(self.pop_dir, fam_filename,samplesize), 'w') as fin:
                 random_sample = random.sample(list, int(samplesize))
-                final_list = '\n'.join(random_sample)
+                final_list = ''.join(random_sample)
                 fin.write(final_list)
-                print("random sample list created {}.txt".format(fam_name))
+                print("random sample list created {}.txt".format(fam_filename))
             fin.close()
 
         # get fam input
-        if any("chr" in file for file in os.listdir(fam_dir)):
-            print("chr information found, process to read the file")
-            for nb in range(1, 23):
-                chrnb = "chr{}_".format(nb)
-                for f in os.listdir(fam_dir):
-                    if f.endswith(".fam") and chrnb in f and fam_filename in f:
-                        fam_input = "{}/{}".format(fam_dir, f)
-                        fam_name = f.split(".fam")[0]
-                        random_draw_samples()
+        if any("chr1_" in file for file in os.listdir(fam_dir)):
+            print("chr1 found, process to read the file")
+            for f in os.listdir(fam_dir):
+                if f.endswith(".fam") and "chr1_" in f and fam_filename in f:
+                    fam_input = "{}/{}".format(fam_dir, f)
+                    random_draw_samples()
+        elif any("chr2_" in file for file in os.listdir(fam_dir)):
+            print("chr2 found, process to read the file")
+            for f in os.listdir(fam_dir):
+                if f.endswith(".fam") and "chr2_" in f and fam_filename in f:
+                    fam_input = "{}/{}".format(fam_dir, f)
+                    random_draw_samples()
         else:
             print("chr information not found, read file without chromosomes")
             for f in os.listdir(fam_dir):
@@ -460,24 +463,22 @@ class GPRS(object):
 
         # use subset file to create a new vcf file
         def build_new_vcf():
-            print("start to subset vcf file")
-            call("bcftools view -Oz -S {} {} > {}/{}_subset_{}.vcf.gz".format(sample_input,
-                                                                    vcfinput,
+            print("start to subset {} vcf file".format(vcf))
+            call("bcftools view -Oz -S {} {} > {}/{}_{}_subset_{}.vcf.gz".format(sample_input,
+                                                                    vcf,
                                                                     self.random_draw_sample_dir,
-                                                                      sample_name, samplesize),shell=True)
-            print("finished subset subset_{}_{}.vcf.gz file".format(sample_name, samplesize))
+                                                                    chrnb, fam_filename, samplesize),shell=True)
+            print("{}_{}_subset_{}.vcf.gz file complete".format(chrnb, fam_filename, samplesize))
 
-        vcfinput = ""
+        print("find the vcf and random draw smaple list")
         for nb in range(1, 23):
             chrnb = "chr{}".format(nb)
-            for vcf_file in os.listdir(vcf_input):
-                if vcf_file.endswith('.vcf.gz') and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and "{}{}".format(chrnb, symbol) in vcf_file:
-                    vcfinput = "{}/{}".format(vcf_input, vcf_file)
-            for j in os.listdir(self.pop_dir):
-                if j.endswith(".txt") and "{}_".format(chrnb) in j and "{}".format(fam_filename) in j:
-                    sample_input = "{}/{}".format(self.pop_dir, j)
-                    sample_name = j.split(".txt")[0]
-                    print("vcf input:{} sample input:{}".format(vcfinput, sample_input))
+            for v in os.listdir(vcf_input):
+                if v.endswith('.vcf.gz') and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and "{}{}".format(chrnb, symbol) in v:
+                    vcf = "{}/{}".format(vcf_input, v)
+                    print("vcf input:{}".format(vcf))
+                    sample_input = "{}/{}_subset{}.txt".format(self.pop_dir, fam_filename, samplesize)
+                    print("sample input:{}".format(vcf))
                     build_new_vcf()
 
     def random_draw_samples_from_fam(self, fam_dir, fam_filename, samplesize, tag):
@@ -488,11 +489,11 @@ class GPRS(object):
                 lines = fin.readlines()
                 for index, cols in enumerate(lines):
                     col = cols.split(" ")
-                    list.append("{} {}".format(col[0], col[1]))
+                    list.append("{} {}\n".format(col[0], col[1]))
 
             with open("{}/{}.txt".format(self.pop_dir, fam_name), 'w') as fin:
                 random_sample = random.sample(list, int(samplesize))
-                final_list = '\n'.join(random_sample)
+                final_list = ''.join(random_sample)
                 fin.write(final_list)
                 print("random sample list created {}.txt".format(fam_name))
             fin.close()
@@ -523,3 +524,32 @@ class GPRS(object):
                     fam_name = "{}_{}".format(f.split(".fam")[0], tag)
                     print("input:{}".format(fam_input))
                     process_data()
+
+    def create_new_marker(self, index_of_chr_id, index_of_pos, index_of_allele1, index_of_allele2, index_of_beta, index_of_se, index_of_pvalue, summary_file, output_name):
+        # make snplist with uniq marker
+        uniq_id_snp_list = ['SNPID'"\n"]
+        with open(("{}/{}".format( self.data_dir, summary_file ))) as file:
+            next(file)
+            for index, lines in enumerate(file):
+                line = lines.strip("\n").split("\t")
+                new_line = "chr{}:{}:{}:{}\n".format(line[int(index_of_chr_id)], line[int(index_of_pos)],line[int(index_of_allele1)],line[int(index_of_allele2)])
+                uniq_id_snp_list.append(new_line)
+
+        uniq_id_snp_list_new = ''.join(uniq_id_snp_list)
+        # output dummy bim
+        with open("{}/{}.csv".format(self.snplists_dir, output_name), 'w') as fout:
+            fout.write(uniq_id_snp_list_new)
+
+        # make qc with uniq marker
+        uniq_id_qc = ['SNPID'"\t"'Allele'"\t"'Beta'"\t"'SE'"\t"'Pvalue'"\n"]
+        with open(("{}/{}".format(self.data_dir, summary_file))) as file:
+            next(file)
+            for index, lines in enumerate(file):
+                line = lines.strip("\n").split("\t")
+                new_snp_id = "chr{}:{}:{}:{}".format(line[int(index_of_chr_id)], line[int(index_of_pos)],line[int(index_of_allele1)],line[int(index_of_allele2)])
+                uniq_id_qc.append("{}\t{}\t{}\t{}\t{}\n".format(new_snp_id, line[int(index_of_allele1)], line[int(index_of_beta)], line[int(index_of_se)], line[int(index_of_pvalue)]))
+
+        uniq_id_qc_new = ''.join(uniq_id_qc)
+        # output dummy bim
+        with open("{}/{}.QC.csv".format(self.qc_dir, output_name), 'w') as fout:
+            fout.write(uniq_id_qc_new)

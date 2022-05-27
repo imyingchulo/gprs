@@ -230,6 +230,23 @@ def random_draw_samples_from_fam(fam_dir, fam_filename, samplesize, tag):
                                     fam_filename=fam_filename,
                                     samplesize=samplesize,tag=tag)
 
+@click.command()
+@click.option('--index_of_chr_id', metavar='<int>', required=True, help='index of chr column in summary file')
+@click.option('--index_of_pos', metavar='<int>', required=True, help='index of pos column in summary file')
+@click.option('--index_of_allele1', metavar='<int>', required=True, help='index of REF column in summary file')
+@click.option('--index_of_allele2', metavar='<int>', required=True, help='index of ALT column in summary file' )
+@click.option('--index_of_beta', metavar='<int>', required=True, help='index of beta column in summary file' )
+@click.option('--index_of_se', metavar='<int>', required=True, help='index of se column in summary file' )
+@click.option('--index_of_pvalue', metavar='<int>', required=True, help='index of pvalue column in summary file' )
+@click.option('--summary_file', metavar='<str>', required=True, help='full GWAS summary file name with extension' )
+@click.option('--output_name', metavar='<str>', required=True, help='output name for uniq snplist and qc files' )
+@click.option('--data_dir', metavar='<str>', required=True, help='path to summary data' )
+def create_new_marker(index_of_chr_id,index_of_pos,index_of_allele1, index_of_allele2, summary_file, index_of_beta, index_of_se, index_of_pvalue, output_name, data_dir):
+    gprs = GPRS(data_dir=data_dir)
+    gprs.create_new_marker(index_of_chr_id=index_of_chr_id,
+                           index_of_pos=index_of_pos,index_of_allele1=index_of_allele1,index_of_allele2=index_of_allele2,
+                           summary_file=summary_file,output_name=output_name, index_of_beta=index_of_beta, index_of_se=index_of_se, index_of_pvalue=index_of_pvalue)
+
 # main.add_command( test )
 main.add_command( build_prs )
 main.add_command( clump )
@@ -245,3 +262,4 @@ main.add_command( transfer_atcg )
 main.add_command( subset_vcf_w_random_sample )
 main.add_command( subset_pop )
 main.add_command( random_draw_samples_from_fam )
+main.add_command( create_new_marker )

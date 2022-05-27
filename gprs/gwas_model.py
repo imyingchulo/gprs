@@ -4,7 +4,7 @@ from gprs.gprs_main import GPRS
 import collections
 
 class GwasModel( GPRS ):
-    def filter_data(self, snp_id_header, allele_header, beta_header, se_header, pvalue_header, file_name,output_name, pvalue=1):
+    def filter_data(self, snp_id_header, allele_header, beta_header, se_header, pvalue_header, file_name, output_name, pvalue=1):
         # read colnames
         df = pd.read_csv( "{}/{}".format( self.data_dir, file_name ), delim_whitespace=True )
 
