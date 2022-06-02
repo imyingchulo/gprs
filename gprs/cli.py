@@ -115,6 +115,7 @@ def select_clump_snps(clump_file_name, qc_file_name,output_name,clump_kb,clump_p
 
 @click.command()
 @click.option( '--vcf_input', metavar='<str>', required=True, help='path to vcf files' )
+@click.option( '--vcf_extension', metavar='<str>', required=True, help='vcf file extension' )
 @click.option( '--output_name', metavar='<str>', required=True, help='it is better if the output_name remain the same. output: [chrnb]_[output_name].sscore' )
 @click.option('--qc_clump_snplist_foldername',metavar='<str>', required=True, help='folder name for .qc_clump_snpslist.csv files, i.e. LAT is the name of LAT_250_1e-5_0.5 folder')
 @click.option( '--memory', metavar='<int>', help='number of memory use' )
@@ -124,10 +125,11 @@ def select_clump_snps(clump_file_name, qc_file_name,output_name,clump_kb,clump_p
 @click.option( '--symbol', metavar='<str/int>', required=True,default='.', help='indicate the symbol or text after chrnb in vcf file, default = "." ; i.e. ALL.chr8.vcf.gz, you can put "." or ".vcf.gz"' )
 @click.option( '--columns', metavar='<int>', default='1 2 3', help='a column index indicate the [SNPID] [ALLELE] [BETA] position; column nb starts from 1 ' )
 @click.option( '--plink_modifier', metavar='<str>', default='no-mean-imputation', help='no-mean-imputation as default in here, get more info by searching plink2.0 modifier ' )
-def build_prs(vcf_input, columns, plink_modifier, output_name, symbol,memory,clump_kb,clump_p1,clump_r2,qc_clump_snplist_foldername ):
+def build_prs(vcf_input, vcf_extension, columns, plink_modifier, output_name, symbol,memory,clump_kb,clump_p1,clump_r2,qc_clump_snplist_foldername ):
     gprs = GPRS()
     gprs.build_prs( memory=memory,
                     vcf_input=vcf_input,
+                    vcf_extension=vcf_extension,
                     symbol = symbol,
                     columns=columns,
                     plink_modifier=plink_modifier,
@@ -247,6 +249,18 @@ def create_new_marker(index_of_chr_id,index_of_pos,index_of_allele1, index_of_al
                            index_of_pos=index_of_pos,index_of_allele1=index_of_allele1,index_of_allele2=index_of_allele2,
                            summary_file=summary_file,output_name=output_name, index_of_beta=index_of_beta, index_of_se=index_of_se, index_of_pvalue=index_of_pvalue)
 
+@click.command()
+@click.option( '--data_set_name', metavar='<str>', required=True, help='the name of the data-set i.e. gout_2019_GCST008970' )
+@click.option( '--clump_kb', metavar='<int>', required=True, help='distance(kb) parameter for clumping' )
+@click.option( '--clump_p1', metavar='<float/scientific notation>', required=True, help='P-value for clumping' )
+@click.option( '--clump_r2', metavar='<float>',required=True, help='r2 value for clumping' )
+@click.option('--indv', metavar='<int>', required=True, help='full path to individuals list (individuals keep in sscore)' )
+@click.option('--output_name', metavar='<str>', required=True, help='output name' )
+def filtered_sscore_w_indv(data_set_name, clump_kb, clump_p1, clump_r2, indv, output_name):
+    gprs = GPRS()
+    gprs.filtered_sscore_w_indv(data_set_name=data_set_name, clump_kb=clump_kb,
+                           clump_p1=clump_p1, clump_r2=clump_r2, indv=indv, output_name=output_name)
+
 # main.add_command( test )
 main.add_command( build_prs )
 main.add_command( clump )
@@ -263,3 +277,4 @@ main.add_command( subset_vcf_w_random_sample )
 main.add_command( subset_pop )
 main.add_command( random_draw_samples_from_fam )
 main.add_command( create_new_marker )
+main.add_command( select_indv_sscore )

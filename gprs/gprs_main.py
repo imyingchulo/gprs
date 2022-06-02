@@ -264,7 +264,7 @@ class GPRS(object):
                     print("{} not found skip".format(clump_snp_file))
         print("All jobs are completed")
 
-    def build_prs(self, vcf_input, output_name, qc_clump_snplist_foldername, memory, clump_kb, clump_p1, clump_r2, symbol='.', columns='1 2 3', plink_modifier='no-mean-imputation'):
+    def build_prs(self, vcf_input, vcf_extension, output_name, qc_clump_snplist_foldername, memory, clump_kb, clump_p1, clump_r2, symbol='.', columns='1 2 3', plink_modifier='no-mean-imputation'):
         # Create a C+T tag
         clump_conditions = "{}_{}_{}".format(clump_kb, clump_p1, clump_r2)
 
@@ -280,7 +280,7 @@ class GPRS(object):
         for nb in range(1, 23):
             chrnb = "chr{}".format(nb)
             for vcf_file in os.listdir(vcf_input):
-                if vcf_file.endswith('.vcf.gz') and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and "{}{}".format(chrnb, symbol) in vcf_file:
+                if vcf_file.endswith('{}'.format(vcf_extension)) and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and "{}{}".format(chrnb, symbol) in vcf_file:
                     qc_file = "{}/{}_{}/{}_{}_{}.qc_clump_snpslist.csv".format(self.qc_clump_snpslist_dir,
                                                                                qc_clump_snplist_foldername, clump_conditions,
                                                                                chrnb, qc_clump_snplist_foldername, clump_conditions)
@@ -464,10 +464,13 @@ class GPRS(object):
         # use subset file to create a new vcf file
         def build_new_vcf():
             print("start to subset {} vcf file".format(vcf))
-            call("bcftools view -Oz -S {} {} > {}/{}_{}_subset_{}.vcf.gz".format(sample_input,
-                                                                    vcf,
+            call("bcftools view -S {} {} > {}/{}_{}_subset_{}.vcf.gz".format(sample_input,vcf,
                                                                     self.random_draw_sample_dir,
                                                                     chrnb, fam_filename, samplesize),shell=True)
+            # call("vcftools --gzvcf {} --keep {} --recode --out {}/{}_{}_subset_{}.vcf.gz".format(vcf,
+            #                                                                    sample_input,
+            #                                                                     self.random_draw_sample_dir,
+            #                                                                     chrnb, fam_filename, samplesize), shell=True)
             print("{}_{}_subset_{}.vcf.gz file complete".format(chrnb, fam_filename, samplesize))
 
         print("find the vcf and random draw smaple list")
@@ -553,3 +556,28 @@ class GPRS(object):
         # output dummy bim
         with open("{}/{}.QC.csv".format(self.qc_dir, output_name), 'w') as fout:
             fout.write(uniq_id_qc_new)
+
+    def filtered_sscore_w_indv(self,data_set_name, clump_kb, clump_p1, clump_r2, indv, output_name):
+         tag = "{}_{}_{}".format(clump_kb, clump_p1, clump_r2)
+         sscore_table = {}
+         if os.path.exists("{}/{}_{}_combined.sscore".format(self.prs_dir,data_set_name, tag)):
+             header = ""
+             with open("{}/{}_{}_combined.sscore".format(self.prs_dir,data_set_name, tag)) as sin:
+                 for index, rows in enumerate(sin.readlines()):
+                     row = rows.split()
+                     if index == 0:
+                         header = "{}\t{}\t{}\n".format(row[0], row[1], row[2])
+                     else:
+                         key = "{}".format(row[0])
+                         sscore_table[key] = "{}\t{}\t{}\n".format(row[0], row[1], row[2])
+
+             with open(indv) as indvin:
+                 with open("{}/{}_{}_combined_sb.sscore".format(self.prs_dir,output_name,tag), 'w') as fout:
+                     fout.write(header)
+                     for row in indvin:
+                         key = row.strip()
+                         if key in sscore_table:
+                             fout.write(sscore_table[key])
+         else:
+             print("{}/{}_{}_combined.sscore not found".format(self.prs_dir, data_set_name, tag))
+
