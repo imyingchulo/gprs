@@ -403,7 +403,7 @@ class GPRS(object):
         with open('{}/{}.list'.format(self.prs_dir, out), 'w') as o:
             for x in allmodels.keys():
                 o.write('{}\t{}\n'.format(x, allmodels[x]))
-        print('File {}.list saved!\n'.format(out))
+        print('File {}.list saved in ./result/prs!\n'.format(out))
 
     def multiple_prs(self, vcf_dir, beta_dir_list,
                 slurm_name, slurm_account='chia657_28', slurm_time='12:00:00', memory=10,
