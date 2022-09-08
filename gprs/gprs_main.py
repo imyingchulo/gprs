@@ -146,7 +146,7 @@ class GPRS(object):
             df = df.astype( dtype= {'CHR': int, 'POS': int, 'N_eff': int}, errors='raise')  
             return df
         
-        # sumstat given as one file
+        # if sumstat given as one file
         if file:
             if not os.path.isfile(sumstat):
                 sys.exit('ERROR: {} is not a file. Check help page.\n'.format(sumstat))
@@ -202,41 +202,38 @@ class GPRS(object):
     
 
     # Using plink to generate bfiles fam/bim/bed.
-    def generate_plink_bfiles(self, snplist_name, output_name, symbol='.', extra_commands=" "):
+    def generate_plink_bfiles(self, merge, sumstat, output_name, symbol='.', extra_commands=" "):
         def run_plink_bfiles():
             visited = set()
             if "{}_{}".format(chrnb, output_name)not in visited:
-                print("strat to generate {}_{} bfiles".format(chrnb, output_name))
+                print("start to generate {}_{} bfiles".format(chrnb, output_name))
                 os.system("plink --vcf {} --extract {} {} --make-bed --out {}".format(vcfinput, snp, extra_commands, output))
             print("{}_{} bfile is ready!".format(chrnb, output_name))
             visited.add("{}_{}".format(chrnb, output_name))
 
-        if any("chr" in file and "{}".format(snplist_name) in file for file in os.listdir(self.snplists_dir)):
-            print("chromosome information are found in snplists")
+        if any("chr" in file and "{}".format(sumstat) in file for file in os.listdir(self.sumstat_dir)):
             # Generate chr number (chr1-chr22)
             for nb in range(1, 23):
                 chrnb = "chr{}".format(nb)
-                snp = "{}/{}_{}.csv".format(self.snplists_dir, chrnb, snplist_name)
+                snp = "{}/{}_{}.csv".format(self.sumstat_dir, sumstat, chrnb)
                 output = "{}/{}_{}".format(self.plink_bfiles_dir, chrnb, output_name)
                 for i in os.listdir(self.ref):
                         # The if condition here is to exclude chr X, Y, and MT, and make sure all inputs are consistent
                         # ex: The input should be chr1 snps-list and chr1 vcf reference
                         if i.endswith('.vcf.gz') and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and "{}{}".format(chrnb, symbol) in i:
                             vcfinput = "{}/{}".format(self.ref, i)
-                            print("snplist: {}, output: {}, vcfinput:{}\n start to generate bfiles".format(snp, output, vcfinput))
+                            print("summary statistics: {}, output: {}, vcfinput:{}\n start to generate bfiles".format(snp, output, vcfinput))
                             run_plink_bfiles()
         else:
-            print("chromosome information are NOT found in snplists")
-            snp = "{}/{}.csv".format(self.snplists_dir, snplist_name)
-            for nb in range(1, 23):
-                chrnb = "chr{}".format(nb)
-                output = "{}/{}_{}".format(self.plink_bfiles_dir, chrnb, output_name)
-                for i in os.listdir(self.ref):
-                    if i.endswith('.vcf.gz') and chrnb != "chrX" and chrnb != "chrY" and chrnb != "chrMT" and "{}{}".format(chrnb, symbol) in i:
-                        vcfinput = "{}/{}".format(self.ref, i)
-                        print("snplist: {}, output: {}, vcfinput:{}\n start to generate bfiles".format(snp, output, vcfinput))
-                        run_plink_bfiles()
-        print("all jobs completed!")
+            print("ERROR: chromosome information are NOT found in snplists")
+        if merge:
+            print("Merging 22 plink files...")
+            with open("{}/merge.list".format(self.plink_bfiles_dir),'w') as o:
+                for chrnb in range(2,23):
+                   o.write("{}/chr{}_{}\n".format(self.plink_bfiles_dir, chrnb, output_name))
+            os.system("plink --bfile {}/chr1_{} --merge-list {}/merge.list --make-bed --out {}/merged_{}".format(
+                                    self.plink_bfiles_dir, output_name, self.plink_bfiles_dir, self.plink_bfiles_dir, output_name ))
+            print("Merged file saved!")
 
     def clump(self, qc_file_name, plink_bfile_name, output_name, clump_kb, clump_p1, clump_p2, clump_r2='0.1',
               clump_field='Pvalue', clump_snp_field='SNPID'):

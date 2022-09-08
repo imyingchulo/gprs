@@ -14,7 +14,7 @@ def main():
 @click.command()
 @click.option('--file/--dir', default=True, help='Whether summary statistics is given as one file, or as a directory with 22 chromosome files with --sumstat')
 @click.option('--sumstat', metavar='<str>', required=True, help='Path to one summary statistic file(default), or a directory with 22 chromosome files (use with --dir flag in this case)')
-@click.option('--comment', metavar='<str>', default='', help='In summary statistic file(s), indicate the text for lines that should not be parsed (for example, "#" for snptest results)')
+@click.option('--comment', metavar='<str>', default='', help='In summary statistic file(s), indicate the text for lines that should be skipped (for example, "#" for snptest results)')
 @click.option('--symbol', metavar='<str>', default='.', help='When giving summary statistics DIRECTORY, indicate the symbol or text after chromosome number in each file, default = "." ')
 @click.option('--out', metavar='<str>', required=True, help='Output prefix for 22 processed summary statistics, deposited in sumstat folder')
 @click.option('--snpid', metavar='<str>', default=None, help='Column header name for SNP ID in sumstat')
@@ -97,14 +97,15 @@ def gwas_filter_data(ref, data_dir, result_dir, snp_id_header,
                       file_name=file_name)
 
 @click.command()
+@click.option('--merge/--no-merge', default=True, help='Whether to keep or skip merging step; use with --no-merge flag if not using LDPred2 model')
 @click.option( '--ref', metavar='<str>', required=True, help='path to population reference panel' )
-@click.option( '--snplist_name', metavar='<str>', required=True, help='snplist_name is [output_name] from [chrnb]_[output_name].csv' )
+@click.option( '--sumstat', metavar='<str>', required=True, help='prefix to summary statistics file from perepare_sumstat function.' )
 @click.option( '--output_name', metavar='<str>', required=True, help='it is better if the output name should be the same as snplist file name' )
 @click.option( '--symbol', metavar='<str/int>', required=True, default='.', help='indicate the symbol or text after chrnb in vcf file, default = "." ; i.e. ALL.chr8.vcf.gz, you can put "." or ".vcf.gz"' )
 @click.option( '--extra_commands', metavar='<str>', default=' ', help='a space to add new functions for generate the plink bfiles' )
-def generate_plink_bfiles(ref, snplist_name, output_name, symbol,extra_commands):
+def generate_plink_bfiles( merge, ref, sumstat, output_name, symbol,extra_commands):
     gprs = GPRS( ref=ref)
-    gprs.generate_plink_bfiles( output_name=output_name, symbol = symbol, snplist_name=snplist_name, extra_commands=extra_commands )
+    gprs.generate_plink_bfiles( merge = merge, output_name = output_name, symbol = symbol, sumstat=sumstat, extra_commands=extra_commands )
 
 @click.command()
 @click.option( '--plink_bfile_name', metavar='<str>', required=True, help='plink_bfile_name is [output_name] from [chrnb]_[output_name].bim/bed/fam' )
@@ -130,9 +131,9 @@ def clump(qc_file_name, plink_bfile_name, clump_kb, clump_p1, clump_p2, output_n
 
 @click.command()
 @click.option( '--bfile', metavar='<str>', required=True, help='prefix to training PLINK files including full path')
-@click.option( '--LDref', metavar='<str>', default='', help='path to directory containing external LD reference PLINK files')
+@click.option( '--LDref', metavar='<str>', default='', help='If using external LD reference, provide directory for a PLINK file with all chromsome merged')
 @click.option( '--LDmatrix', metavar='<str>', default='./tmp-data/LD_matrix', help='Path to LD matrix directory')
-@click.option( '--sumstat', metavar='<str>', required=True, help='prefix to GWAS summary statistics including full path')
+@click.option( '--sumstat', metavar='<str>', required=True, help='prefix to GWAS by-chromosome summary statistics including full path')
 @click.option( '--output_dir', metavar='<str>', required=True, help='directory name to output beta files')
 @click.option( '--h2', metavar='<float>', default='', help='heritability estimate')
 def ldpred2_train(bfile, ldref, ldmatrix, sumstat, output_dir, h2):
@@ -166,7 +167,7 @@ def beta_list(beta_dirs, out):
 
 @click.command()
 @click.option( '--vcf_dir', metavar='<str>', required=True, help='path to directories containing vcf files')
-@click.option( '--beta_dir_list', metavar='<str>', required=True, help='list of beta directories created from beta-list function')
+@click.option( '--beta_dir_list', metavar='<str>', required=True, help='list of beta directories created from beta-list function. If not moved, it is in ./result/prs ')
 @click.option( '--slurm_name', metavar='<str>', required=True, help='slurm job name')
 @click.option( '--slurm_account', metavar='<str>', required=True, default='chia657_28', help='slurm job account; default="chia657_28" ')
 @click.option( '--slurm_time', metavar='<str>', required=True, default='12:00:00', help='slurm job time; default="12:00:00" ')
