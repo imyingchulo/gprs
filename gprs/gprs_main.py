@@ -235,12 +235,12 @@ class GPRS(object):
                                     self.plink_bfiles_dir, output_name, self.plink_bfiles_dir, self.plink_bfiles_dir, output_name ))
             print("Merged file saved!")
 
-    def clump(self, qc_file_name, plink_bfile_name, output_name, clump_kb, clump_p1, clump_p2, clump_r2='0.1',
+    def clump(self, sumstat_prefix, plink_bfile_name, output_name, clump_kb, clump_p1, clump_p2, clump_r2='0.1',
               clump_field='Pvalue', clump_snp_field='SNPID'):
         # Create a C+T tag
         output_name_with_conditions = "{}_{}_{}_{}".format(output_name, clump_kb, clump_p1, clump_r2)
 
-        # check the dir exists
+        # check the dir exists for output
         print("check the directory")
         if os.path.exists("{}/{}".format(self.plink_clump_dir, output_name_with_conditions)):
             print("{}/{} exists".format(self.plink_clump_dir, output_name_with_conditions))
@@ -251,41 +251,40 @@ class GPRS(object):
 
         def run_plink():
             visited = set()
-            if qc_files not in visited:
-                print("start {}/{} clumping".format(self.qc_dir, qc_files))
+            if sumstat_files not in visited:
+                print("start {}/{} clumping".format(self.sumstat_dir, sumstat_files))
                 os.system("plink --bfile {} --clump {}/{} --clump-p1 {} --clump-p2 {} --clump-r2 {} --clump-kb {} --clump-field {} --clump-snp-field {} --out {} ".format(
                         plinkinput,
-                        self.qc_dir, qc_files,
-                        clump_p1, clump_p2, clump_r2,
-                        clump_kb, clump_field, clump_snp_field, output))
-            visited.add("{}".format(qc_files))
-            print("finished {}/{} clumping".format(self.qc_dir, qc_files))
+                        self.sumstat_dir, sumstat_files,
+                        clump_p1, clump_p2, clump_r2, clump_kb, 
+                        clump_field, clump_snp_field, output))
+            visited.add("{}".format(sumstat_files))
+            print("finished {}/{} clumping".format(self.sumstat_dir, sumstat_files))
 
-        if any("chr" in file and "{}".format(qc_file_name) in file for file in os.listdir(self.qc_dir)):
-            print("chromosome information are found in .QC.csv")
+        if any("chr" in file and "{}".format(sumstat_prefix) in file for file in os.listdir(self.sumstat_dir)):
             # Generate chr number (chr1-chr22)
             for nb in range(1, 23):
                 chrnb = "chr{}".format(nb)
-                qc_files = "{}_{}.QC.csv".format(chrnb, qc_file_name)
+                sumstat_files = "{}_{}.csv".format(sumstat_prefix, chrnb)
                 output = "{}/{}/{}_{}".format(self.plink_clump_dir, output_name_with_conditions, chrnb, output_name_with_conditions)
                 plinkinput = "{}/{}_{}.bim".format(self.plink_bfiles_dir, chrnb, plink_bfile_name).split(".")[0]
                 if os.path.exists("{}.bim".format(plinkinput)):
-                    print("qc_files:{} \noutput:{} \nplinkinput:{}".format(qc_files, output, plinkinput))
+                    print("sumstat_files:{} \noutput:{} \nplinkinput:{}".format(sumstat_files, output, plinkinput))
                     run_plink()
                 else:
-                    print("{}.bim not found. Move to next file".format(plinkinput))
+                    print("Warning: {}.bim not found. Moving on to next file".format(plinkinput))
         else:
-            print("chromosome information are not found in .QC.csv")
-            for nb in range(1, 23):
-                chrnb = "chr{}".format(nb)
-                qc_files = "{}.QC.csv".format(qc_file_name)
-                output = "{}/{}/{}_{}".format(self.plink_clump_dir, output_name_with_conditions, chrnb, output_name_with_conditions)
-                plinkinput = "{}/{}_{}.bim".format(self.plink_bfiles_dir, chrnb, plink_bfile_name).split(".")[0]
-                if os.path.exists("{}.bim".format(plinkinput)):
-                    print("qc_files:{} \noutput:{} \nplinkinput:{}".format(qc_files, output, plinkinput))
-                    run_plink()
-                else:
-                    print("{}.bim not found. Move to next file".format(plinkinput))
+             print("ERROR: cannot file summary statistic files")
+        #     for nb in range(1, 23):
+        #         chrnb = "chr{}".format(nb)
+        #         qc_files = "{}.QC.csv".format(qc_file_name)
+        #         output = "{}/{}/{}_{}".format(self.plink_clump_dir, output_name_with_conditions, chrnb, output_name_with_conditions)
+        #         plinkinput = "{}/{}_{}.bim".format(self.plink_bfiles_dir, chrnb, plink_bfile_name).split(".")[0]
+        #         if os.path.exists("{}.bim".format(plinkinput)):
+        #             print("qc_files:{} \noutput:{} \nplinkinput:{}".format(qc_files, output, plinkinput))
+        #             run_plink()
+        #         else:
+        #             print("{}.bim not found. Move to next file".format(plinkinput))
         print("All chromosome clumping finished!")
 
     def select_clump_snps(self, qc_file_name, clump_file_name, clumpfolder_name, output_name, clump_kb, clump_p1, clump_r2):
