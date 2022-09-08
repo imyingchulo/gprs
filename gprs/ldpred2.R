@@ -56,9 +56,9 @@ sumstats <- data.table()
 
 #load by chr
 for (chrnb in 1:22){
-  sumstat <- bigreadr::fread2(paste0(opt$sumstat,'_chr',chrnb), data.table=TRUE)
+  sumstat <- bigreadr::fread2(paste0(opt$sumstat,'_chr',chrnb,'.csv'), data.table=TRUE)
   cat(paste0('Processing chr',chrnb,'\n'))
-  names(sumstat) <- c("chr","pos","a1","a0","beta","beta_se","p","n_eff")
+  names(sumstat) <- c("snpid","chr","pos","a1","a0","beta","beta_se","p","n_eff")
   cat(paste0(nrow(sumstat),' SNPs in file... '))
   sumstat <- sumstat[sumstat$pos %in% info$pos, ]
   cat(paste0(nrow(sumstat),' SNPs in hapmap3\n')) 
