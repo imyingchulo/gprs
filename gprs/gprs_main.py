@@ -284,15 +284,18 @@ class GPRS(object):
                     qc_file = "{}/{}_{}/{}_{}_{}.qc_clump_snpslist.csv".format(self.qc_clump_snpslist_dir,
                                                                                qc_clump_snplist_foldername, clump_conditions,
                                                                                chrnb, qc_clump_snplist_foldername, clump_conditions)
-                    if os.path.exists(qc_file) and "{}".format(qc_file) not in visited:
-                        os.system("plink2 --vcf {}/{} dosage=DS --score {} {} '{}' --memory {} --out {}/{}_{}/{}_{}_{}".format(
-                                                                                vcf_input, vcf_file,
-                                                                                qc_file, columns, plink_modifier,
-                                                                                memory,
-                                                                                self.prs_dir,
-                                                                                output_name, clump_conditions,
-                                                                                chrnb, output_name, clump_conditions))
-                        print("{}_{}_{}.sscore completed!".format(chrnb, output_name, clump_conditions))
+                    if os.path.exists("{}/{}_{}/{}_{}_{}.sscore".format(self.prs_dir,output_name, clump_conditions, chrnb, output_name, clump_conditions)):
+                        print("{}/{}_{}/{}_{}_{}.sscore exists, move to next chromosome".format(self.prs_dir,output_name, clump_conditions, chrnb, output_name, clump_conditions))
+
+                    elif os.path.exists(qc_file) and "{}".format(qc_file) not in visited:
+                            os.system("plink2 --vcf {}/{} dosage=DS --score {} {} '{}' --memory {} --out {}/{}_{}/{}_{}_{}".format(
+                                                                                    vcf_input, vcf_file,
+                                                                                    qc_file, columns, plink_modifier,
+                                                                                    memory,
+                                                                                    self.prs_dir,
+                                                                                    output_name, clump_conditions,
+                                                                                    chrnb, output_name, clump_conditions))
+                            print("{}_{}_{}.sscore completed!".format(chrnb, output_name, clump_conditions))
                     else:
                         print("{} not found. skip".format(qc_file))
                     visited.add("{}".format(qc_file))
@@ -338,7 +341,9 @@ class GPRS(object):
         with open("{}/{}_{}_combined.sscore".format(self.prs_dir, filename, clump_conditions), 'w') as fout:
             fout.write(combined_prs)
         # call("rm -rf {}/{}_{}".format(self.prs_dir, filename, clump_conditions), shell=True)
-        print('Combined all the sscore file. Original sscore files deleted')
+        # print('Combined all the sscore file. Original sscore files deleted')
+        print('Combined all the sscore file.')
+
 
     # Calculate the PRS statistical results and output the statistics summary
     def prs_statistics(self, score_file, pheno_file, output_name, data_set_name, prs_stats_R, r_command, clump_kb, clump_p1, clump_r2):
