@@ -32,7 +32,7 @@ class GPRS(object):
         self.prs_dir = '{}/{}'.format(self.result_dir, 'prs')
         self.qc_dir = '{}/{}'.format(self.result_dir, 'qc')
         self.snplists_dir = '{}/{}'.format(self.result_dir, 'snplists')
-        self.qc_clump_snpslist_dir = '{}/{}'.format(self.plink_dir, 'qc_and_clump_snpslist')
+        self.ct_dir = '{}/{}'.format(self.plink_dir, 'ct')
         self.ldpred2_dir = '{}/{}'.format(self.result_dir, 'ldpred2')
         self.setup_dir()
 
@@ -45,7 +45,7 @@ class GPRS(object):
         self.create_prs_dir()
         self.create_qc_dir()
         self.create_snplists_dir()
-        self.create_qc_clump_snpslist_dir()
+        self.create_ct_dir()
         self.create_stat_dir()
         self.create_pop_dir()
         self.create_random_draw_sample_dir()
@@ -91,9 +91,9 @@ class GPRS(object):
         if not os.path.exists(self.snplists_dir):
             os.mkdir(self.snplists_dir)
 
-    def create_qc_clump_snpslist_dir(self):  # A function to create qc'd clump snplists folder
-        if not os.path.exists(self.qc_clump_snpslist_dir):
-            os.mkdir(self.qc_clump_snpslist_dir)
+    def create_ct_dir(self):  # A function to create qc'd clump snplists folder
+        if not os.path.exists(self.ct_dir):
+            os.mkdir(self.ct_dir)
 
     def create_random_draw_sample_dir(self):
         if not os.path.exists(self.random_draw_sample_dir):
@@ -235,7 +235,7 @@ class GPRS(object):
                                     self.plink_bfiles_dir, output_name, self.plink_bfiles_dir, self.plink_bfiles_dir, output_name ))
             print("Merged file saved!")
 
-    def clump(self, sumstat_prefix, plink_bfile_name, output_name, clump_kb, clump_p1, clump_p2, clump_r2='0.1',
+    def clump(self, sumstat, plink_bfile_name, output_name, clump_kb, clump_p1, clump_p2, clump_r2='0.1',
               clump_field='Pvalue', clump_snp_field='SNPID'):
         # Create a C+T tag
         output_name_with_conditions = "{}_{}_{}_{}".format(output_name, clump_kb, clump_p1, clump_r2)
@@ -261,11 +261,11 @@ class GPRS(object):
             visited.add("{}".format(sumstat_files))
             print("finished {}/{} clumping".format(self.sumstat_dir, sumstat_files))
 
-        if any("chr" in file and "{}".format(sumstat_prefix) in file for file in os.listdir(self.sumstat_dir)):
+        if any("chr" in file and "{}".format(sumstat) in file for file in os.listdir(self.sumstat_dir)):
             # Generate chr number (chr1-chr22)
             for nb in range(1, 23):
                 chrnb = "chr{}".format(nb)
-                sumstat_files = "{}_{}.csv".format(sumstat_prefix, chrnb)
+                sumstat_files = "{}_{}.csv".format(sumstat, chrnb)
                 output = "{}/{}/{}_{}".format(self.plink_clump_dir, output_name_with_conditions, chrnb, output_name_with_conditions)
                 plinkinput = "{}/{}_{}.bim".format(self.plink_bfiles_dir, chrnb, plink_bfile_name).split(".")[0]
                 if os.path.exists("{}.bim".format(plinkinput)):
@@ -287,7 +287,7 @@ class GPRS(object):
         #             print("{}.bim not found. Move to next file".format(plinkinput))
         print("All chromosome clumping finished!")
 
-    def select_clump_snps(self, qc_file_name, clump_file_name, clumpfolder_name, output_name, clump_kb, clump_p1, clump_r2):
+    def select_clump_snps(self, sumstat, clump_file_name, clumpfolder_name, output_name, clump_kb, clump_p1, clump_r2):
         # Create a C+T tag
         clump_conditions = "{}_{}_{}".format(clump_kb, clump_p1, clump_r2)
 
@@ -297,10 +297,10 @@ class GPRS(object):
         else:
             os.mkdir("{}/{}_{}".format(self.plink_clump_dir, clumpfolder_name, clump_conditions))
 
-        if os.path.exists("{}/{}_{}".format(self.qc_clump_snpslist_dir, clumpfolder_name, clump_conditions)):
+        if os.path.exists("{}/{}_{}".format(self.ct_dir, clumpfolder_name, clump_conditions)):
             pass
         else:
-            os.mkdir("{}/{}_{}".format(self.qc_clump_snpslist_dir, clumpfolder_name, clump_conditions))
+            os.mkdir("{}/{}_{}".format(self.ct_dir, clumpfolder_name, clump_conditions))
 
         # STEP1: generate [filename]_clumped_snplist.csv
         def generate_clumped_snplist():
@@ -328,19 +328,18 @@ class GPRS(object):
         def generate_qc_snplist():
             visited = set()
             if clump_snp_file not in visited:
-                    print("start extracting {} and {}".format(qc_files, clump_snp_file))
+                    print("start extracting {} and {}".format(sumstat_files, clump_snp_file))
                     clump_snp = pd.read_csv(clump_snp_file, delim_whitespace=True)
                     clump_snp.rename(columns={'SNP': 'SNPID'}, inplace=True)
-                    qc_snp = pd.read_csv("{}".format(qc_files), delim_whitespace=True)
+                    qc_snp = pd.read_csv("{}".format(sumstat_files), delim_whitespace=True)
                     newsnplist = qc_snp[qc_snp["SNPID"].isin(clump_snp["SNPID"])]
-                    newsnplist.to_csv("{}/{}_{}/{}.qc_clump_snpslist.csv".format(self.qc_clump_snpslist_dir, clumpfolder_name, clump_conditions, output), sep=' ', index=False, header=True)
-                    print("{}.qc_clump_snpslist.csv created".format(output))
+                    newsnplist.to_csv("{}/{}_{}/{}.weight".format(self.ct_dir, clumpfolder_name, clump_conditions, output), sep=' ', index=False, header=True)
+                    print("{}.weight created".format(output))
             else:
                 pass
             visited.add("{}".format(clump_snp_file))
 
-        if any("chr" in file and "{}".format(qc_file_name) in file for file in os.listdir(self.qc_dir)):
-            print("chr information are found")
+        if any("chr" in file and "{}".format(sumstat) in file for file in os.listdir(self.sumstat_dir)):
             for nb in range(1, 23):
                 chrnb = "chr{}".format(nb)
                 clump_snp_file = ("{}/{}_{}/{}_{}_{}_clumped_snplist.csv".format(self.plink_clump_dir,
@@ -348,29 +347,29 @@ class GPRS(object):
                                                                                  clump_conditions,
                                                                                  chrnb, clump_file_name,
                                                                                  clump_conditions))
-                qc_files = "{}/{}_{}.QC.csv".format(self.qc_dir, chrnb, qc_file_name)
+                sumstat_files = "{}/{}_{}.csv".format(self.sumstat_dir, sumstat, chrnb)
                 output = "{}_{}_{}".format(chrnb, output_name, clump_conditions)
                 if os.path.exists("{}".format(clump_snp_file)):
-                    print("clump_snp_file:{} \noutput:{} \nqc_files:{}".format(clump_snp_file, output, qc_files))
+                    print("clump_snp_file:{} \noutput:{} \nsumstat_files:{}".format(clump_snp_file, output, sumstat_files))
                     generate_qc_snplist()
                 else:
                     print("{} not found skip".format(clump_snp_file))
         else:
-            print("chr information are not found")
-            for nb in range(1, 23):
-                chrnb = "chr{}".format(nb)
-                clump_snp_file = ("{}/{}_{}/{}_{}_{}_clumped_snplist.csv".format(self.plink_clump_dir,
-                                                                                 clumpfolder_name,
-                                                                                 clump_conditions,
-                                                                                 chrnb, clump_file_name,
-                                                                                 clump_conditions))
-                output = "{}_{}_{}".format(chrnb, output_name, clump_conditions)
-                qc_files = "{}/{}.QC.csv".format(self.qc_dir, qc_file_name)
-                if os.path.exists("{}".format(clump_snp_file)):
-                    print("clump_snp_file:{} \noutput:{} \nqc_files:{}".format(clump_snp_file, output, qc_files))
-                    generate_qc_snplist()
-                else:
-                    print("{} not found skip".format(clump_snp_file))
+            print("ERROR: chr information are not found")
+            # for nb in range(1, 23):
+            #     chrnb = "chr{}".format(nb)
+            #     clump_snp_file = ("{}/{}_{}/{}_{}_{}_clumped_snplist.csv".format(self.plink_clump_dir,
+            #                                                                      clumpfolder_name,
+            #                                                                      clump_conditions,
+            #                                                                      chrnb, clump_file_name,
+            #                                                                      clump_conditions))
+            #     output = "{}_{}_{}".format(chrnb, output_name, clump_conditions)
+            #     qc_files = "{}/{}.QC.csv".format(self.qc_dir, qc_file_name)
+            #     if os.path.exists("{}".format(clump_snp_file)):
+            #         print("clump_snp_file:{} \noutput:{} \nqc_files:{}".format(clump_snp_file, output, qc_files))
+            #         generate_qc_snplist()
+            #     else:
+            #         print("{} not found skip".format(clump_snp_file))
         print("All jobs are completed")
 
     def ldpred2_train(self, bfile, sumstat, output_dir, h2='', ldref='', ldmatrix='./tmp-data/LD_matrix'):
@@ -578,45 +577,27 @@ gprs build-prs --vcf_dir {} --model""".format(
     #     print('Combined all the sscore file. Original sscore files deleted')
 
     # Calculate the PRS statistical results and output the statistics summary
-    def prs_statistics(self, score_file, pheno_file, output_name, data_set_name, prs_stats_R, r_command, clump_kb, clump_p1, clump_r2):
-        filter_condition = "{}_{}_{}".format(clump_kb, clump_p1, clump_r2)
-
-        # Sum the SNPs number from .qc_clump_snpslist.csv file
-        lines = []
-        for i in range(1, 23):
-            file = "{}/{}_{}/chr{}_{}_{}.qc_clump_snpslist.csv".format(self.qc_clump_snpslist_dir,
-                                                                           data_set_name, filter_condition, i,
-                                                                           data_set_name, filter_condition)
-            if os.path.exists("{}".format(file)):
-                print("sum th SNPs from {}".format(file))
-                df = pd.read_csv("{}".format(file))
-                index = df.index
-                number_of_rows = len(index)
-                lines.append(number_of_rows)
-                print("{} SNPs nb: {}".format(file, number_of_rows))
-            else:
-                print("{} not found. Skip.".format(file))
-
+    def prs_statistics(self, score_file, pheno_file, model_name, binary, pop_prev, plotroc, r_command):
         if os.path.exists(score_file):
-            # The R script is written by Soyoung Jeon
-            # USAGE Rscript --vanilla prs_stats_quantitative_phenotype.R [score file] [pheno file] [target pop for OR] [ref pop for OR] [graph pdf name]
-            call("{0} --vanilla {1} {2} {3} {4} {5} {6} {8}/{7}".format(r_command, prs_stats_R, score_file, pheno_file,
-                                                                        data_set_name, filter_condition, sum(lines),
-                                                                        output_name, self.stat_dir), shell=True)
-
-            # Read the statistics result and reformat it
-            # Reformat: separator = tab, change float into scientific notation
-            stat_data = pd.read_csv("{}/{}_{}_stat.txt".format(self.stat_dir, output_name, filter_condition))
-            if os.path.exists("{}/{}_{}_stat.txt".format(self.stat_dir, output_name, filter_condition)):
-                stat_data.to_csv("{}/{}_{}_stat.txt".format(self.stat_dir, output_name, filter_condition),
-                    index=False,
-                    header=True,
-                    sep='\t',
-                    float_format='%.2E')
+            if binary:
+                family = 'binary'
             else:
-                print("{}/{}_{}_stat.txt Not Found".format(self.stat_dir, output_name, filter_condition))
+                family = 'quantitative'
+            
+            if plotroc:
+                plotroc = 'plotroc'
+            else:
+                plotroc = 'no_plot'
+            # The R script is written by Soyoung Jeon
+            print("{0} --vanilla ./gprs/prs_stat.R {1} {2} {3} {4} {5} {6} {7}/{1}".format(r_command, model_name, score_file, pheno_file,
+                                                                            family, pop_prev, plotroc, 
+                                                                            self.stat_dir))
+            call("{0} --vanilla ./gprs/prs_stat.R {1} {2} {3} {4} {5} {6} {7}/{1}".format(r_command, model_name, score_file, pheno_file,
+                                                                            family, pop_prev, plotroc, 
+                                                                            self.stat_dir), shell=True)
         else:
             print("{} not found. Please check the sscore again".format(score_file))
+
 
     # In combine_prs_stat function is to combine PRS statistical results as one file
     def combine_prs_stat(self, data_set_name, clump_kb, clump_p1, clump_r2):

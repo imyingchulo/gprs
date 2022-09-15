@@ -28,7 +28,6 @@ def main():
 @click.option('--neff', metavar='<str>', default=None, help='Column header name for EFFECTIVE SAMPLE SIZE in sumstat')
 @click.option('--total', metavar='<int>', default=0, help='Total sample size for continuous trait; DO NOT use with --Neff or --case_control')
 @click.option('--case_control', metavar='<int>', nargs=2, default=(0,0), help='Case and control sample size for binary trait, separated by a space (order does not matter); DO NOT use with --Neff or --total')
-
 def prepare_sumstat( file, sumstat, comment, symbol, out, snpid, chr, pos, ea, nea,  beta, se, pval, neff, total, case_control ):
    gprs = GPRS()
    gprs.prepare_sumstat(file=file,
@@ -115,11 +114,11 @@ def generate_plink_bfiles( merge, ref, sumstat, output_name, symbol,extra_comman
 @click.option( '--clump_p2', metavar='<float/scientific notation>', required=True, help='should equals to p1 reduce the snps' )
 @click.option( '--clump_r2', metavar='<float>', default=0.1, help='r2 value for clumping, default = 0.1' )
 @click.option( '--clump_field', metavar='<str>', default='Pvalue', help='P-value column name, default = Pvalue' )
-@click.option( '--qc_file_name', metavar='<str>', required=True, help='qc_file_name is [output_name] from [chrnb]_[output_name].QC.csv' )
+@click.option( '--sumstat', metavar='<str>', required=True, help='[output_name] from [output_name]_[chrnb].csv in sumstat directory' )
 @click.option( '--clump_snp_field', metavar='<str>', default='SNPID', help='SNP ID column name, default = SNPID' )
-def clump(qc_file_name, plink_bfile_name, clump_kb, clump_p1, clump_p2, output_name, clump_r2, clump_field, clump_snp_field):
+def clump(sumstat, plink_bfile_name, clump_kb, clump_p1, clump_p2, output_name, clump_r2, clump_field, clump_snp_field):
     gprs = GPRS()
-    gprs.clump( qc_file_name=qc_file_name,
+    gprs.clump( sumstat=sumstat,
                 plink_bfile_name=plink_bfile_name,
                 clump_kb=clump_kb,
                 clump_p1=clump_p1,
@@ -128,6 +127,18 @@ def clump(qc_file_name, plink_bfile_name, clump_kb, clump_p1, clump_p2, output_n
                 clump_r2=clump_r2,
                 clump_field=clump_field,
                 clump_snp_field=clump_snp_field )
+@click.command()
+@click.option( '--sumstat', metavar='<str>', required=True, help='[output_name] from [output_name]_[chrnb].csv in sumstat directory' )
+@click.option( '--clump_file_name', metavar='<str>', required=True, help='clump_file_name is [output_name] from [chrnb]_[output_name].clump' )
+@click.option( '--output_name', metavar='<str>', required=True, help='it is better if the output_name remain the same. output: [chrnb]_[output_name]_clumped_snplist.csv' )
+@click.option( '--clump_kb', metavar='<int>', required=True, help='distance(kb) parameter for clumping' )
+@click.option( '--clump_p1', metavar='<float/scientific notation>', required=True, help='first set of P-value for clumping' )
+@click.option( '--clump_r2', metavar='<float>', required=True, help='r2 value for clumping' )
+@click.option('--clumpfolder_name',metavar='<str>', required=True, help='folder name for .clump files')
+def select_clump_snps(clump_file_name, sumstat,output_name,clump_kb,clump_p1,clump_r2, clumpfolder_name):
+    gprs = GPRS()
+    gprs.select_clump_snps( sumstat=sumstat, clump_file_name=clump_file_name, output_name=output_name,
+                            clump_kb=clump_kb,clump_p1=clump_p1,clump_r2=clump_r2,clumpfolder_name=clumpfolder_name)
 
 @click.command()
 @click.option( '--bfile', metavar='<str>', required=True, help='prefix to training PLINK files including full path')
@@ -145,18 +156,6 @@ def ldpred2_train(bfile, ldref, ldmatrix, sumstat, output_dir, h2):
                         output_dir=output_dir,
                         h2=h2)
 
-@click.command()
-@click.option( '--qc_file_name', metavar='<str>', required=True, help='qc_file_name is [output_name] from [chrnb]_[output_name].QC.csv' )
-@click.option( '--clump_file_name', metavar='<str>', required=True, help='clump_file_name is [output_name] from [chrnb]_[output_name].clump' )
-@click.option( '--output_name', metavar='<str>', required=True, help='it is better if the output_name remain the same. output: [chrnb]_[output_name]_clumped_snplist.csv' )
-@click.option( '--clump_kb', metavar='<int>', required=True, help='distance(kb) parameter for clumping' )
-@click.option( '--clump_p1', metavar='<float/scientific notation>', required=True, help='first set of P-value for clumping' )
-@click.option( '--clump_r2', metavar='<float>', required=True, help='r2 value for clumping' )
-@click.option('--clumpfolder_name',metavar='<str>', required=True, help='folder name for .clump files')
-def select_clump_snps(clump_file_name, qc_file_name,output_name,clump_kb,clump_p1,clump_r2, clumpfolder_name):
-    gprs = GPRS()
-    gprs.select_clump_snps( qc_file_name=qc_file_name, clump_file_name=clump_file_name, output_name=output_name,
-                            clump_kb=clump_kb,clump_p1=clump_p1,clump_r2=clump_r2,clumpfolder_name=clumpfolder_name)
 
 @click.command()
 @click.option( '--beta_dirs', metavar='<str>', required=True, help='list of beta directories to compute PRS with, separated by space')
@@ -225,22 +224,18 @@ def combine_prs(filename,clump_kb,clump_p1,clump_r2):
 @click.command()
 @click.option( '--score_file', metavar='<str>', required=True, help='the absolute path to combined .sscore file')
 @click.option( '--pheno_file', metavar='<str>', required=True, help='the absolute path to pheno file')
-@click.option( '--output_name', metavar='<str>', required=True, help='the output name')
-@click.option( '--data_set_name', metavar='<str>', required=True, help='the name of the data-set i.e. gout_2019_GCST008970 ')
-@click.option( '--prs_stats_R', metavar='<str>', required=True, help='the absolute path to "prs_stats_quantitative_phenotype.R"')
+@click.option( '--model_name', metavar='<str>', required=True, help='the model name to be used for output')
 @click.option( '--r_command', metavar='<str>', required=True, help='use "which R" in linux, and copy the path after --r_command')
-@click.option( '--clump_kb', metavar='<int>', required=True, help='distance(kb) parameter for clumping' )
-@click.option( '--clump_p1', metavar='<float/scientific notation>', required=True, help='first set of P-value for clumping' )
-@click.option( '--clump_r2', metavar='<float>', default=0.1, help='r2 value for clumping, default = 0.1' )
-def prs_statistics(score_file, pheno_file, output_name, data_set_name, prs_stats_R, r_command,clump_kb,clump_p1,clump_r2):
+@click.option('--binary/--quantitative', default=False, help='whether phenotype is binary or quantitative; default: --quantitative')
+@click.option( '--pop_prev', metavar='<str>', default='NA', help='population prevalence for binary trait. Required for binary trait but leave it blank or enter NA for quantitative trait')
+@click.option( '--plotroc/--no_plot', metavar='<str>', default=False, help='whether to plot ROC curve for binary trait. Leave it blank for --no_plot for quantitative trait')
+def prs_statistics(score_file, pheno_file, model_name, r_command, binary, pop_prev, plotroc):
     gprs = GPRS()
     gprs.prs_statistics( score_file=score_file,
                          pheno_file=pheno_file,
-                         output_name=output_name,
-                         data_set_name=data_set_name,
-                         prs_stats_R=prs_stats_R,
+                         model_name=model_name,
                          r_command=r_command,
-                         clump_kb=clump_kb,clump_p1=clump_p1,clump_r2=clump_r2)
+                         binary=binary,pop_prev=pop_prev,plotroc=plotroc)
 
 @click.command()
 @click.option( '--data_set_name', metavar='<str>', required=True, help='the name of the data-set i.e. gout_2019_GCST008970' )
