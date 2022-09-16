@@ -30,8 +30,6 @@ class GPRS(object):
         self.plink_bfiles_dir = '{}/{}'.format(self.plink_dir, 'bfiles')
         self.plink_clump_dir = '{}/{}'.format(self.plink_dir, 'clump')
         self.prs_dir = '{}/{}'.format(self.result_dir, 'prs')
-        self.qc_dir = '{}/{}'.format(self.result_dir, 'qc')
-        self.snplists_dir = '{}/{}'.format(self.result_dir, 'snplists')
         self.ct_dir = '{}/{}'.format(self.plink_dir, 'ct')
         self.ldpred2_dir = '{}/{}'.format(self.result_dir, 'ldpred2')
         self.setup_dir()
@@ -43,11 +41,8 @@ class GPRS(object):
         self.create_plink_bfiles_dir()
         self.create_plink_clump_dir()
         self.create_prs_dir()
-        self.create_qc_dir()
-        self.create_snplists_dir()
         self.create_ct_dir()
         self.create_stat_dir()
-        self.create_pop_dir()
         self.create_random_draw_sample_dir()
         self.create_ldpred2_dir()
 
@@ -62,10 +57,6 @@ class GPRS(object):
     def create_plink_dir(self):  # A function to create plink folder
         if not os.path.exists(self.plink_dir):
             os.mkdir(self.plink_dir)
-
-    def create_pop_dir(self):  # A function to create pop folder
-        if not os.path.exists(self.pop_dir):
-            os.mkdir(self.pop_dir)
 
     def create_stat_dir(self):  # A function to create stat folder
         if not os.path.exists(self.stat_dir):
@@ -82,14 +73,6 @@ class GPRS(object):
     def create_prs_dir(self):  # A function to create prs folder
         if not os.path.exists(self.prs_dir):
             os.mkdir(self.prs_dir)
-
-    def create_qc_dir(self):  # A function to create qc folder
-        if not os.path.exists(self.qc_dir):
-            os.mkdir(self.qc_dir)
-
-    def create_snplists_dir(self):  # A function to create snplists folder
-        if not os.path.exists(self.snplists_dir):
-            os.mkdir(self.snplists_dir)
 
     def create_ct_dir(self):  # A function to create qc'd clump snplists folder
         if not os.path.exists(self.ct_dir):
@@ -200,7 +183,6 @@ class GPRS(object):
 
         print('\nProcessing Done. 22 summary statistics saved in result/sumstat folder!\n')
     
-
     # Using plink to generate bfiles fam/bim/bed.
     def generate_plink_bfiles(self, merge, sumstat, output_name, symbol='.', extra_commands=" "):
         def run_plink_bfiles():
@@ -501,84 +483,9 @@ gprs build-prs --vcf_dir {} --model""".format(
             all[['#IID', 'SCORE_SUM', 'TOTAL_ALLELE_CT']].to_csv('{}/{}.sscore'.format(out, model), index=False, sep='\t')
             print('Done! Combined score for "{}" model saved'.format(model))
 
-
-    # def build_prs(self, vcf_input, output_name, qc_clump_snplist_foldername, memory, clump_kb, clump_p1, clump_r2, symbol='.', columns='1 2 3', plink_modifier='no-mean-imputation'):
-    #     # Create a C+T tag
-    #     clump_conditions = "{}_{}_{}".format(clump_kb, clump_p1, clump_r2)
-
-    #     # Check the folder exists or not, if not create the folder
-    #     if os.path.exists("{}/{}_{}".format(self.prs_dir, output_name, clump_conditions)):
-    #         print("{}/{}_{} exists".format(self.prs_dir, output_name, clump_conditions))
-    #         pass
-    #     else:
-    #         print("{}/{}_{} not exists, going to create one".format(self.prs_dir, output_name, clump_conditions))
-    #         os.mkdir("{}/{}_{}".format(self.prs_dir, output_name, clump_conditions))
-
-    #     visited = set()
-    #     for nb in range(1, 23):
-    #         chrnb = "chr{}".format(nb)
-    #         for vcf_file in os.listdir(vcf_input):
-    #             # Define the input files (vcf and qc files)
-    #             if vcf_file.endswith('.vcf.gz') and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and "{}{}".format(chrnb, symbol) in vcf_file:
-    #                 qc_file = "{}/{}_{}/{}_{}_{}.qc_clump_snpslist.csv".format(self.qc_clump_snpslist_dir,
-    #                                                                            qc_clump_snplist_foldername, clump_conditions,
-    #                                                                            chrnb, qc_clump_snplist_foldername, clump_conditions)
-    #                 if os.path.exists(qc_file) and "{}".format(qc_file) not in visited:
-    #                     os.system("plink2 --vcf {}/{} dosage=DS --score {} {} '{}' --memory {} --out {}/{}_{}/{}_{}_{}".format(
-    #                                                                             vcf_input, vcf_file,
-    #                                                                             qc_file, columns, plink_modifier,
-    #                                                                             memory,
-    #                                                                             self.prs_dir,
-    #                                                                             output_name, clump_conditions,
-    #                                                                             chrnb, output_name, clump_conditions))
-    #                     print("{}_{}_{}.sscore completed!".format(chrnb, output_name, clump_conditions))
-    #                 else:
-    #                     print("{} not found. skip".format(qc_file))
-    #                 visited.add("{}".format(qc_file))
-    #     print("ALL work are complete!")
-
-    # def combine_prs(self, filename, clump_kb, clump_p1, clump_r2):
-    #     # Create a C+T tag
-    #     clump_conditions = "{}_{}_{}".format(clump_kb, clump_p1, clump_r2)
-    #     data_dir = "{}/{}_{}".format(self.prs_dir,filename, clump_conditions)
-    #     table = defaultdict(list)
-
-    #     for i in os.listdir(data_dir):
-    #         if i.endswith(".sscore"):
-    #             if os.path.exists("{}/{}".format(data_dir, i)):
-    #                 print("start to extract the id, allele nb and score from {}/{}".format(data_dir, i))
-    #                 with open("{}/{}".format(data_dir, i), 'r') as sscorein:
-    #                     for index, rows in enumerate(sscorein.readlines()):
-    #                         # use split to separate each row, and access the data by using row[0], row[1]...
-    #                         row = rows.split()
-    #                         # skip the header
-    #                         if index > 0:
-    #                             key = "{}".format(row[0])
-    #                             # append data with select columns
-    #                             nb = float(row[1])
-    #                             score = float(row[3]) * nb
-    #                             table[key].append((nb, score))
-    #                 print("finished to extract the id, allele nb and score from {}/{}".format(data_dir, i))
-    #             else:
-    #                 print("{}/{} not found. Skip".format(data_dir, i))
-
-    #     result = ['id\tALLELE_CT\tSCORE_SUM']
-    #     # take the value from dictionary
-    #     for key, value in table.items():
-    #         unzip_value = list(zip(*value))
-    #         allele_ct = sum(list(unzip_value[0]))
-    #         score_sum = sum(list(unzip_value[1]))
-    #         result.append("{}\t{}\t{}".format(key, allele_ct, score_sum))
-    #     combined_prs = '\n'.join(result)
-
-    #     with open("{}/{}_{}_combined.sscore".format(self.prs_dir, filename, clump_conditions), 'w') as fout:
-    #         fout.write(combined_prs)
-    #     # call("rm -rf {}/{}_{}".format(self.prs_dir, filename, clump_conditions), shell=True)
-    #     print('Combined all the sscore file. Original sscore files deleted')
-
     # Calculate the PRS statistical results and output the statistics summary
-    def prs_statistics(self, score_file, pheno_file, model_name, binary, pop_prev, plotroc, r_command):
-        if os.path.exists(score_file):
+    def prs_stat(self, score, pheno, data, model, binary, pop_prev, plotroc, r):
+        if os.path.exists(score):
             if binary:
                 family = 'binary'
             else:
@@ -588,111 +495,25 @@ gprs build-prs --vcf_dir {} --model""".format(
                 plotroc = 'plotroc'
             else:
                 plotroc = 'no_plot'
+
+            if not os.path.exists("{}/{}".format(self.stat_dir, data)):
+                os.mkdir("{}/{}".format(self.stat_dir, data))
+            else:
+                print("Warning: statistics directory for {} already exists. Result will be overwritten with same model name. \n".format(data))
             # The R script is written by Soyoung Jeon
-            print("{0} --vanilla ./gprs/prs_stat.R {1} {2} {3} {4} {5} {6} {7}/{1}".format(r_command, model_name, score_file, pheno_file,
+            call("{0}script --vanilla ./gprs/prs_stat.R {1} {2} {3} {4} {5} {6} {7}/{8}/{1}".format(r, model, score, pheno,
                                                                             family, pop_prev, plotroc, 
-                                                                            self.stat_dir))
-            call("{0} --vanilla ./gprs/prs_stat.R {1} {2} {3} {4} {5} {6} {7}/{1}".format(r_command, model_name, score_file, pheno_file,
-                                                                            family, pop_prev, plotroc, 
-                                                                            self.stat_dir), shell=True)
+                                                                            self.stat_dir, data), shell=True)
         else:
-            print("{} not found. Please check the sscore again".format(score_file))
+            print("{} not found. Please check the sscore again".format(score))
 
 
     # In combine_prs_stat function is to combine PRS statistical results as one file
-    def combine_prs_stat(self, data_set_name, clump_kb, clump_p1, clump_r2):
-        filter_condition = "{}_{}_{}".format(clump_kb, clump_p1, clump_r2)
-        extension = "_stat.txt"
-        target_files = [i for i in glob.glob("{}/{}*{}".format(self.stat_dir, data_set_name, extension))]
+    def combine_stat(self, data):
+        target_files = [i for i in glob.glob("{}/{}/*.stat".format(self.stat_dir, data))]
+        print("Combining : \n\t{}".format("\n\t".join(target_files)))
         # Combine all the csv files
         combined_csv = pd.concat([pd.read_csv(f) for f in target_files])
         # Export to csv
-        combined_csv.to_csv("{}/combined_{}.txt".format(self.stat_dir, data_set_name), index=False, header=True, sep=' ')
-
-    # Optional functions
-    def subset_pop(self, input_data, column_name, pop_info, output_name):
-        file = pd.read_csv("{}".format(input_data), delim_whitespace=True)
-        subset_file = file.loc[(file["{}".format(column_name)] == "{}".format(pop_info))]
-        subset_file.to_csv("{}".format(output_name), sep='\t', index=False, header=True)
-
-    def generate_plink_bfiles_w_individual_info(self, popfile_name, bfile_name, output_name):
-        for nb in range(1, 23):
-            chrnb = "chr{}".format(nb)
-            for j in os.listdir(self.pop_dir):
-                if "{}.txt".format(popfile_name) in j:
-                    for i in os.listdir(self.plink_bfiles_dir):
-                        if "{}_{}".format(chrnb, bfile_name) in i:
-                            bfile = i.split(".")[0]
-                            os.system("plink --bfile {}/{} --keep {}/{} --make-bed --out {}/{}_{}".format(
-                                self.plink_bfiles_dir, bfile,
-                                self.pop_dir, j,
-                                self.plink_bfiles_dir,
-                                chrnb, output_name))
-                        print("with chr: {}_{} is finished!".format(chrnb, bfile_name))
-        print("all jobs completed!")
-
-    # Transfer a t c g into capital A T C G
-    def transfer_atcg(self, qc_file_name):
-        for nb in range(1, 23):
-            chrnb = "chr{}".format(nb)
-            df = pd.read_csv("{}/{}_{}.QC.csv".format(self.qc_dir, chrnb, qc_file_name), sep=' ')
-            df.loc[:, 'Allele'] = df['Allele'].apply({'a': 'A', 't': 'T', 'c': 'C', 'g': 'G'}.get)
-            df.to_csv("{}/{}_{}.QC.csv".format(self.qc_dir, chrnb, qc_file_name), sep=' ', index=False, header=True)
-        print("transfer completed!")
-
-    def subset_vcf_w_random_sample(self, fam_dir, fam_filename, samplesize, vcf_input, symbol):
-        def random_draw_samples():
-            list = []
-            print("start to subset the samples")
-            with open(fam_input, 'r') as fin:
-                lines = fin.readlines()
-                for index, cols in enumerate(lines):
-                    col = cols.split(" ")
-                    list.append("{}_{}".format(col[0], col[1]))
-
-            with open("{}/{}.txt".format(self.random_draw_sample_dir, fam_name), 'w') as fin:
-                random_sample = random.sample(list, samplesize)
-                final_list = '\n'.join(random_sample)
-                fin.write(final_list)
-                print("random sample list created {}.txt".format(fam_name))
-            fin.close()
-
-        # get fam input
-        if any("chr" in file for file in os.listdir(fam_dir)):
-            print("chr information found, process to read the file")
-            for nb in range(1, 23):
-                chrnb = "chr{}_".format(nb)
-                for f in os.listdir(fam_dir):
-                    if f.endswith(".fam") and chrnb in f and fam_filename in f:
-                        fam_input = "{}/{}".format(fam_dir, f)
-                        fam_name = f.split(".fam")[0]
-                        random_draw_samples()
-        else:
-            print("chr information not found, read file without chromosomes")
-            for f in os.listdir(fam_dir):
-                if f.endswith(".fam") and fam_filename in f:
-                    fam_input = "{}/{}".format(fam_dir, f)
-                    fam_name = f.split(".fam")[0]
-                    random_draw_samples()
-
-        # use subset file to create a new vcf file
-        def build_new_vcf():
-            print("start to subset vcf file")
-            call("bcftools view -Oz -S {} {} > {}/subset_{}_{}.vcf.gz".format(sample_input,
-                                                                    vcfinput,
-                                                                    self.random_draw_sample_dir,
-                                                                      sample_name, samplesize),shell=True)
-            print("finished subset subset_{}_{}.vcf.gz file".format(sample_name, samplesize))
-
-        vcfinput = ""
-        for nb in range(1, 23):
-            chrnb = "chr{}".format(nb)
-            for vcf_file in os.listdir(vcf_input):
-                if vcf_file.endswith('.vcf.gz') and chrnb != "chrY" and chrnb != "chrX" and chrnb != "wgs" and "{}{}".format(chrnb, symbol) in vcf_file:
-                    vcfinput = "{}/{}".format(vcf_input, vcf_file)
-            for j in os.listdir(self.random_draw_sample_dir):
-                if j.endswith(".txt") and "{}_".format(chrnb) in j:
-                    sample_input = "{}/{}".format(self.random_draw_sample_dir, j)
-                    sample_name = j.split(".txt")[0]
-                    print("vcf input:{} sample input:{}".format(vcfinput, sample_input))
-                    build_new_vcf()
+        combined_csv.to_csv("{}/{}_combined.stat".format(self.stat_dir, data), index=False, header=True, sep='\t', quoting=None)
+        print("Combining Done. Result saved in {}/{}_combined.stat.".format(self.stat_dir,data))

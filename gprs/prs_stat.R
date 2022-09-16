@@ -137,6 +137,6 @@ if(family == 'binary'){
                           Beta=prs.coef[1], SE=prs.coef[2], R2=prs.obs_r2, N=length(prs$PHENO) )
 }
 
-write.table( format(stat, digits=3), paste0(output_name, ".stat"), row.names = F, quote = F, sep="\t")
+write.table( format(stat, digits=3), paste0(output_name, ".stat"), row.names = F, quote = F, sep=" ")
 cat("\n")
-cat(paste0("Statistics calculation is done. Results saved in ./result/stat. \n"))
+cat(paste0("Statistics calculation is done. Results saved as ",output_name,".stat \n"))

@@ -222,30 +222,28 @@ def combine_prs(filename,clump_kb,clump_p1,clump_r2):
     gprs.combine_prs( filename=filename,clump_kb=clump_kb,clump_p1=clump_p1,clump_r2=clump_r2)
 
 @click.command()
-@click.option( '--score_file', metavar='<str>', required=True, help='the absolute path to combined .sscore file')
-@click.option( '--pheno_file', metavar='<str>', required=True, help='the absolute path to pheno file')
-@click.option( '--model_name', metavar='<str>', required=True, help='the model name to be used for output')
-@click.option( '--r_command', metavar='<str>', required=True, help='use "which R" in linux, and copy the path after --r_command')
+@click.option( '--score', metavar='<str>', required=True, help='the absolute path to combined .sscore file')
+@click.option( '--pheno', metavar='<str>', required=True, help='the absolute path to pheno file')
+@click.option( '--data', metavar='<str>', required=True, help='output directory name to save the statistics. Recommended to keep it the same for one dataset for combine-stat function')
+@click.option( '--model', metavar='<str>', required=True, help='the model name to be used for output. Recommended to include parameters for the model used to build PRS')
+@click.option( '--r', metavar='<str>', required=True, help='use "which R" in linux, and copy the path after --r_command')
 @click.option('--binary/--quantitative', default=False, help='whether phenotype is binary or quantitative; default: --quantitative')
 @click.option( '--pop_prev', metavar='<str>', default='NA', help='population prevalence for binary trait. Required for binary trait but leave it blank or enter NA for quantitative trait')
 @click.option( '--plotroc/--no_plot', metavar='<str>', default=False, help='whether to plot ROC curve for binary trait. Leave it blank for --no_plot for quantitative trait')
-def prs_statistics(score_file, pheno_file, model_name, r_command, binary, pop_prev, plotroc):
+def prs_stat(score, pheno, model, data, r, binary, pop_prev, plotroc):
     gprs = GPRS()
-    gprs.prs_statistics( score_file=score_file,
-                         pheno_file=pheno_file,
-                         model_name=model_name,
-                         r_command=r_command,
+    gprs.prs_stat( score=score,
+                         pheno=pheno,
+                         model=model,
+                         data=data,
+                         r=r,
                          binary=binary,pop_prev=pop_prev,plotroc=plotroc)
 
 @click.command()
-@click.option( '--data_set_name', metavar='<str>', required=True, help='the name of the data-set i.e. gout_2019_GCST008970' )
-@click.option( '--clump_kb', metavar='<int>', required=True, help='distance(kb) parameter for clumping' )
-@click.option( '--clump_p1', metavar='<float/scientific notation>', required=True, help='first set of P-value for clumping' )
-@click.option( '--clump_r2', metavar='<float>', default=0.1, help='r2 value for clumping, default = 0.1' )
-def combine_prs_stat(data_set_name,clump_kb,clump_p1,clump_r2):
+@click.option( '--data', metavar='<str>', required=True, help='directory in ./result/stat to combine the statistics.' )
+def combine_stat(data):
     gprs = GPRS()
-    gprs.combine_prs_stat( data_set_name=data_set_name,
-                           clump_kb=clump_kb,clump_p1=clump_p1,clump_r2=clump_r2)
+    gprs.combine_stat( data=data )
 
 
 ## Optional function here
@@ -295,7 +293,7 @@ main.add_command( beta_list )
 main.add_command( build_prs )
 main.add_command( clump )
 main.add_command( combine_prs )
-main.add_command( combine_prs_stat)
+main.add_command( combine_stat)
 main.add_command( geneatlas_filter_data )
 main.add_command( generate_plink_bfiles )
 main.add_command( generate_plink_bfiles_w_individual_info )
@@ -303,7 +301,8 @@ main.add_command( gwas_filter_data )
 main.add_command( ldpred2_train )
 main.add_command( multiple_prs )
 main.add_command( prepare_sumstat )
-main.add_command( prs_statistics )
+main.add_command( prs_stat )
+main.add_command( combine_stat )
 main.add_command( select_clump_snps )
 main.add_command( transfer_atcg )
 main.add_command( subset_vcf_w_random_sample )
