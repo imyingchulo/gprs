@@ -160,8 +160,12 @@ class GPRS(object):
                 output = "{}/{}/{}_{}".format(self.plink_clump_dir, output_name_with_conditions, chrnb, output_name_with_conditions)
                 plinkinput = "{}/{}_{}.bim".format(self.plink_bfiles_dir, chrnb, plink_bfile_name).split(".")[0]
                 if os.path.exists("{}.bim".format(plinkinput)):
-                    print("qc_files:{} \noutput:{} \nplinkinput:{}".format(qc_files, output, plinkinput))
-                    run_plink()
+                    # adding resume point here
+                    if os.path.exists("{}.clumped".format(output)) and os.path.exists("{}.nosex".format(output)):
+                        print("{}.clumped exists, move to next chromosome".format(output))
+                    else:
+                        print("qc_files:{} \noutput:{} \nplinkinput:{}".format(qc_files, output, plinkinput))
+                        run_plink()
                 else:
                     print("{}.bim not found. Move to next file".format(plinkinput))
         else:
@@ -172,8 +176,12 @@ class GPRS(object):
                 output = "{}/{}/{}_{}".format(self.plink_clump_dir, output_name_with_conditions, chrnb, output_name_with_conditions)
                 plinkinput = "{}/{}_{}.bim".format(self.plink_bfiles_dir, chrnb, plink_bfile_name).split(".")[0]
                 if os.path.exists("{}.bim".format(plinkinput)):
-                    print("qc_files:{} \noutput:{} \nplinkinput:{}".format(qc_files, output, plinkinput))
-                    run_plink()
+                    # adding resume point here
+                    if os.path.exists("{}.clumped".format(output)) and os.path.exists("{}.nosex".format(output)):
+                        print("{}.clumped exists, move to next chromosome".format(output))
+                    else:
+                        print("qc_files:{} \noutput:{} \nplinkinput:{}".format(qc_files, output, plinkinput))
+                        run_plink()
                 else:
                     print("{}.bim not found. Move to next file".format(plinkinput))
         print("All chromosome clumping finished!")
@@ -402,21 +410,19 @@ class GPRS(object):
         subset_file = file.loc[(file["{}".format(column_name)] == "{}".format(pop_info))]
         subset_file.to_csv("{}".format(output_name), sep='\t', index=False, header=True)
 
-    def generate_plink_bfiles_w_individual_info(self, popfile_name, bfile_name, plink_command, output_name):
+    def generate_plink_bfiles_w_individual_info(self, popfile, bfile_name, plink_command, output_name):
         for nb in range(1, 23):
             chrnb = "chr{}".format(nb)
-            for j in os.listdir(self.pop_dir):
-                if "{}.txt".format(popfile_name) in j:
-                    for i in os.listdir(self.plink_bfiles_dir):
-                        if "{}_{}".format(chrnb, bfile_name) in i:
-                            bfile = i.split(".")[0]
-                            os.system("plink --bfile {}/{} {} {}/{} --make-bed --out {}/{}_{}".format(
-                                self.plink_bfiles_dir, bfile,
-                                plink_command,
-                                self.pop_dir, j,
-                                self.plink_bfiles_dir,
-                                chrnb, output_name))
-                        print("with chr: {}_{} is finished!".format(chrnb, bfile_name))
+            for i in os.listdir(self.plink_bfiles_dir):
+                if "{}_{}".format(chrnb, bfile_name) in i:
+                    bfile = i.split(".")[0]
+                    os.system("plink --bfile {}/{} {} {} --make-bed --out {}/{}_{}".format(
+                        self.plink_bfiles_dir, bfile,
+                        plink_command,
+                        popfile,
+                        self.plink_bfiles_dir,
+                        chrnb, output_name))
+                print("with chr: {}_{} is finished!".format(chrnb, bfile_name))
         print("all jobs completed!")
 
     # Transfer a t c g into capital A T C G
