@@ -21,7 +21,7 @@ class GPRS(object):
         self.result_dir = Path('{}/{}'.format(os.getcwd(), result_dir)).resolve()
         self.plink_dir = '{}/{}'.format(self.result_dir, 'plink')
         self.pop_dir = '{}/{}'.format(self.result_dir, 'pop')
-        self.random_draw_sample_dir = '{}/{}'.format(self.result_dir, 'random_draw_sample')
+        # self.random_draw_sample_dir = '{}/{}'.format(self.result_dir, 'random_draw_sample')
         self.stat_dir = '{}/{}'.format(self.result_dir, 'stat')
         self.plink_bfiles_dir = '{}/{}'.format(self.plink_dir, 'bfiles')
         self.plink_clump_dir = '{}/{}'.format(self.plink_dir, 'clump')
@@ -42,7 +42,7 @@ class GPRS(object):
         self.create_qc_clump_snpslist_dir()
         self.create_stat_dir()
         self.create_pop_dir()
-        self.create_random_draw_sample_dir()
+        # self.create_random_draw_sample_dir()
 
     def create_result_dir(self):  # A function to create result folder
         if not os.path.exists(self.result_dir):
@@ -84,9 +84,9 @@ class GPRS(object):
         if not os.path.exists(self.qc_clump_snpslist_dir):
             os.mkdir(self.qc_clump_snpslist_dir)
 
-    def create_random_draw_sample_dir(self):
-        if not os.path.exists(self.random_draw_sample_dir):
-            os.mkdir(self.random_draw_sample_dir)
+    # def create_random_draw_sample_dir(self):
+    #     if not os.path.exists(self.random_draw_sample_dir):
+    #         os.mkdir(self.random_draw_sample_dir)
 
     # Using plink to generate bfiles fam/bim/bed.
     def generate_plink_bfiles(self, snplist_name, output_name, symbol='.', extra_commands=" "):
@@ -374,9 +374,9 @@ class GPRS(object):
                 print("{} not found. Skip.".format(file))
 
         if os.path.exists(score_file):
-            # The R script is written by Soyoung Jeon
+            # The R script is written by Soyoung Jeon and modified by Ying-Chu Lo
             # USAGE Rscript --vanilla prs_stats_quantitative_phenotype.R [score file] [pheno file] [target pop for OR] [ref pop for OR] [graph pdf name]
-            call("{0} --vanilla {1} {2} {3} {4} {5} {6} {8}/{7}".format(r_command, prs_stats_R, score_file, pheno_file,
+            call("{0} --vanilla {1} {2} {3} {4} {5} {6} {8}/{7} {9}".format(r_command, prs_stats_R, score_file, pheno_file,
                                                                         data_set_name, filter_condition, sum(lines),
                                                                         output_name, self.stat_dir, pc_file), shell=True)
 
