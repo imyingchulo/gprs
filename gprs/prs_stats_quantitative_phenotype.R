@@ -4,6 +4,7 @@ library(tidyverse)
 library(pROC)
 library(DescTools)
 library(WebPower)
+library(rsq)
 
 args <- commandArgs(TRUE)
 
