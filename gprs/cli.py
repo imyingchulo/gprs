@@ -153,12 +153,13 @@ def combine_prs(filename,clump_kb,clump_p1,clump_r2):
 @click.option( '--pheno_file', metavar='<str>', required=True, help='the absolute path to pheno file')
 @click.option( '--output_name', metavar='<str>', required=True, help='the output name')
 @click.option( '--data_set_name', metavar='<str>', required=True, help='the name of the data-set i.e. gout_2019_GCST008970 ')
+@click.option( '--pc_file', metavar='<str>', required=True, help='the absolute path to pc file')
 @click.option( '--prs_stats_R', metavar='<str>', required=True, help='the absolute path to "prs_stats_quantitative_phenotype.R')
 @click.option( '--r_command', metavar='<str>', required=True, help='use "which R" in linux, and copy the path after --r_command')
 @click.option( '--clump_kb', metavar='<int>', required=True, help='distance(kb) parameter for clumping' )
 @click.option( '--clump_p1', metavar='<float/scientific notation>', required=True, help='first set of P-value for clumping' )
 @click.option( '--clump_r2', metavar='<float>', default=0.1, help='r2 value for clumping, default = 0.1' )
-def prs_statistics(score_file, pheno_file, output_name, data_set_name, prs_stats_R, r_command,clump_kb,clump_p1,clump_r2):
+def prs_statistics(score_file, pheno_file, output_name, data_set_name,pc_file, prs_stats_R, r_command,clump_kb,clump_p1,clump_r2):
     gprs = GPRS()
     gprs.prs_statistics( score_file=score_file,
                          pheno_file=pheno_file,
@@ -166,6 +167,7 @@ def prs_statistics(score_file, pheno_file, output_name, data_set_name, prs_stats
                          data_set_name=data_set_name,
                          prs_stats_R=prs_stats_R,
                          r_command=r_command,
+                         pc_file=pc_file,
                          clump_kb=clump_kb,clump_p1=clump_p1,clump_r2=clump_r2)
 
 @click.command()

@@ -1,7 +1,3 @@
-##USAGE Rcript --vanilla PRS.R [score file] [pheno file] [graph pdf name]
-#pheno file requires header: 1st "id" 2nd "pheno" coded 0/1, 3rd - any additional covariates to include
-#score file needs header: 1st"id" ...4th "SCORE_SUM" (sscore.py output works)
-
 # install.packages(c("tidyverse","pROC","DescTools","WebPower"))
 
 library(tidyverse)
@@ -17,6 +13,7 @@ input_file_name <- args[3]
 filter_condition <- args[4]
 snps_nb <- args[5]
 output_name <- as.character(args[6])
+pcs <- args[7]
 
 print(paste("score file= ",scoref),quote=F)
 print(paste("pheno file= ",phenof),quote=F)
@@ -24,29 +21,41 @@ print(paste("input_file_name= ",input_file_name),quote=F)
 print(paste("filter_conditions= ",filter_condition),quote=F)
 print(paste("snps_nb= ",snps_nb),quote=F)
 print(paste("output_name= ",output_name),quote=F)
+print(paste("pcs= ",pcs),quote=F)
 cat("\n")
 
-##logistic regression
+#read and merge the files
 pheno <- read.table(phenof,header=T)
 pheno$pheno <- as.factor(pheno$pheno)
 score <- read.table(scoref,header = T)
-prs <- inner_join(score[,c(1,3)], pheno, by="id")
-logit <- glm(pheno~., data=prs[,-c(1)], family="binomial")
+pcf <- read.table(pcs,header=F)
+colnames(pcf) <- c("id", paste0("PC",1:10))
+sscore_pc <- merge(score, pcf, by='id')
+pheno.prs <- inner_join(sscore_pc[,c(1,3,4:13)], pheno, by="id")
 
-prs.degree_of_freedom <-summary(logit)$df[2]
-prs.coef <- summary(logit)$coeff["SCORE_SUM",]
-prs.beta <- as.numeric(prs.coef[1])
-prs.aic <- as.numeric(summary(logit)$aic)
-prs.p <- as.numeric(prs.coef[4])
-prs.r2 <- as.numeric(PseudoR2(logit,which="Nagelkerke"))
-#summary(logit)
+# logistic regression
+prs.result <- NULL
+pheno.prs$pheno <- as.numeric(pheno.prs$pheno)
+pheno.prs$SCORE_SUM <- as.numeric(pheno.prs$SCORE_SUM)
+lm_model <- lm(pheno~., data=pheno.prs[,-c(1)])
+model <- summary(lm(pheno~., data=pheno.prs[,-c(1)]))
+# model$coefficients
+prs.df <- model$df[2]
+model.r2 <- model$r.squared
+prs.r2 <- model.r2
+prs.coef <- model$coeff["SCORE_SUM",]
+prs.p <- model$coeff["SCORE_SUM",4]
+prs.result <- rbind(prs.result, c(R2=prs.r2,prs.coef[4], prs.coef[1], prs.coef[2], DF= prs.df))
+partial.r2 <- rsq.partial(lm_model)
 
+# output statistics result
 stat <- as.data.frame(stat)
 stat <- data.frame(data=input_file_name,filter_condition=filter_condition, snps_nb=snps_nb, P=prs.p,
-                   BETA=prs.beta, Degree_of_freedom=prs.degree_of_freedom , PseudoR2=prs.r2)
+                   Degree_of_freedom=prs.df , r2=prs.r2, Partial_r2=partial.r2$partial.rsq[1])
 new_stat <- as.data.frame(stat)
 filename <- paste(output_name, filter_condition, "stat.txt", sep="_")
 write.csv(stat, file = filename, row.names = FALSE)
+
 
 
 
