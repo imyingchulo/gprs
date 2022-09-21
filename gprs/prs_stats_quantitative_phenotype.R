@@ -1,7 +1,4 @@
 # install.packages(c("tidyverse","pROC","DescTools","WebPower"))
-list.of.packages <- c("tidyverse", "pROC", "DescTools", "WebPower", "rsq")
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages(, repos = "http://cran.us.r-project.org")[,"Package"])]
-if(length(new.packages)) install.packages(new.packages)
 
 library(tidyverse)
 library(pROC)
