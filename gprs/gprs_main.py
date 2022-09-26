@@ -374,6 +374,7 @@ class GPRS(object):
                 print("{} not found. Skip.".format(file))
 
         if os.path.exists(score_file):
+            print("start to calculate {} statistics result".format(score_file))
             # The R script is written by Soyoung Jeon and modified by Ying-Chu Lo
             # USAGE Rscript --vanilla prs_stats_quantitative_phenotype.R [score file] [pheno file] [target pop for OR] [ref pop for OR] [graph pdf name]
             call("{0} --vanilla {1} {2} {3} {4} {5} {6} {8}/{7} {9}".format(r_command, prs_stats_R, score_file, pheno_file,
