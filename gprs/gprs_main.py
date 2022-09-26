@@ -375,16 +375,17 @@ class GPRS(object):
 
         if os.path.exists(score_file):
             print("start to calculate {} statistics result".format(score_file))
+            print("{0} --vanilla {1} {2} {3} {4} {5} {6} {8}/{7} {9}".format(r_command, prs_stats_R, score_file, pheno_file,
+                                                                        data_set_name, filter_condition, sum(lines),output_name, self.stat_dir, pc_file))
             # The R script is written by Soyoung Jeon and modified by Ying-Chu Lo
             # USAGE Rscript --vanilla prs_stats_quantitative_phenotype.R [score file] [pheno file] [target pop for OR] [ref pop for OR] [graph pdf name]
-            call("{0} --vanilla {1} {2} {3} {4} {5} {6} {8}/{7} {9}".format(r_command, prs_stats_R, score_file, pheno_file,
-                                                                        data_set_name, filter_condition, sum(lines),
-                                                                        output_name, self.stat_dir, pc_file), shell=True)
+            call("{0} --vanilla {1} {2} {3} {4} {5} {6} {8}/{7}_tmp {9}".format(r_command, prs_stats_R, score_file, pheno_file,
+                                                                        data_set_name, filter_condition, sum(lines),output_name, self.stat_dir, pc_file), shell=True)
 
             # Read the statistics result and reformat it
             # Reformat: separator = tab, change float into scientific notation
-            stat_data = pd.read_csv("{}/{}_{}_stat.txt".format(self.stat_dir, output_name, filter_condition))
-            if os.path.exists("{}/{}_{}_stat.txt".format(self.stat_dir, output_name, filter_condition)):
+            stat_data = pd.read_csv("{}/{}_{}_tmp_stat.txt".format(self.stat_dir, output_name, filter_condition))
+            if os.path.exists("{}".format(stat_data)):
                 stat_data.to_csv("{}/{}_{}_stat.txt".format(self.stat_dir, output_name, filter_condition),
                     index=False,
                     header=True,
