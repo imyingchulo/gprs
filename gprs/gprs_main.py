@@ -386,13 +386,15 @@ class GPRS(object):
             # Reformat: separator = tab, change float into scientific notation
             stat_data = pd.read_csv("{}/{}_tmp_{}_stat.txt".format(self.stat_dir, output_name, filter_condition))
             if os.path.exists("{}".format(stat_data)):
+                print("start to re-format the {} to {}/{}_{}_stat.txt".format(stat_data,self.stat_dir, output_name, filter_condition))
                 stat_data.to_csv("{}/{}_{}_stat.txt".format(self.stat_dir, output_name, filter_condition),
                     index=False,
                     header=True,
                     sep='\t',
                     float_format='%.2E')
+                # call("rm {}")
             else:
-                print("{}/{}_{}_stat.txt Not Found".format(self.stat_dir, output_name, filter_condition))
+                print("{}/{}_tmp_{}_stat.txt Not Found".format(self.stat_dir, output_name, filter_condition))
         else:
             print("{} not found. Please check the sscore again".format(score_file))
 
