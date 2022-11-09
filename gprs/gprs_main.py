@@ -431,11 +431,17 @@ class GPRS(object):
 
     # Transfer a t c g into capital A T C G
     def transfer_atcg(self, qc_file_name):
-        for nb in range(1, 23):
-            chrnb = "chr{}".format(nb)
-            df = pd.read_csv("{}/{}_{}.QC.csv".format(self.qc_dir, chrnb, qc_file_name), sep=' ')
+        if "chr" in "{}/{}.QC.csv".format(self.qc_dir, qc_file_name):
+            for nb in range(1, 23):
+                chrnb = "chr{}".format(nb)
+                df = pd.read_csv("{}/{}_{}.QC.csv".format(self.qc_dir, chrnb, qc_file_name), sep=' ')
+                df.loc[:, 'Allele'] = df['Allele'].apply({'a': 'A', 't': 'T', 'c': 'C', 'g': 'G'}.get)
+                df.to_csv("{}/{}_{}.QC.csv".format(self.qc_dir, chrnb, qc_file_name), sep=' ', index=False, header=True)
+            print("transfer completed!")
+        else:
+            df = pd.read_csv("{}/{}.QC.csv".format(self.qc_dir, qc_file_name), sep=' ')
             df.loc[:, 'Allele'] = df['Allele'].apply({'a': 'A', 't': 'T', 'c': 'C', 'g': 'G'}.get)
-            df.to_csv("{}/{}_{}.QC.csv".format(self.qc_dir, chrnb, qc_file_name), sep=' ', index=False, header=True)
+            df.to_csv("{}/{}.updated.QC.csv".format(self.qc_dir, qc_file_name), sep=' ', index=False, header=True)
         print("transfer completed!")
 
     def subset_vcf_w_random_sample(self, fam_dir, fam_filename, samplesize, vcf_input, symbol):
