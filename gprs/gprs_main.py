@@ -430,11 +430,11 @@ class GPRS(object):
         print("all jobs completed!")
 
     # Transfer a t c g into capital A T C G
-    def transfer_atcg(self, dir, inputfile, output_file_name, a1_header, a2_header):
-        df = pd.read_csv("{}".format(inputfile), sep=' ')
+    def transfer_atcg(self, dir, inputfile, output_file_name, a1_header, a2_header, sep):
+        df = pd.read_csv("{}".format(inputfile), sep="{}".format(sep))
         df.loc[:, a1_header] = df[a1_header].apply({'a': 'A', 't': 'T', 'c': 'C', 'g': 'G'}.get)
         df.loc[:, a2_header] = df[a2_header].apply({'a': 'A', 't': 'T', 'c': 'C', 'g': 'G'}.get)
-        df.to_csv("{}/{}.updated.QC.csv".format(dir, output_file_name), sep=' ', index=False, header=True)
+        df.to_csv("{}/{}.updated.QC.csv".format(dir, output_file_name), sep="\t", index=False, header=True)
         print("transfer completed!")
 
     def subset_vcf_w_random_sample(self, fam_dir, fam_filename, samplesize, vcf_input, symbol):
