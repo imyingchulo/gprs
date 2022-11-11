@@ -182,16 +182,15 @@ def combine_prs_stat(data_set_name,clump_kb,clump_p1,clump_r2):
 
 ## Optional function here
 @click.command()
-@click.option('--dir', metavar='<str>', help='dir to GWAS summary file')
+@click.option('--dir_output', metavar='<str>', help='dir to GWAS summary file')
 @click.option('--inputfile', metavar='<str>', help='full path to GWAS summary file')
 @click.option('--output_file_name', metavar='<str>', help='updtae GWAS summary output name')
-@click.option('--a1_header', metavar='<str>', help='allele 1 header in GWAS summary')
-@click.option('--a2_header', metavar='<str>', help='allele 2 header in GWAS summary')
-@click.option('--sep', metavar='<str>', help='GWAS summary separator')
-def transfer_atcg(dir, inputfile, output_file_name, a1_header, a2_header, sep):
+@click.option('--a1_header', metavar='<str>', help='index of allele 1 in GWAS summary')
+@click.option('--a2_header', metavar='<str>', help='index of allele 2 in GWAS summary')
+def transfer_atcg(dir, inputfile, output_file_name, a1_header_index, a2_header_index):
     gprs = GPRS()
-    gprs.transfer_atcg(dir=dir, inputfile=inputfile, output_file_name=output_file_name,
-                       a1_header=a1_header, a2_header=a2_header, sep=sep)
+    gprs.transfer_atcg(dir_output=dir_output, inputfile=inputfile, output_file_name=output_file_name,
+                       a1_header_index=a1_header_index, a2_header_index=a2_header_index)
 
 @click.command()
 @click.option('--input_data', metavar='<str>', required=True, help='The full path to phenotype file (contains the population information)')
