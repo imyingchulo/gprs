@@ -191,10 +191,10 @@ class GPRS(object):
         clump_conditions = "{}_{}_{}".format(clump_kb, clump_p1, clump_r2)
 
         # check dir
-        if os.path.exists("{}/{}_{}".format(self.plink_clump_dir, clumpfolder_name, clump_conditions)):
-            pass
-        else:
-            os.mkdir("{}/{}_{}".format(self.plink_clump_dir, clumpfolder_name, clump_conditions))
+        # if os.path.exists("{}/{}_{}".format(self.plink_clump_dir, clumpfolder_name, clump_conditions)):
+        #     pass
+        # else:
+        #     os.mkdir("{}/{}_{}".format(self.plink_clump_dir, clumpfolder_name, clump_conditions))
 
         if os.path.exists("{}/{}_{}".format(self.qc_clump_snpslist_dir, clumpfolder_name, clump_conditions)):
             pass
@@ -296,7 +296,7 @@ class GPRS(object):
                         print("{}/{}_{}/{}_{}_{}.sscore exists, move to next chromosome".format(self.prs_dir,output_name, clump_conditions, chrnb, output_name, clump_conditions))
 
                     elif os.path.exists(qc_file) and "{}".format(qc_file) not in visited:
-                            os.system("plink2 --vcf {}/{} dosage=DS --score {} {} '{}' --memory {} --out {}/{}_{}/{}_{}_{}".format(
+                            os.system("plink2 --vcf {}/{} dosage=DS --score {} {} '{}' 'ignore-dup-ids' --memory {} --out {}/{}_{}/{}_{}_{}".format(
                                                                                     vcf_input, vcf_file,
                                                                                     qc_file, columns, plink_modifier,
                                                                                     memory,
