@@ -125,7 +125,7 @@ class GPRS(object):
                         run_plink_bfiles()
         print("all jobs completed!")
 
-    def clump(self, qc_file_name, plink_bfile_name, output_name, clump_kb, clump_p1, clump_p2, clump_r2='0.1',
+    def clump(self, qc_file_name, plink_bfile_name, output_name, clump_kb, clump_p1, clump_p2, extra_commands=" ", clump_r2='0.1',
               clump_field='Pvalue', clump_snp_field='SNPID'):
         # Create a C+T tag
         output_name_with_conditions = "{}_{}_{}_{}".format(output_name, clump_kb, clump_p1, clump_r2)
@@ -143,11 +143,11 @@ class GPRS(object):
             visited = set()
             if qc_files not in visited:
                 print("start {}/{} clumping".format(self.qc_dir, qc_files))
-                os.system("plink --bfile {} --clump {}/{} --clump-p1 {} --clump-p2 {} --clump-r2 {} --clump-kb {} --clump-field {} --clump-snp-field {} --out {} ".format(
+                os.system("plink --bfile {} --clump {}/{} --clump-p1 {} --clump-p2 {} --clump-r2 {} --clump-kb {} --clump-field {} --clump-snp-field {} {} --out {} ".format(
                         plinkinput,
                         self.qc_dir, qc_files,
                         clump_p1, clump_p2, clump_r2,
-                        clump_kb, clump_field, clump_snp_field, output))
+                        clump_kb, clump_field, clump_snp_field, extra_commands, output))
             visited.add("{}".format(qc_files))
             print("finished {}/{} clumping".format(self.qc_dir, qc_files))
 

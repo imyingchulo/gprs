@@ -51,7 +51,7 @@ sscore.r2 <- (pheno.prs.r2-pheno.prs.part.r2)
 stat <- data.frame(data=input_file_name,
                    Filter_condition=filter_condition,
                    Fullmodel_R2=pheno.prs.r2,
-                   Partial_R2=pheno.prs.part.r2,
+                   Partial_R2_withoutPRS=pheno.prs.part.r2,
                    PseudoR2_sscore=sscore.r2)
 
 new_stat <- as.data.frame(stat)
